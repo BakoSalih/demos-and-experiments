@@ -10,8 +10,6 @@
 
 <script type="text/javascript">
 
-
-
 let type = "WebGL"
 if(!PIXI.utils.isWebGLSupported()){
   type = "canvas"
@@ -30,7 +28,6 @@ let app = new PIXI.Application({
 //Add the canvas that Pixi automatically created for you to the HTML document
 document.body.appendChild(app.view);
 
-
 //load an image and run the `setup` function when it's done
 const loader = new PIXI.Loader();
 loader
@@ -44,83 +41,18 @@ function setup() {
 let container = new PIXI.Container();
 app.stage.addChild(container);
 
+
 function unit_hex(center, radius) {
   this.center = center;
   let range = [0,1,2,3,4,5];
-  let f_corner = (x, origin) => [origin[0] + radius*Math.cos(x*Math.PI/3), origin[1] + radius*Math.sin(x*Math.PI/3) ];
+  let f_corner = (x, origin) => [origin[0] + Math.cos(x*Math.PI/3), origin[1] + Math.sin(x*Math.PI/3) ];
   this.corners = range.map(x => f_corner(x, center));
   let edges = [];
   this.edge = i => [this.corners[i], this.corners[(i + 1) % 6] ];
 }
 
-function pt_hex(center, radius) {
-  this.center = center;
-  let range = [0,1,2,3,4,5];
-  let f_corner = (x, origin) => [origin[0] + radius*Math.cos(x*Math.PI/3 + Math.PI/6),
-                                 origin[1] + radius*Math.sin(x*Math.PI/3 + Math.PI/6)];
-  this.corners = range.map(x => f_corner(x, center));
-  let edges = [];
-  this.edge = i => [this.corners[i], this.corners[(i + 1) % 6] ];
-}
-
-// global vars
-var Pi = Math.PI;
-var x_dir = [Math.cos(Pi/6), -Math.sin(Pi/6)];
-var y_dir = [Math.cos(Pi/6), Math.sin(Pi/6)];
-var z_dir = [0, 1];
-
-function lattice_pt(dir, pos) {
-  const [x,y,z] = dir;
-  const [a,b,c] = pos;
-  // cube coordinates (x,y,z) with basis:
-  // pointy: (cos(Pi/3), sin(Pi/3)), (cos(2Pi/3), sin(2Pi/3)), (0,1)
-  return [a*x[0] + b*y[0] + c*z[0], a*x[1] + b*y[1] + c*z[1]];
-}
-
-const d = 50; // d is the unit distance
-// direction vectors
-const dir = [x_dir, y_dir, z_dir];
-// iterate over all directions.
-//        z  y
-//        |/  (x,y,z) triple
-//         \
-//          x
-
-edges = [];
-const [A, B, C] = [5,5,5]
-for (i = 0; i < A; i++) {
-  for (j = 0; j < B; j++) {
-      for (k = 0; k < C; k++) {
-        let vertex = new PIXI.Graphics();
-        const pt = lattice_pt(dir, [i,j,k]);
-        const [xpos, ypos] = [d+d*pt[0], C*d + d*pt[1]];
-        vertex.beginFill(0x000000);
-        vertex.drawCircle(xpos, ypos, 2);
-        vertex.endFill();
-        container.addChild(vertex);
-
-        let hex = new unit_hex([xpos, ypos], d/Math.sqrt(3) );
-        for (x=0; x<6; x = x + 2) {
-            let [edge0, edge1] = hex.edge(x);
-            let line = new PIXI.Graphics();
-            line.lineStyle(2, 0x000000, 1);
-            //line.beginFill(0x000000);
-            //line.drawCircle(edge0[0], edge0[1], 1);
-            //line.drawCircle(edge1[0], edge1[1], 1);
-            //line.endFill();
-            //line.coord = [0, 0, edge0[0], edge0[1], edge1[0], edge1[1]];
-            line.moveTo(edge0[0], edge0[1]);
-            line.lineTo(edge1[0], edge1[1]);
-            edges.push(line);
-            container.addChild(line);
-        }
-    }
-  }
-}
 
 
-
-/*
 edges = [];
 for (i = 1; i < 10; i++) {
   for (j = 1; j < 7; j++) {
@@ -162,13 +94,24 @@ for (i = 1; i < 10; i++) {
   }
 }
 
-*/
+for (i = 1; i < 20; i++) {
+  for (j = 1; j < 20-1; j++) {
+    let vertex = new PIXI.Graphics();
+    const xcord = j*39 + 20*(i % 2);
+    const ycord = i*32;
+    vertex.beginFill(0x000000);
+    vertex.drawCircle(xcord, ycord, 3);
+    vertex.endFill();
+    container.addChild(vertex);
+  }
+}
 
 for (i = 0; i < edges.length; i++) {
   const edge = edges[i];
   edge.alpha= 0.1;
   edge.interactive = true;
-  edge.hitArea = new PIXI.Polygon(edge.coord);
+  const pos =  edge.center;
+  edge.hitArea = new PIXI.Polygon(0,0,-20+3,32, 0,64 ,20-3,32);
   edge.mousedown = function(mouseData) {
     if (this.alpha == 1) {
       this.alpha = 0.1;
@@ -188,10 +131,7 @@ var ticker = PIXI.Ticker.shared
 ticker.add(() => {
 gameLoop();
 });
-
-function gameLoop() {
-}
-
+  
 </script>
 </body>
 </html>
