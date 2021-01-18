@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Hello World</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.1.3/pixi.min.js"></script>
+</head>
+<body>
+
+<script type="text/javascript">
+
+let type = "WebGL"
+if(!PIXI.utils.isWebGLSupported()){
+  type = "canvas"
+}
+
+//Create a Pixi Application
+let app = new PIXI.Application({
+  width: 2000,
+  height: 2000,
+  antialias: true,
+  transparent: true,
+  resolution: 1
+}
+);
+
+//Add the canvas that Pixi automatically created for you to the HTML document
+document.body.appendChild(app.view);
+
+
+//This `setup` function will run when the image has loaded
+function setup() {
+let container = new PIXI.Container();
+app.stage.addChild(container);
+
+/*	
+function unit_hex(center, radius) {
+  this.center = center;
+  let range = [0,1,2,3,4,5];
+  let f_corner = (x, origin) => [origin[0] + Math.cos(x*Math.PI/3), origin[1] + Math.sin(x*Math.PI/3) ];
+  this.corners = range.map(x => f_corner(x, center));
+  let edges = [];
+  this.edge = i => [this.corners[i], this.corners[(i + 1) % 6] ];
+}
+*/	
+
+
+edges = [];
+/*	
+for (i = 1; i < 10; i++) {
+  for (j = 1; j < 7; j++) {
+    const xpos = (3*j-1)*39;
+    const ypos = (2*i)*32;
+    for (k =1; k < 6; k++) {
+      let line = new PIXI.Graphics();
+      line.lineStyle(1,0x000000, 1);
+      line.position.x = xpos;
+      line.position.y = ypos;
+      line.center = [line.position.x, line.position.y];
+      line.rot = k;
+      line.moveTo(-20,  32);
+      line.lineTo(+20, 32);
+      line.rotation = 1*Math.PI/3 *(k);
+      edges.push(line);
+      container.addChild(line);
+    }
+  }
+  if (i < 9) {
+    for (j = 1; j < 7; j++) {
+      const xpos = (3*j+1/2)*39;
+      const ypos = (2*i+1)*32;
+      const iter = [0,3];
+      for (k =0; k < 2; k++) {
+        let line = new PIXI.Graphics();
+        line.lineStyle(1,0x000000, 1);
+        line.position.x = xpos;
+        line.position.y = ypos;
+        line.center = [line.position.x, line.position.y];
+        line.rot = iter[k];
+        line.moveTo(- 20,  32);
+        line.lineTo( + 20, 32);
+        line.rotation = 1*Math.PI/3 *(iter[k]);
+        edges.push(line);
+        container.addChild(line);
+      }
+    }
+  }
+}
+*/	
+
+const r = 2;
+const n = 20;
+const m = 10;
+for (i = 0; i < n; i++) {
+  for (j = 0; j < n; j++) {
+    let vertex = new PIXI.Graphics();
+    const xcord = j*5 + (i % n);
+    const ycord = i % n;
+    vertex.beginFill(0x000000);
+    vertex.drawCircle(xcord, ycord, 3);
+    vertex.endFill();
+    container.addChild(vertex);
+  }
+}
+
+/*
+for (i = 0; i < edges.length; i++) {
+  const edge = edges[i];
+  edge.alpha= 0.1;
+  edge.interactive = true;
+  const pos =  edge.center;
+  edge.hitArea = new PIXI.Polygon(0,0,-20+3,32, 0,64 ,20-3,32);
+  edge.mousedown = function(mouseData) {
+    if (this.alpha == 1) {
+      this.alpha = 0.1;
+    }
+    else {
+      this.alpha = 1;
+      this.tint  =  0x000000;
+    }
+  }
+  }
+}
+*/
+
+//Start the game loop by adding the `gameLoop` function to
+//Pixi's `ticker` and providing it with a `delta` argument.
+counter = 0;
+var ticker = PIXI.Ticker.shared
+ticker.add(() => {
+gameLoop();
+});
+  
+</script>
+</body>
+</html>
