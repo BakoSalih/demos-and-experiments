@@ -1,0 +1,13 @@
+body {background-color: white;}
+.row {
+display: flex;
+}
+
+.column {
+flex: 50%;
+background-color: lightgray;
+}
+
+.input0 {
+padding: 5px
+}

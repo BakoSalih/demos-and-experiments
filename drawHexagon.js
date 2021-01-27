@@ -1,72 +1,5 @@
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Lozenge tiling</title>
 
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.1.3/pixi.min.js"></script>
-
-  <style>
-
-   </style>
-</head>
-<body>
-
-<div class="row">
-  <div class="column", id="simulation">
-  	<div id="sim"></div>
-  </div>
-  <div class="column">
-    <h2> Hexagon parameters </h2>
-    <div id="inputA" class="input0">
-      A =
-      <input type="number" value="20" id="Abox" name="A" >
-    </div>
-  	<div id="inputB" class="input0">
-      B =
-      <input type="number" value="20" id="Bbox" name="B" >
-    </div>
-  	<div id="inputC" class="input0">
-      C =
-      <input type="number" value="20" id="Cbox" name="C" >
-    </div>
-    <div id="inputHole" class="input0">
-      hole width =
-      <input type="number" value="5" max="10" id="holes" name="H" >
-    </div>
-
-    <button id="newhex", onclick="myFunction()">Generate</button>
-
-    <h2> Regular hexagon </h2>
-  	<div id="inputN", class="input0">
-      N =
-      <input type="number" value="20" id="Nbox" name="N" >
-    </div>
-
-    <button id="regularhex" onclick="regularHex()">Generate</button>
-
-    <h2> Properties </h2>
-    <button id="edges" onclick="edges()">Edges</button>
-    <button id="rotate" onclick="rotate()">Rotate</button>
-    <h2> Generate </h2>
-    <button id="refresh" onclick="refresh()">Generate</button>
-  </div>
-
-</div>
-
-<script type="text/javascript">
-
-</script>
-
-<script type="module">
-
-import { weight_hexagon } from './weight_hexagon.js';
-import { W_split, Reduction, Matching, gap} from './matching.js';
-
-
-var i;
-var j;
+import { weight_hexagon } from 'weight_hexagon.js';
 
 let type = "WebGL"
 if(!PIXI.utils.isWebGLSupported()){
@@ -90,36 +23,104 @@ document.getElementById("sim").appendChild(app.view);
 const A = document.getElementById("Abox").valueAsNumber;
 const B = document.getElementById("Bbox").valueAsNumber;
 const C = document.getElementById("Cbox").valueAsNumber;
-const holeWidth = document.getElementById("holes").valueAsNumber;
 
 // edges exist of not
 app.stage.edgeExist = 1;
 // initial rotation
 app.stage.rotated = 0;
-// initial probability
-var W;
-var P;
 
 // create initial matching
 
 
-// let W = weight_hexagon([[1],[1]],1,A,B,C);
-// W = gap(W,A,B,10);
-// W = W_split(W);
-// let P = Reduction(W, W.im);
-// let M = Matching(P, W[0].length);
+let W = weight_hexagon([[1],[1]],1,A,B,C);
+//W = gap(W,A,B,C,2,0,0);
+W = W_split(W);
+let P = Reduction(W, W.im);
+let M = Matching(P, W[0].length);
 
 //load an image and run the `setup` function when it's done
 const loader = new PIXI.Loader();
 loader
-.load(setup(A, B, C, holeWidth));
+.load(setup(A, B, C));
 //.load(setup(A, B, C, M));
 
-//drawHexagon(A,B,C,M)
+drawHexagon(A,B,C,M)
+
+function regenerate() {
+  //
+  // let W = weight_hexagon([[1],[1]],1,a,b,c)
+  // W = W_split(W);
+  // let P = Reduction(W, W.im);
+  const A = document.getElementById("Abox").valueAsNumber;
+  const B = document.getElementById("Bbox").valueAsNumber;
+  const C = document.getElementById("Cbox").valueAsNumber;
+
+  let M = Matching(P, W[0].length);
+  drawHexagon(A,B,C,M);
+  // app.ticker.add((delta) => {
+  //   d += delta
+  //   if (Math.floor(d) % 50 == 0) {
+  //   app.stage.removeChildren(0)
+  //   let M = Matching(P);
+  //   setup(3, 3, 3);
+  //   }
+  // });
+}
+
+function rotate() {
+  let container = app.stage.children[0];
+  if (container.rotation == 0) {
+    container.rotation = Math.PI/6;
+    container.x = 200;
+    container.y = -100;
+  } else {
+    container.rotation = 0;
+    container.x = 0;
+    container.y = 0;
+  }
+}
+
+function edges() {
+  if (app.stage.edgeExist == 1) {
+    app.stage.edgeExist = 0;
+  } else {
+    app.stage.edgeExist = 1;
+  }
+
+}
+
+function myFunction() {
+  //app.stage.removeChildren(0)
+  // constants for the size of the hexagon
+  const A = document.getElementById("Abox").valueAsNumber;
+  const B = document.getElementById("Bbox").valueAsNumber;
+  const C = document.getElementById("Cbox").valueAsNumber;
+
+  app.stage.removeChildren(0);
+  setup(A, B, C);
+
+//  setup(A, B, C, M);
+}
+
+function regularHex() {
+  app.stage.removeChildren(0)
+  // constants for the size of the hexagon
+  const N = document.getElementById("Nbox").valueAsNumber;
+
+  // set A,B,C
+  document.getElementById("Abox").setAttribute("value", N);
+  document.getElementById("Bbox").setAttribute("value", N);
+  document.getElementById("Cbox").setAttribute("value", N);
+
+  app.stage.removeChildren(0);
+  setup(N,N,N);
+  //setup(N, N, N, M);
+}
+
 
 // This `setup` function will run when the image has loaded
 // Paints the matching
-function setup(a, b, c, holeWidth = 0) {
+function setup(a, b, c) {
 
 	let container = new PIXI.Container();
 	app.stage.addChild(container);
@@ -202,15 +203,12 @@ for (i = 0; i < 2*n-1; i++) {
 
   // create new matching
   W = weight_hexagon([[1],[1]],1,a,b,c)
-  W = gap(W,a,b,2*holeWidth);
   W = W_split(W);
   P = Reduction(W, W.im);
-  let M = Matching(P, W[0].length);
+  M = Matching(P, W[0].length);
 
   // draw matching
-  //console.log(W.holes);
-  //console.log(M);
-  drawHexagon(a,b,c,M,W.holes);
+  drawHexagon(a,b,c,M);
 
 	// app.ticker.add((delta) => {
 	// 		//container.rotation += 0.01* delta;
@@ -275,7 +273,6 @@ function drawHexagon(a,b,c,M,holes=[]) {
       }
     }
   }
-
   if (holes.length > 0) {
     for (i = 0; i < 2*n-1; i++) {
       for (j = 0; j < 2*m-1; j++) {
@@ -289,104 +286,3 @@ function drawHexagon(a,b,c,M,holes=[]) {
     }
   }
 }
-
-
-function refresh() {
-  //
-  // let W = weight_hexagon([[1],[1]],1,a,b,c)
-  // W = W_split(W);
-  // let P = Reduction(W, W.im);
-  const A = document.getElementById("Abox").valueAsNumber;
-  const B = document.getElementById("Bbox").valueAsNumber;
-  const C = document.getElementById("Cbox").valueAsNumber;
-
-  let M = Matching(P, W[0].length);
-  drawHexagon(A,B,C,M,W.holes);
-  // app.ticker.add((delta) => {
-  //   d += delta
-  //   if (Math.floor(d) % 50 == 0) {
-  //   app.stage.removeChildren(0)
-  //   let M = Matching(P);
-  //   setup(3, 3, 3);
-  //   }
-  // });
-}
-
-export function rotate() {
-  let container = app.stage.children[0];
-  if (container.rotation == 0) {
-    container.rotation = Math.PI/6;
-    container.x = 200;
-    container.y = -100;
-  } else {
-    container.rotation = 0;
-    container.x = 0;
-    container.y = 0;
-  }
-}
-
-function edges() {
-  if (app.stage.edgeExist == 1) {
-    app.stage.edgeExist = 0;
-  } else {
-    app.stage.edgeExist = 1;
-  }
-
-}
-
-function myFunction() {
-  //app.stage.removeChildren(0)
-  // constants for the size of the hexagon
-  const A = document.getElementById("Abox").valueAsNumber;
-  const B = document.getElementById("Bbox").valueAsNumber;
-  const C = document.getElementById("Cbox").valueAsNumber;
-
-  let hole = document.getElementById("holes").valueAsNumber;
-  if (hole > Math.floor((B+C)/2)) {
-    hole = Math.floor((B+C)/2);
-    document.getElementById("holes").setAttribute("value", hole);
-    document.getElementById("holes").setAttribute("max", hole);
-  }
-
-  app.stage.removeChildren(0);
-  setup(A, B, C, hole);
-
-//  setup(A, B, C, M);
-}
-
-function regularHex() {
-  // constants for the size of the hexagon
-  const N = document.getElementById("Nbox").valueAsNumber;
-  const hole = document.getElementById("holes").valueAsNumber;
-
-  // set A,B,C
-  document.getElementById("Abox").setAttribute("value", N);
-  document.getElementById("Bbox").setAttribute("value", N);
-  document.getElementById("Cbox").setAttribute("value", N);
-  document.getElementById("holes").setAttribute("max", Math.floor(N/2));
-
-  app.stage.removeChildren(0);
-  setup(N,N,N,hole);
-  //setup(N, N, N, M);
-}
-
-window.myFunction = myFunction;
-window.regularHex = regularHex;
-window.rotate = rotate;
-window.edges = edges;
-window.refresh = refresh;
-window.gap = gap;
-window.weight_hexagon = weight_hexagon;
-
- let W0 = weight_hexagon([[1],[1]],1,5,5,5);
-//console.log(gap(W0,5,5,3))
-//document.querySelector('#newhex').addEventListener('click', myFunction);
-//document.querySelector('#regularhex').addEventListener('click', regularHex);
-//document.querySelector('#rotate').addEventListener('click', rotate);
-//document.querySelector('#edges').addEventListener('click', edges);
-//document.querySelector('#refresh').addEventListener('click', refresh);
-
-</script>
-
-</body>
-</html>
