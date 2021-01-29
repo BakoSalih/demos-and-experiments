@@ -1,4 +1,1 @@
-## Welcome
-
-
-[test](https://bakosalih.github.io/page/lozengetiling)
+[Tilings](https://bakosalih.github.io/page/lozengetiling)
