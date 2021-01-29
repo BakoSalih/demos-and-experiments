@@ -1,0 +1,542 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Lozenge tiling</title>
+
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.1.3/pixi.min.js"></script>
+
+</head>
+<body>
+
+<div class="row">
+  <div class="column", id="simulation">
+  	<div id="sim"></div>
+  </div>
+  <div class="column">
+    <h2> Hexagon parameters </h2>
+    <div id="inputA" class="input0">
+      A =
+      <input type="number" value="20" id="Abox" name="A" >
+    </div>
+  	<div id="inputB" class="input0">
+      B =
+      <input type="number" value="20" id="Bbox" name="B" >
+    </div>
+  	<div id="inputC" class="input0">
+      C =
+      <input type="number" value="20" id="Cbox" name="C" >
+    </div>
+
+    <button id="newhex", onclick="myFunction()">Generate</button>
+
+    <h2> Regular hexagon </h2>
+  	<div id="inputN", class="input0">
+      N =
+      <input type="number" value="20" id="Nbox" name="N" >
+    </div>
+
+    <button id="regularhex" onclick="regularHex()">Generate</button>
+
+    <h2> Properties </h2>
+    <button id="edges" onclick="edges()">Edges</button>
+    <button id="rotate" onclick="rotate()">Rotate</button>
+    <h2> Generate </h2>
+    <button id="refresh" onclick="refresh()">Refresh</button>
+    <button id="animatehex" onclick="animatehex()">Animate</button>
+    <button id="pause" onclick="pause()">pause/start</button>
+    <h2> other options </h2>
+    <button id="randomize" onclick="randomize_color()">Randomize color</button>
+    <button id="paths" onclick="paths()">paths</button>
+
+  </div>
+
+
+  <div class="column">
+  <h2> Holes </h2>
+  <div id="inputHole" class="input0">
+    width =
+    <input type="number" value="5" id="holes" name="H" >
+  </div>
+  <div id="inputHoleX" class="input0">
+    x pos =
+    <input type="number" value="0" id="holeX" name="X" >
+  </div>
+  <div id="inputHoleY" class="input0">
+    y pos =
+    <input type="number" value="0" id="holeY" name="Y" >
+  </div>
+  </div>
+</div>
+
+<script type="module">
+import { weight_hexagon } from './weight_hexagon_obscured.js';
+import { W_split, Reduction, Matching, gap} from './matching_obscured.js';
+
+var i;
+var j;
+
+let type = "WebGL"
+if(!PIXI.utils.isWebGLSupported()){
+  type = "canvas"
+}
+//Create a Pixi Application
+let app = new PIXI.Application({
+  width: window.innerWidth*0.5,
+  height: window.innerHeight*0.95,
+  antialias: true,
+  transparent: true
+}
+);
+
+
+//Add the canvas that Pixi automatically created for you to the HTML document
+document.getElementById("sim").appendChild(app.view);
+
+// get A,B,C from input
+const A = document.getElementById("Abox").valueAsNumber;
+const B = document.getElementById("Bbox").valueAsNumber;
+const C = document.getElementById("Cbox").valueAsNumber;
+const holeWidth = document.getElementById("holes").valueAsNumber;
+
+// edges exist of not
+// first load without edges
+app.stage.edgeExist = 0;
+// initial rotation
+app.stage.rotated = 0;
+// initial probability
+var W;
+var P;
+const u = [1,0];
+const v = [-1/2, Math.sqrt(3)/2];
+const w = [1/2, Math.sqrt(3)/2];
+
+//load an image and run the `setup` function when it's done
+const loader = new PIXI.Loader();
+loader
+.load(setup(A, B, C, holeWidth));
+
+// start with displaying edges
+app.stage.edgeExist = 1;
+// option 2: draw paths
+app.stage.paths = 0;
+// option 3:
+
+// make cells white for beginning
+for (i=0;i<app.stage.loz1.length;i++) {
+  app.stage.loz1[i].tint = 0xFFFFFF;
+  app.stage.loz2[i].tint = 0xFFFFFF;
+  app.stage.loz3[i].tint = 0xFFFFFF;
+}
+
+
+// This `setup` function will run when the image has loaded
+// Paints the matching
+function setup(a, b, c, holeWidth = 0, X = 0, Y = 0) {
+	let container = new PIXI.Container();
+	app.stage.addChild(container);
+
+  // edge exist?
+  const lineThickness = app.stage.edgeExist;
+  // draw paths?
+  const paths = app.stage.paths;
+
+  // constants for hexagon dimensions
+  const n = a + c;
+  const m = b + c;
+
+  // constants for the grid directions
+  const u = [1,0];
+  const v = [-1/2, Math.sqrt(3)/2];
+  const w = [1/2, Math.sqrt(3)/2];
+
+  // length of unit to fit the screen / normalize
+  const rx = app.screen.height/(3*Math.max(b+c));
+  const ry = app.screen.height/(3*Math.max(a+c));
+  const r = Math.min(rx,ry);
+
+  // app window size and padding
+  const height = app.screen.height;
+  const width = app.screen.width;
+
+  // center of hexagon
+  const x_center = r*(a * v[0] + b * u[0] + c * w[0]);
+  const y_center = r*(a * v[1] + b * u[1] + c * w[1]);
+
+  // put hexagon in the middle
+  container.x = width/2;
+  container.y = height/2;
+
+  // rotate hexagon if chosen
+  container.rotation = app.stage.rotated;
+
+  app.stage.lozenges = [];
+  for (i=0; i<2*n-1; i++) {
+    const row = new Array(2*m-1);
+    app.stage.lozenges.push(row);
+  }
+
+  app.stage.loz1 = [];
+  app.stage.loz2 = [];
+  app.stage.loz3 = [];
+
+
+  for (i = 0; i < 2*n-1; i++) {
+    for (j = 0; j < 2*m-1; j++) {
+
+      // current coordinate of hexagon center
+      const x_cord = r*(j * u[0] + i * v[0]);
+      const y_cord = height - r*(j * u[1] + i * v[1]);
+
+      // transform up-down
+      const x0 = -x_center + x_cord;
+      const y0 = -height + y_center + y_cord;
+
+      // add lozenge to container and to lozenges for future access
+      if ((i < 2*a && j < 2*b + i) || (i >= 2*a && j > i-2*a)) {
+        let lozenge;
+        if (j % 2 == 0 && i % 2 == 0) {
+          // (even,even) position lozenge
+          lozenge = createLozenge(x0, y0, r, 1, lineThickness, paths);
+          app.stage.loz1.push(lozenge);
+        } else if (j % 2 == 1 && i % 2 == 0) {
+          // (even,odd) position lozenge
+          lozenge = createLozenge(x0, y0, r, 2, lineThickness, paths);
+          app.stage.loz2.push(lozenge);
+        } else if (j % 2 == 0 && i % 2 == 1) {
+          // (odd,even) position lozenge
+          lozenge = createLozenge(x0, y0, r, 3, lineThickness, paths);
+          app.stage.loz3.push(lozenge);
+        } else {
+          // (odd,odd) no lozenge
+          lozenge = new PIXI.Graphics();
+        }
+
+        // hide all lozenges until the matching activates the relevant ones
+        lozenge.visible = false;
+        app.stage.lozenges[i][j] = lozenge;
+        container.addChild(lozenge);
+      }
+    }
+  }
+
+  // create new matching
+  W = weight_hexagon([[1],[1]],1,a,b,c)
+  W = gap(W,a,b,c,2*holeWidth,X,Y);
+  W = W_split(W);
+  P = Reduction(W, W.im);
+  let M = Matching(P, W[0].length);
+
+
+  // var loz = new PIXI.Graphics();
+  // loz.beginFill(0x1cff00, 1);
+  // loz.lineStyle(1/2, 0x000000, lineThickness);
+  // loz.moveTo(width, height);
+  // loz.lineTo(0,0);
+  // loz.lineTo(-r*v[0], r*v[1]);
+  // loz.lineTo(r*10, r*10);
+  // loz.lineTo(0,0);
+  // loz.endFill();
+  // container.addChild(loz);
+
+
+  // draw matching
+  drawHexagon(a,b,c,M,W.holes);
+  //drawHexagon(a,b,c,M,W.holes);
+
+
+
+  if (holeWidth > 0) {
+    // all the vertices
+    let vertex = new PIXI.Graphics();
+		vertex.interactive = true;
+	  vertex.buttonMode = true;
+    vertex.beginFill(0xFFFFFF);
+    vertex.on('mousedown', onDown)
+        .on('mousemove', onDragMove)
+        .on('mouseup', onDragEnd)
+        .on('mouseupoutside', onDragEnd);
+        // .on('mouseup', onRelease)
+        // .on('mouseupoutside',onRelease);
+    vertex.drawCircle(X - r/2, Y + r*Math.sqrt(3)/2, 10);
+    vertex.endFill();
+    container.addChild(vertex);
+  }
+
+
+
+
+}
+
+function createLozenge(xPos, yPos, r, type, lineThickness = 1, paths = 0)
+{
+  var loz = new PIXI.Graphics();
+  if (type == 1) { //
+    loz.x = xPos - r/2;
+    loz.y = yPos + r*Math.sqrt(3)/2;
+    loz.beginFill(0xFFFFFF, 1);
+    loz.tint = 0x1cff00;
+    loz.lineStyle(1/2, 0x000000, lineThickness);
+    loz.moveTo(0, 0);
+    loz.lineTo(2*r, 0);
+    loz.lineTo(r, -r*Math.sqrt(3));
+    loz.lineTo(-r, -r*Math.sqrt(3));
+    loz.endFill();
+
+    // if we want paths we set tint to 0 and draw a line in middle
+    if (paths == 1) {
+      loz.tint = 0xFFFFFF;
+      loz.lineStyle(2, 0x000000);
+      loz.moveTo(-r/2,-r*Math.sqrt(3)/2);
+      loz.lineTo(3*r/2, -r*Math.sqrt(3)/2);
+    }
+
+
+  } else if (type == 2) { // top lozenge
+    loz.x = xPos + r/2;
+    loz.y = yPos + r*Math.sqrt(3)/2;
+    loz.beginFill(0xFFFFFF, 1);
+    loz.tint = 0xfc0606;
+    loz.lineStyle(1/2, 0x000000, lineThickness);
+    loz.moveTo(0, 0);
+    loz.lineTo(r, -r*Math.sqrt(3));
+    loz.lineTo(-r, -r*Math.sqrt(3));
+    loz.lineTo(-2*r, 0);
+    loz.lineTo(0,0);
+    loz.endFill();
+
+    // if we want paths we set tint to 0 and draw a line in middle
+    if (paths == 1) {
+      loz.tint = 0xFFFFFF;
+    }
+
+  } else if (type == 3) { //
+    loz.x = xPos;
+    loz.y = yPos + r*Math.sqrt(3);
+    loz.beginFill(0xFFFFFF, 1);
+    loz.tint = 0xfffa8a;
+    loz.lineStyle(1/2, 0x000000, lineThickness);
+    loz.moveTo(0, 0);
+    loz.lineTo(r, -r*Math.sqrt(3));
+    loz.lineTo(0, -2*r*Math.sqrt(3));
+    loz.lineTo(-r, -r*Math.sqrt(3));
+    loz.lineTo(0, 0);
+    loz.endFill();
+
+    // if we want paths we set tint to 0 and draw a line in middle
+    if (paths == 1) {
+      loz.tint = 0xFFFFFF;
+      loz.lineStyle(2, 0x000000);
+      loz.moveTo(-r/2, -r*Math.sqrt(3)/2);
+      loz.lineTo(r/2, -3*r*Math.sqrt(3)/2);
+    }
+
+  }
+
+  return loz
+}
+
+
+// updates the lozenges using matching matrix M
+function drawHexagon(a,b,c,M,holes) {
+  const n = a+c;
+  const m = b+c;
+
+  for (i = 0; i < 2*n-1; i++) {
+    for (j = 0; j < 2*m-1; j++) {
+      // use Matching matrix M to make lozenges visible
+      if ((i < 2*a && j < 2*b + i) || (i >= 2*a && j > i-2*a)) {
+        if (M[i][j] && !holes[holes.length-1-i][j])  {
+          app.stage.lozenges[i][j].visible = true;
+        } else {
+          app.stage.lozenges[i][j].visible = false;
+        }
+
+        // use holes to hide
+        // if (holes.length > 0 && holes[holes.length-1-i][j])  {
+        //   app.stage.lozenges[i][j].visible = false;
+        // }
+      }
+    }
+  }
+
+}
+
+
+function refresh() {
+  const A = document.getElementById("Abox").valueAsNumber;
+  const B = document.getElementById("Bbox").valueAsNumber;
+  const C = document.getElementById("Cbox").valueAsNumber;
+  let M = Matching(P, W[0].length);
+  drawHexagon(A,B,C,M,W.holes);
+
+}
+
+function animatehex() {
+  const A = document.getElementById("Abox").valueAsNumber;
+  const B = document.getElementById("Bbox").valueAsNumber;
+  const C = document.getElementById("Cbox").valueAsNumber;
+
+  // animate/stopped
+  let ticker = PIXI.Ticker.shared;
+  //ticker.autoStart = false;
+  ticker.maxFPS = 1;
+  if (!ticker.started) {
+    ticker.add(() => {
+        let M = Matching(P, W[0].length);
+        drawHexagon(A,B,C,M,W.holes);
+    });
+  }
+}
+
+function randomize_color() {
+  const color1 = Math.random() * 0xFFFFFF;
+  const color2 = Math.random() * 0xFFFFFF;
+  const color3 = Math.random() * 0xFFFFFF;
+
+  for (i=0;i<app.stage.loz1.length;i++) {
+    app.stage.loz1[i].tint = color1;
+    app.stage.loz2[i].tint = color2;
+    app.stage.loz3[i].tint = color3;
+  }
+}
+
+function pause() {
+  // toggle start / stop
+  if (!PIXI.Ticker.shared.started) {
+    PIXI.Ticker.shared.start();
+  } else {
+    PIXI.Ticker.shared.stop();
+  }
+}
+
+function rotate() {
+  let container = app.stage.children[0];
+  if (container.rotation == 0) {
+    container.rotation = Math.PI/6;
+    app.stage.rotated = Math.PI/6;
+  } else {
+    container.rotation = 0;
+    app.stage.rotated = 0;
+  }
+}
+
+function edges() {
+  if (app.stage.edgeExist == 0) {
+    app.stage.edgeExist = 1;
+  } else {
+    app.stage.edgeExist = 0;
+  }
+}
+
+function paths() {
+  if (app.stage.paths == 0) {
+    app.stage.paths = 1;
+  } else {
+    app.stage.paths = 0;
+  }
+
+}
+
+function myFunction() {
+  // constants for the size of the hexagon
+
+  //app.stage.edgeExist = 1;
+  const A = document.getElementById("Abox").valueAsNumber;
+  const B = document.getElementById("Bbox").valueAsNumber;
+  const C = document.getElementById("Cbox").valueAsNumber;
+
+  const hole = document.getElementById("holes").valueAsNumber;
+  const X = document.getElementById("holeX").valueAsNumber;
+  const Y = document.getElementById("holeY").valueAsNumber;
+  if (hole > Math.floor((B+C)/2)) {
+    hole = Math.floor((B+C)/2);
+    document.getElementById("holes").setAttribute("value", hole);
+    document.getElementById("holes").setAttribute("max", hole);
+  }
+
+  W = weight_hexagon([[1],[1]],1,A,B,C)
+  W = gap(W,A,B,C,2*hole,X,Y);
+  W = W_split(W);
+  P = Reduction(W, W.im);
+  let M = Matching(P, W[0].length);
+
+
+  app.stage.removeChildren(0);
+  setup(A, B, C, hole, X, Y);
+  drawHexagon(A, B, C, M, W.holes);
+}
+
+function regularHex() {
+
+  //app.stage.edgeExist = 1;
+  // constants for the size of the hexagon
+  const N = document.getElementById("Nbox").valueAsNumber;
+  const hole = document.getElementById("holes").valueAsNumber;
+
+  // set A,B,C
+  document.getElementById("Abox").setAttribute("value", N);
+  document.getElementById("Bbox").setAttribute("value", N);
+  document.getElementById("Cbox").setAttribute("value", N);
+  document.getElementById("holes").setAttribute("max", Math.floor(N/2));
+  const X = document.getElementById("holeX").valueAsNumber;
+  const Y = document.getElementById("holeY").valueAsNumber;
+
+  app.stage.removeChildren(0);
+  setup(N,N,N, hole, X, Y);
+}
+
+function onDown(e) {
+  this.data = e.data;
+  this.dragging = true;
+  var newPosition = this.data.getLocalPosition(this.parent);
+  this.position.x = Math.floor(newPosition.x / 10)*10;
+  this.position.y = Math.floor(newPosition.y / 10)*10;
+
+  document.getElementById("holeX").setAttribute("value", this.position.x);
+  document.getElementById("holeY").setAttribute("value", this.position.y);
+
+}
+
+function onDragMove(e)
+{
+
+	if (this.dragging)
+    {
+      var newPosition = this.data.getLocalPosition(this.parent);
+      this.position.x = Math.floor(newPosition.x / 10)*10;
+      this.position.y = Math.floor(newPosition.y / 10)*10;
+
+      document.getElementById("holeX").setAttribute("value", this.position.x);
+      document.getElementById("holeY").setAttribute("value", this.position.y);
+    }
+
+}
+
+function onDragEnd()
+{
+    this.dragging = false;
+    // set the interaction data to null
+    this.data = null;
+
+}
+
+console.log(app.width)
+
+window.myFunction = myFunction;
+window.regularHex = regularHex;
+window.rotate = rotate;
+window.edges = edges;
+window.refresh = refresh;
+window.animatehex = animatehex;
+window.randomize_color = randomize_color;
+window.pause = pause;
+window.gap = gap;
+window.weight_hexagon = weight_hexagon;
+
+
+</script>
+
+</body>
+</html>

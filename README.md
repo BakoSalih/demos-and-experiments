@@ -1,4 +1,4 @@
 ## Welcome
 
 
-[test](https://bakosalih.github.io/page/hexagon3)
+[test](https://bakosalih.github.io/page/lozengetiling)
