@@ -102,7 +102,7 @@ const holeWidth = document.getElementById("holes").valueAsNumber;
 
 // edges exist of not
 // first load without edges
-app.stage.edgeExist = 0;
+app.stage.edgeExist = 1;
 // initial rotation
 app.stage.rotated = 0;
 // initial probability
@@ -123,12 +123,7 @@ app.stage.edgeExist = 1;
 app.stage.paths = 0;
 // option 3:
 
-// make cells white for beginning
-for (i=0;i<app.stage.loz1.length;i++) {
-  app.stage.loz1[i].tint = 0xFFFFFF;
-  app.stage.loz2[i].tint = 0xFFFFFF;
-  app.stage.loz3[i].tint = 0xFFFFFF;
-}
+
 
 
 // This `setup` function will run when the image has loaded
