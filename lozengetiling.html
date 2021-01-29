@@ -18,15 +18,15 @@
     <h2> Hexagon parameters </h2>
     <div id="inputA" class="input0">
       A =
-      <input type="number" value="20" id="Abox" name="A" >
+      <input type="number" value="30" id="Abox" name="A" >
     </div>
   	<div id="inputB" class="input0">
       B =
-      <input type="number" value="20" id="Bbox" name="B" >
+      <input type="number" value="30" id="Bbox" name="B" >
     </div>
   	<div id="inputC" class="input0">
       C =
-      <input type="number" value="20" id="Cbox" name="C" >
+      <input type="number" value="30" id="Cbox" name="C" >
     </div>
 
     <button id="newhex", onclick="myFunction()">Generate</button>
@@ -34,7 +34,7 @@
     <h2> Regular hexagon </h2>
   	<div id="inputN", class="input0">
       N =
-      <input type="number" value="20" id="Nbox" name="N" >
+      <input type="number" value="30" id="Nbox" name="N" >
     </div>
 
     <button id="regularhex" onclick="regularHex()">Generate</button>
@@ -57,7 +57,7 @@
   <h2> Holes </h2>
   <div id="inputHole" class="input0">
     width =
-    <input type="number" value="5" id="holes" name="H" >
+    <input type="number" value="4" id="holes" name="H" >
   </div>
   <div id="inputHoleX" class="input0">
     x pos =
@@ -71,8 +71,8 @@
 </div>
 
 <script type="module">
-import { weight_hexagon } from './weight_hexagon_obscured.js';
-import { W_split, Reduction, Matching, gap} from './matching_obscured.js';
+import { weight_hexagon } from './weight_hexagon.js';
+import { W_split, Reduction, Matching, gap} from './matching.js';
 
 var i;
 var j;
@@ -104,13 +104,15 @@ const holeWidth = document.getElementById("holes").valueAsNumber;
 // first load without edges
 app.stage.edgeExist = 1;
 // initial rotation
-app.stage.rotated = 0;
+app.stage.rotated = Math.PI/6;
 // initial probability
 var W;
 var P;
 const u = [1,0];
 const v = [-1/2, Math.sqrt(3)/2];
 const w = [1/2, Math.sqrt(3)/2];
+
+
 
 //load an image and run the `setup` function when it's done
 const loader = new PIXI.Loader();
@@ -123,14 +125,49 @@ app.stage.edgeExist = 1;
 app.stage.paths = 0;
 // option 3:
 
+// // make cells white for beginning
+// for (i=0;i<app.stage.loz1.length;i++) {
+//   app.stage.loz1[i].tint = 0xFFFFFF;
+//   app.stage.loz2[i].tint = 0xFFFFFF;
+//   app.stage.loz3[i].tint = 0xFFFFFF;
+// }
 
+// central point
+// rx,ry,r
+const rx = app.screen.width/(3*Math.max(B+C));
+const ry = app.screen.height/(3*Math.max(A+C));
+const r = Math.min(rx,ry);
+
+//hole(container )
+if (holeWidth > 0) {
+  let container = new PIXI.Container();
+	app.stage.addChild(container);
+  // all the vertices
+  let vertex = new PIXI.Graphics();
+  vertex.interactive = true;
+  vertex.buttonMode = true;
+  vertex.beginFill(0x000000);
+  vertex.on('mousedown', onDown)
+      .on('mousemove', onDragMove)
+      .on('mouseup', onDragEnd)
+      .on('mouseupoutside', onDragEnd);
+      // .on('mouseup', onRelease)
+      // .on('mouseupoutside',onRelease);
+  vertex.drawCircle(0, 0, 4);
+  vertex.endFill();
+  container.addChild(vertex);
+  container.x = app.screen.width/2;
+  container.y = app.screen.height/2;
+  vertex.x = -r/2;
+  vertex.y = r*Math.sqrt(3)/2;
+}
 
 
 // This `setup` function will run when the image has loaded
 // Paints the matching
 function setup(a, b, c, holeWidth = 0, X = 0, Y = 0) {
 	let container = new PIXI.Container();
-	app.stage.addChild(container);
+	app.stage.addChildAt(container,0);
 
   // edge exist?
   const lineThickness = app.stage.edgeExist;
@@ -147,9 +184,11 @@ function setup(a, b, c, holeWidth = 0, X = 0, Y = 0) {
   const w = [1/2, Math.sqrt(3)/2];
 
   // length of unit to fit the screen / normalize
-  const rx = app.screen.height/(3*Math.max(b+c));
+  const rx = app.screen.width/(3*Math.max(b+c));
   const ry = app.screen.height/(3*Math.max(a+c));
   const r = Math.min(rx,ry);
+  // save r
+  app.stage.r = r;
 
   // app window size and padding
   const height = app.screen.height;
@@ -239,29 +278,6 @@ function setup(a, b, c, holeWidth = 0, X = 0, Y = 0) {
   // draw matching
   drawHexagon(a,b,c,M,W.holes);
   //drawHexagon(a,b,c,M,W.holes);
-
-
-/*
-  if (holeWidth > 0) {
-    // all the vertices
-    let vertex = new PIXI.Graphics();
-		vertex.interactive = true;
-	  vertex.buttonMode = true;
-    vertex.beginFill(0xFFFFFF);
-    vertex.on('mousedown', onDown)
-        .on('mousemove', onDragMove)
-        .on('mouseup', onDragEnd)
-        .on('mouseupoutside', onDragEnd);
-        // .on('mouseup', onRelease)
-        // .on('mouseupoutside',onRelease);
-    vertex.drawCircle(X - r/2, Y + r*Math.sqrt(3)/2, 10);
-    vertex.endFill();
-    container.addChild(vertex);
-  }
-*/
-
-
-
 }
 
 function createLozenge(xPos, yPos, r, type, lineThickness = 1, paths = 0)
@@ -328,7 +344,6 @@ function createLozenge(xPos, yPos, r, type, lineThickness = 1, paths = 0)
     }
 
   }
-
   return loz
 }
 
@@ -337,7 +352,6 @@ function createLozenge(xPos, yPos, r, type, lineThickness = 1, paths = 0)
 function drawHexagon(a,b,c,M,holes) {
   const n = a+c;
   const m = b+c;
-
   for (i = 0; i < 2*n-1; i++) {
     for (j = 0; j < 2*m-1; j++) {
       // use Matching matrix M to make lozenges visible
@@ -347,11 +361,6 @@ function drawHexagon(a,b,c,M,holes) {
         } else {
           app.stage.lozenges[i][j].visible = false;
         }
-
-        // use holes to hide
-        // if (holes.length > 0 && holes[holes.length-1-i][j])  {
-        //   app.stage.lozenges[i][j].visible = false;
-        // }
       }
     }
   }
@@ -372,7 +381,13 @@ function animatehex() {
   const A = document.getElementById("Abox").valueAsNumber;
   const B = document.getElementById("Bbox").valueAsNumber;
   const C = document.getElementById("Cbox").valueAsNumber;
-
+  // const size = W.length;
+  // let Mavg = [];
+  // for (var i=0; i<height; i++) {
+  //   Mavg[i] = [];
+  //   Mavg[i].length = height;
+  //   Mavg[i].fill(0);
+  // }
   // animate/stopped
   let ticker = PIXI.Ticker.shared;
   //ticker.autoStart = false;
@@ -458,7 +473,7 @@ function myFunction() {
   let M = Matching(P, W[0].length);
 
 
-  app.stage.removeChildren(0);
+  app.stage.removeChildAt(0);
   setup(A, B, C, hole, X, Y);
   drawHexagon(A, B, C, M, W.holes);
 }
@@ -478,20 +493,15 @@ function regularHex() {
   const X = document.getElementById("holeX").valueAsNumber;
   const Y = document.getElementById("holeY").valueAsNumber;
 
-  app.stage.removeChildren(0);
+  app.stage.removeChildAt(0);
   setup(N,N,N, hole, X, Y);
 }
 
 function onDown(e) {
   this.data = e.data;
+  // console.log(app.screen.width/2);
+  // console.log(this.data.global.x);
   this.dragging = true;
-  var newPosition = this.data.getLocalPosition(this.parent);
-  this.position.x = Math.floor(newPosition.x / 10)*10;
-  this.position.y = Math.floor(newPosition.y / 10)*10;
-
-  document.getElementById("holeX").setAttribute("value", this.position.x);
-  document.getElementById("holeY").setAttribute("value", this.position.y);
-
 }
 
 function onDragMove(e)
@@ -500,11 +510,19 @@ function onDragMove(e)
 	if (this.dragging)
     {
       var newPosition = this.data.getLocalPosition(this.parent);
-      this.position.x = Math.floor(newPosition.x / 10)*10;
-      this.position.y = Math.floor(newPosition.y / 10)*10;
+      const r = app.stage.r;
 
-      document.getElementById("holeX").setAttribute("value", this.position.x);
-      document.getElementById("holeY").setAttribute("value", this.position.y);
+      const xscale = 2*r*Math.sqrt(3);
+      const yscale = 4*r;
+      const x = Math.round(newPosition.x/(xscale));
+      const y = Math.round((newPosition.y)/(yscale));
+
+      this.position.x = x*xscale;
+      this.position.y = y*yscale;
+
+
+      document.getElementById("holeX").setAttribute("value", 2*x);
+      document.getElementById("holeY").setAttribute("value", -2*y);
     }
 
 }
@@ -514,10 +532,12 @@ function onDragEnd()
     this.dragging = false;
     // set the interaction data to null
     this.data = null;
-
+    const A = document.getElementById("Abox").valueAsNumber;
+    const B = document.getElementById("Bbox").valueAsNumber;
+    const C = document.getElementById("Cbox").valueAsNumber;
+    myFunction(A,B,C)
 }
 
-console.log(app.width)
 
 window.myFunction = myFunction;
 window.regularHex = regularHex;
