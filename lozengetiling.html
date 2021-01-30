@@ -53,26 +53,14 @@
   </div>
 
 
-  <div class="column">
-  <h2> Holes </h2>
-  <div id="inputHole" class="input0">
-    width =
-    <input type="number" value="4" id="holes" name="H" >
-  </div>
-  <div id="inputHoleX" class="input0">
-    x pos =
-    <input type="number" value="0" id="holeX" name="X" >
-  </div>
-  <div id="inputHoleY" class="input0">
-    y pos =
-    <input type="number" value="0" id="holeY" name="Y" >
-  </div>
+  <div class="column" id="holes">
+
   </div>
 </div>
 
 <script type="module">
-import { weight_hexagon } from './weight_hexagon_obscured.js';
-import { W_split, Reduction, Matching, gap} from './matching_obscured.js';
+import { weight_hexagon } from './weight_hexagon.js';
+import { W_split, Reduction, Matching, gap} from './matching.js';
 
 var i;
 var j;
@@ -90,6 +78,12 @@ let app = new PIXI.Application({
 }
 );
 
+// idea: Perhaps create Hexagon object that has all the current properties
+// of the hexagon for clarity
+
+// hexagon dimension: A,B,C
+// hexagon number of holes:
+//
 
 //Add the canvas that Pixi automatically created for you to the HTML document
 document.getElementById("sim").appendChild(app.view);
@@ -98,7 +92,6 @@ document.getElementById("sim").appendChild(app.view);
 const A = document.getElementById("Abox").valueAsNumber;
 const B = document.getElementById("Bbox").valueAsNumber;
 const C = document.getElementById("Cbox").valueAsNumber;
-const holeWidth = document.getElementById("holes").valueAsNumber;
 
 // edges exist of not
 // first load without edges
@@ -111,19 +104,21 @@ var P;
 const u = [1,0];
 const v = [-1/2, Math.sqrt(3)/2];
 const w = [1/2, Math.sqrt(3)/2];
-
+// set initial number of holes
+app.stage.holes = 0;
 
 
 //load an image and run the `setup` function when it's done
 const loader = new PIXI.Loader();
 loader
-.load(setup(A, B, C, holeWidth));
+.load(setup(A, B, C));
 
 // start with displaying edges
 app.stage.edgeExist = 1;
 // option 2: draw paths
 app.stage.paths = 0;
-// option 3:
+// option 3: set initial number of holes
+app.stage.holes = 0;
 
 // // make cells white for beginning
 // for (i=0;i<app.stage.loz1.length;i++) {
@@ -138,34 +133,48 @@ const rx = app.screen.width/(3*Math.max(B+C));
 const ry = app.screen.height/(3*Math.max(A+C));
 const r = Math.min(rx,ry);
 
-//hole(container )
-if (holeWidth > 0) {
-  let container = new PIXI.Container();
-	app.stage.addChild(container);
-  // all the vertices
-  let vertex = new PIXI.Graphics();
-  vertex.interactive = true;
-  vertex.buttonMode = true;
-  vertex.beginFill(0x000000);
-  vertex.on('mousedown', onDown)
-      .on('mousemove', onDragMove)
-      .on('mouseup', onDragEnd)
-      .on('mouseupoutside', onDragEnd);
-      // .on('mouseup', onRelease)
-      // .on('mouseupoutside',onRelease);
-  vertex.drawCircle(0, 0, 4);
-  vertex.endFill();
-  container.addChild(vertex);
-  container.x = app.screen.width/2;
-  container.y = app.screen.height/2;
-  vertex.x = -r/2;
-  vertex.y = r*Math.sqrt(3)/2;
+
+
+
+{
+    let container = new PIXI.Container();
+    app.stage.addChild(container);
+
+    hole(container, app.stage.holes);
+    app.stage.holes += 1;
+    hole(container, app.stage.holes);
+    app.stage.holes += 1;
+
+    container.x = app.screen.width/2;
+    container.y = app.screen.height/2;
 }
+
+
+
+// if (holeWidth > 0) {
+//   let container = new PIXI.Container();
+// 	app.stage.addChild(container);
+//   // all the vertices
+//   let vertex = new PIXI.Graphics();
+//   vertex.interactive = true;
+//   vertex.buttonMode = true;
+//   vertex.beginFill(0x000000);
+//   vertex.on('mousedown', onDown)
+//       .on('mousemove', onDragMove)
+//       .on('mouseup', onDragEnd)
+//       .on('mouseupoutside', onDragEnd);
+//       // .on('mouseup', onRelease)
+//       // .on('mouseupoutside',onRelease);
+//   vertex.drawCircle(0, 0, 4);
+//   vertex.endFill();
+//   vertex.x = -r/2;
+//   vertex.y = r*Math.sqrt(3)/2;
+// }
 
 
 // This `setup` function will run when the image has loaded
 // Paints the matching
-function setup(a, b, c, holeWidth = 0, X = 0, Y = 0) {
+function setup(a, b, c) {
 	let container = new PIXI.Container();
 	app.stage.addChildAt(container,0);
 
@@ -255,11 +264,33 @@ function setup(a, b, c, holeWidth = 0, X = 0, Y = 0) {
     }
   }
 
-  // create new matching
+  // create underlying weights
   W = weight_hexagon([[1],[1]],1,a,b,c)
-  W = gap(W,a,b,c,2*holeWidth,X,Y);
+
+  // add the holes
+
+  // give W a matrix with positions of holes, initialize first
+
+
+  W.holes = [];
+  for (var i=0; i<W.length; i++) {
+    W.holes[i] = [];
+    W.holes[i].length = W.length;
+    W.holes[i].fill(0);
+  }
+
+  // add holes to W
+  for (i=0;i<app.stage.holes;i++) {
+    const width = document.getElementById(`holeW${i}`).valueAsNumber;
+    const X = document.getElementById(`holeX${i}`).valueAsNumber;
+    const Y = document.getElementById(`holeY${i}`).valueAsNumber;
+    W = gap(W,a,b,c,width,X,Y);
+  }
+  // compute reduction
   W = W_split(W);
   P = Reduction(W, W.im);
+
+  // get matching
   let M = Matching(P, W[0].length);
 
 
@@ -357,6 +388,7 @@ function drawHexagon(a,b,c,M,holes) {
       // use Matching matrix M to make lozenges visible
       if ((i < 2*a && j < 2*b + i) || (i >= 2*a && j > i-2*a)) {
         if (M[i][j] && !holes[holes.length-1-i][j])  {
+        //if (M[i][j])  {
           app.stage.lozenges[i][j].visible = true;
         } else {
           app.stage.lozenges[i][j].visible = false;
@@ -457,27 +489,43 @@ function myFunction() {
   const B = document.getElementById("Bbox").valueAsNumber;
   const C = document.getElementById("Cbox").valueAsNumber;
 
-  const hole = document.getElementById("holes").valueAsNumber;
-  const X = document.getElementById("holeX").valueAsNumber;
-  const Y = document.getElementById("holeY").valueAsNumber;
-  if (hole > Math.floor((B+C)/2)) {
-    hole = Math.floor((B+C)/2);
-    document.getElementById("holes").setAttribute("value", hole);
-    document.getElementById("holes").setAttribute("max", hole);
-  }
+  // const hole = document.getElementById("holes").valueAsNumber;
+  // const X = document.getElementById("holeX").valueAsNumber;
+  // const Y = document.getElementById("holeY").valueAsNumber;
+  // if (hole > Math.floor((B+C)/2)) {
+  //   hole = Math.floor((B+C)/2);
+  //   document.getElementById("holes").setAttribute("value", hole);
+  //   document.getElementById("holes").setAttribute("max", hole);
+  // }
 
   W = weight_hexagon([[1],[1]],1,A,B,C)
-  W = gap(W,A,B,C,2*hole,X,Y);
+  // add the holes
+  W.holes = [];
+  for (var i=0; i<W.length; i++) {
+    W.holes[i] = [];
+    W.holes[i].length = W.length;
+    W.holes[i].fill(0);
+  }
+
+  // add holes to W
+  for (i=0;i<app.stage.holes;i++) {
+    const width = document.getElementById(`holeW${i}`).valueAsNumber;
+    const X = document.getElementById(`holeX${i}`).valueAsNumber;
+    const Y = document.getElementById(`holeY${i}`).valueAsNumber;
+    W = gap(W,A,B,C,width,X,Y);
+  }
+
   W = W_split(W);
   P = Reduction(W, W.im);
   let M = Matching(P, W[0].length);
 
 
   app.stage.removeChildAt(0);
-  setup(A, B, C, hole, X, Y);
+  setup(A, B, C);
   drawHexagon(A, B, C, M, W.holes);
 }
 
+// change!!!
 function regularHex() {
 
   //app.stage.edgeExist = 1;
@@ -490,8 +538,9 @@ function regularHex() {
   document.getElementById("Bbox").setAttribute("value", N);
   document.getElementById("Cbox").setAttribute("value", N);
   document.getElementById("holes").setAttribute("max", Math.floor(N/2));
-  const X = document.getElementById("holeX").valueAsNumber;
-  const Y = document.getElementById("holeY").valueAsNumber;
+  /////////////////////////// change
+  // const X = document.getElementById("holeX").valueAsNumber;
+  // const Y = document.getElementById("holeY").valueAsNumber;
 
   app.stage.removeChildAt(0);
   setup(N,N,N, hole, X, Y);
@@ -520,9 +569,11 @@ function onDragMove(e)
       this.position.x = x*xscale;
       this.position.y = y*yscale;
 
-
-      document.getElementById("holeX").setAttribute("value", 2*x);
-      document.getElementById("holeY").setAttribute("value", -2*y);
+      const num = this.number;
+      // this.Xinput.setAttribute("value", 2*x)
+      // this.Yinput.setAttribute("value", -2*y)
+      document.getElementById(`holeX${num}`).setAttribute("value", 2*x);
+      document.getElementById(`holeY${num}`).setAttribute("value", -2*y);
     }
 
 }
@@ -535,7 +586,65 @@ function onDragEnd()
     const A = document.getElementById("Abox").valueAsNumber;
     const B = document.getElementById("Bbox").valueAsNumber;
     const C = document.getElementById("Cbox").valueAsNumber;
-    myFunction(A,B,C)
+    myFunction()
+}
+
+function hole(container, num) {
+  // all the vertices
+  let vertex = new PIXI.Graphics();
+  vertex.interactive = true;
+  vertex.buttonMode = true;
+  vertex.beginFill(0x000000);
+  vertex.on('mousedown', onDown)
+      .on('mousemove', onDragMove)
+      .on('mouseup', onDragEnd)
+      .on('mouseupoutside', onDragEnd);
+      // .on('mouseup', onRelease)
+      // .on('mouseupoutside',onRelease);
+  vertex.drawCircle(0, 0, 4);
+  vertex.endFill();
+  vertex.x = -r/2;
+  vertex.y = r*Math.sqrt(3)/2;
+
+
+  // make title
+  let div = document.getElementById("holes");
+  div.innerHTML += `<h2> Hole ${num} </h2>`
+
+  //document.body.appendChild(title)
+
+  let Iwidth = document.createElement("INPUT");
+  Iwidth.setAttribute("type", "number");
+  Iwidth.setAttribute("value", 0);
+  Iwidth.setAttribute("id", `holeW${num}`);
+  Iwidth.setAttribute("onchange", "myFunction()")
+  document.getElementById("holes").appendChild(Iwidth);
+
+
+  let Ix = document.createElement("INPUT");
+  Ix.setAttribute("type", "number");
+  Ix.setAttribute("value", 0);
+  Ix.setAttribute("id", `holeX${num}`);
+  Ix.setAttribute("onchange", "myFunction()")
+  document.getElementById("holes").appendChild(Ix);
+
+  let Iy = document.createElement("INPUT");
+  Iy.setAttribute("type", "number");
+  Iy.setAttribute("value", 0);
+  Iy.setAttribute("id", `holeY${num}`);
+  Iy.setAttribute("onchange", "myFunction()")
+  document.getElementById("holes").appendChild(Iy);
+
+  // vertex.Xinput = Ix;
+  // vertex.Yinput = Iy;
+  vertex.number = num;
+
+  container.addChild(vertex);
+}
+
+
+function addHole() {
+
 }
 
 
