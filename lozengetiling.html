@@ -28,6 +28,10 @@
       C =
       <input type="number" value="30" id="Cbox" name="C" >
     </div>
+  	<div id="inputW" class="input0">
+      weight =
+      <input type="number" value="0" id="cweight" name="Wweight" >
+    </div>
 
     <button id="newhex", onclick="myFunction()">Generate</button>
 
@@ -283,7 +287,8 @@ function setup() {
   }
 
   // create underlying weights
-  W = weight_hexagon([[1],[1]],1,a,b,c)
+  const cweight = document.getElementById("cweight").valueAsNumber;
+  W = weight_hexagon(qweight(2*(a+b+1), cweight),1,a,b,c)
 
   // add the holes
 
@@ -508,7 +513,10 @@ function myFunction() {
   //   document.getElementById("holes").setAttribute("max", hole);
   // }
 
-  W = weight_hexagon([[1],[1]],1,A,B,C)
+
+  //W = weight_hexagon([[1],[1]],1,A,B,C)
+  const cweight = document.getElementById("cweight").valueAsNumber;
+  W = weight_hexagon(qweight(2*(A+B+1), cweight),1,A,B,C)
   // add the holes
   W.holes = [];
   for (var i=0; i<W.length; i++) {
@@ -556,7 +564,8 @@ function reweight() {
   const B = document.getElementById("Bbox").valueAsNumber;
   const C = document.getElementById("Cbox").valueAsNumber;
 
-  W = weight_hexagon([[1],[1]],1,A,B,C)
+  const cweight = document.getElementById("cweight").valueAsNumber;
+  W = weight_hexagon(qweight(2*(A+B+1), cweight),1,A,B,C)
   // add the holes
   W.holes = [];
   for (var i=0; i<W.length; i++) {
@@ -714,6 +723,23 @@ function addHoles() {
 }
 
 
+function qweight(N, a) {
+  let bottom;
+  let top;
+  if (a == 0) {
+    bottom = [1];
+    top = [1];
+  } else {
+    const q = Math.exp(-a/N);
+    top = new Array(N);
+    top.fill(1);
+    bottom = new Array(N);
+    for (let k=0;k<N;k++) {
+      bottom[k] = q**k;
+    }
+  }
+  return [bottom, top];
+}
 window.myFunction = myFunction;
 window.regularHex = regularHex;
 window.rotate = rotate;
@@ -726,6 +752,7 @@ window.gap = gap;
 window.paths = paths;
 window.addHoles = addHoles;
 window.weight_hexagon = weight_hexagon;
+window.qweight = qweight;
 
 
 </script>
