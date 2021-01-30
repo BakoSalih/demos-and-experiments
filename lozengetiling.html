@@ -617,6 +617,7 @@ function hole(container, num) {
   Iwidth.setAttribute("type", "number");
   Iwidth.setAttribute("value", 0);
   Iwidth.setAttribute("id", `holeW${num}`);
+  Iwidth.setAttribute("step", "2");
   Iwidth.setAttribute("onchange", "myFunction()")
   document.getElementById("holes").appendChild(Iwidth);
 
