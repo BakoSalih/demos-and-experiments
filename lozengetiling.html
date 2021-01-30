@@ -39,22 +39,33 @@
 
     <button id="regularhex" onclick="regularHex()">Generate</button>
 
-    <h2> Properties </h2>
-    <button id="edges" onclick="edges()">Edges</button>
-    <button id="rotate" onclick="rotate()">Rotate</button>
+
     <h2> Generate </h2>
     <button id="refresh" onclick="refresh()">Refresh</button>
     <button id="animatehex" onclick="animatehex()">Animate</button>
     <button id="pause" onclick="pause()">pause/start</button>
-    <h2> other options </h2>
-    <button id="randomize" onclick="randomize_color()">Randomize color</button>
-    <button id="paths" onclick="paths()">paths</button>
-
+    <h2> Properties </h2>
+    <div>
+    <button id="rotate" onclick="rotate()">Rotate</button>
+    </div>
+    <div>
+      <button id="randomize" onclick="randomize_color()">Randomize color</button>
+    </div>
+    <div>
+      <input type="checkbox" id="edges" onclick="edges()" checked>Show edges</button>
+    </div>
+    <div>
+    <input type="checkbox" id="paths" onclick="paths()">Show paths</button>
+    </div>
   </div>
 
 
-  <div class="column" id="holes">
-
+  <div class="column">
+    <h2> Holes </h2>
+    <div>
+    Holes <input type="number", id="holeNum", onchange="addHoles()", value="0", min="0"></input>
+    </div>
+    <div id="holes"> </div>
   </div>
 </div>
 
@@ -80,10 +91,20 @@ let app = new PIXI.Application({
 
 // idea: Perhaps create Hexagon object that has all the current properties
 // of the hexagon for clarity
-
 // hexagon dimension: A,B,C
 // hexagon number of holes:
 //
+var Hexagon = { a:30,
+                b:30,
+                c:30,
+                holes: 0,
+                edgeShow: true,
+                paths: false,
+                rotated: Math.PI/6,
+                u: [1,0],
+                v: [-1/2, Math.sqrt(3)/2],
+                w: [1/2, Math.sqrt(3)/2]
+              }
 
 //Add the canvas that Pixi automatically created for you to the HTML document
 document.getElementById("sim").appendChild(app.view);
@@ -105,20 +126,18 @@ const u = [1,0];
 const v = [-1/2, Math.sqrt(3)/2];
 const w = [1/2, Math.sqrt(3)/2];
 // set initial number of holes
-app.stage.holes = 0;
+//app.stage.holes = 0;
 
 
 //load an image and run the `setup` function when it's done
 const loader = new PIXI.Loader();
 loader
-.load(setup(A, B, C));
+.load(setup());
 
 // start with displaying edges
 app.stage.edgeExist = 1;
-// option 2: draw paths
-app.stage.paths = 0;
 // option 3: set initial number of holes
-app.stage.holes = 0;
+//app.stage.holes = 0;
 
 // // make cells white for beginning
 // for (i=0;i<app.stage.loz1.length;i++) {
@@ -136,18 +155,7 @@ const r = Math.min(rx,ry);
 
 
 
-{
-    let container = new PIXI.Container();
-    app.stage.addChild(container);
 
-    hole(container, app.stage.holes);
-    app.stage.holes += 1;
-    hole(container, app.stage.holes);
-    app.stage.holes += 1;
-
-    container.x = app.screen.width/2;
-    container.y = app.screen.height/2;
-}
 
 
 
@@ -174,14 +182,24 @@ const r = Math.min(rx,ry);
 
 // This `setup` function will run when the image has loaded
 // Paints the matching
-function setup(a, b, c) {
+function setup() {
+  // get hexagon parameters
+  const a = document.getElementById("Abox").valueAsNumber;
+  const b = document.getElementById("Bbox").valueAsNumber;
+  const c = document.getElementById("Cbox").valueAsNumber;
+
 	let container = new PIXI.Container();
 	app.stage.addChildAt(container,0);
 
   // edge exist?
-  const lineThickness = app.stage.edgeExist;
+  let lineThickness
+  if (Hexagon.edgeShow) {
+    lineThickness = 1;
+  } else {
+    lineThickness = 0;
+  }
   // draw paths?
-  const paths = app.stage.paths;
+  const paths = Hexagon.paths;
 
   // constants for hexagon dimensions
   const n = a + c;
@@ -280,7 +298,7 @@ function setup(a, b, c) {
   }
 
   // add holes to W
-  for (i=0;i<app.stage.holes;i++) {
+  for (i=0;i<Hexagon.holes;i++) {
     const width = document.getElementById(`holeW${i}`).valueAsNumber;
     const X = document.getElementById(`holeX${i}`).valueAsNumber;
     const Y = document.getElementById(`holeY${i}`).valueAsNumber;
@@ -386,6 +404,7 @@ function drawHexagon(a,b,c,M,holes) {
   for (i = 0; i < 2*n-1; i++) {
     for (j = 0; j < 2*m-1; j++) {
       // use Matching matrix M to make lozenges visible
+      // use holes matrix to hide lozenges that make up holes
       if ((i < 2*a && j < 2*b + i) || (i >= 2*a && j > i-2*a)) {
         if (M[i][j] && !holes[holes.length-1-i][j])  {
         //if (M[i][j])  {
@@ -401,12 +420,12 @@ function drawHexagon(a,b,c,M,holes) {
 
 
 function refresh() {
+  // just create a new matching (same Weight/Reduction matrix)
   const A = document.getElementById("Abox").valueAsNumber;
   const B = document.getElementById("Bbox").valueAsNumber;
   const C = document.getElementById("Cbox").valueAsNumber;
   let M = Matching(P, W[0].length);
   drawHexagon(A,B,C,M,W.holes);
-
 }
 
 function animatehex() {
@@ -465,20 +484,11 @@ function rotate() {
 }
 
 function edges() {
-  if (app.stage.edgeExist == 0) {
-    app.stage.edgeExist = 1;
-  } else {
-    app.stage.edgeExist = 0;
-  }
+  Hexagon.edgeShow = document.getElementById("edges").checked;
 }
 
 function paths() {
-  if (app.stage.paths == 0) {
-    app.stage.paths = 1;
-  } else {
-    app.stage.paths = 0;
-  }
-
+  Hexagon.paths = document.getElementById("paths").checked;
 }
 
 function myFunction() {
@@ -508,7 +518,7 @@ function myFunction() {
   }
 
   // add holes to W
-  for (i=0;i<app.stage.holes;i++) {
+  for (i=0;i<Hexagon.holes;i++) {
     const width = document.getElementById(`holeW${i}`).valueAsNumber;
     const X = document.getElementById(`holeX${i}`).valueAsNumber;
     const Y = document.getElementById(`holeY${i}`).valueAsNumber;
@@ -531,20 +541,45 @@ function regularHex() {
   //app.stage.edgeExist = 1;
   // constants for the size of the hexagon
   const N = document.getElementById("Nbox").valueAsNumber;
-  const hole = document.getElementById("holes").valueAsNumber;
 
   // set A,B,C
   document.getElementById("Abox").setAttribute("value", N);
   document.getElementById("Bbox").setAttribute("value", N);
   document.getElementById("Cbox").setAttribute("value", N);
-  document.getElementById("holes").setAttribute("max", Math.floor(N/2));
-  /////////////////////////// change
-  // const X = document.getElementById("holeX").valueAsNumber;
-  // const Y = document.getElementById("holeY").valueAsNumber;
 
-  app.stage.removeChildAt(0);
-  setup(N,N,N, hole, X, Y);
+  myFunction()
 }
+
+
+function reweight() {
+  const A = document.getElementById("Abox").valueAsNumber;
+  const B = document.getElementById("Bbox").valueAsNumber;
+  const C = document.getElementById("Cbox").valueAsNumber;
+
+  W = weight_hexagon([[1],[1]],1,A,B,C)
+  // add the holes
+  W.holes = [];
+  for (var i=0; i<W.length; i++) {
+    W.holes[i] = [];
+    W.holes[i].length = W.length;
+    W.holes[i].fill(0);
+  }
+
+  // add holes to W
+  for (i=0;i<Hexagon.holes;i++) {
+    const width = document.getElementById(`holeW${i}`).valueAsNumber;
+    const X = document.getElementById(`holeX${i}`).valueAsNumber;
+    const Y = document.getElementById(`holeY${i}`).valueAsNumber;
+    W = gap(W,A,B,C,width,X,Y);
+  }
+
+  W = W_split(W);
+  P = Reduction(W, W.im);
+  let M = Matching(P, W[0].length);
+
+  drawHexagon(A, B, C, M, W.holes);
+}
+
 
 function onDown(e) {
   this.data = e.data;
@@ -586,7 +621,7 @@ function onDragEnd()
     const A = document.getElementById("Abox").valueAsNumber;
     const B = document.getElementById("Bbox").valueAsNumber;
     const C = document.getElementById("Cbox").valueAsNumber;
-    myFunction()
+    reweight()
 }
 
 function hole(container, num) {
@@ -601,49 +636,82 @@ function hole(container, num) {
       .on('mouseupoutside', onDragEnd);
       // .on('mouseup', onRelease)
       // .on('mouseupoutside',onRelease);
-  vertex.drawCircle(0, 0, 4);
+  vertex.drawCircle(0, 0, 5);
   vertex.endFill();
   vertex.x = -r/2;
   vertex.y = r*Math.sqrt(3)/2;
 
 
+  const A = document.getElementById("Abox").valueAsNumber;
+  const B = document.getElementById("Bbox").valueAsNumber;
+  const C = document.getElementById("Cbox").valueAsNumber;
+  const max = Math.min(A+B,A+C)/2;
+
   // make title
   let div = document.getElementById("holes");
   div.innerHTML += `<h2> Hole ${num} </h2>`
 
+  let buttongroup = document.createElement("DIV");
+
   //document.body.appendChild(title)
 
+  buttongroup.innerHTML += `Width: `;
   let Iwidth = document.createElement("INPUT");
-  Iwidth.setAttribute("type", "number");
+  Iwidth.setAttribute("type", "range");
   Iwidth.setAttribute("value", 0);
   Iwidth.setAttribute("id", `holeW${num}`);
   Iwidth.setAttribute("step", "2");
+  Iwidth.setAttribute("min", "0");
+  Iwidth.setAttribute("max", `${max}`);
   Iwidth.setAttribute("onchange", "myFunction()")
-  document.getElementById("holes").appendChild(Iwidth);
+  buttongroup.appendChild(Iwidth);
 
 
+  buttongroup.innerHTML += `<br>X-pos: `;
   let Ix = document.createElement("INPUT");
   Ix.setAttribute("type", "number");
   Ix.setAttribute("value", 0);
   Ix.setAttribute("id", `holeX${num}`);
   Ix.setAttribute("onchange", "myFunction()")
-  document.getElementById("holes").appendChild(Ix);
+  buttongroup.appendChild(Ix);
 
+
+  buttongroup.innerHTML += `<br>Y-pos: `;
   let Iy = document.createElement("INPUT");
   Iy.setAttribute("type", "number");
   Iy.setAttribute("value", 0);
   Iy.setAttribute("id", `holeY${num}`);
   Iy.setAttribute("onchange", "myFunction()")
-  document.getElementById("holes").appendChild(Iy);
+  buttongroup.appendChild(Iy);
 
-  // vertex.Xinput = Ix;
-  // vertex.Yinput = Iy;
+  div.appendChild(buttongroup);
+
   vertex.number = num;
 
   container.addChild(vertex);
 }
 
+function addHoles() {
+  let div = document.getElementById("holes");
+  div.innerHTML = '';
+  if (app.stage.children.length > 1) {
+  app.stage.removeChildAt(1);
+  }
 
+  Hexagon.holes = document.getElementById("holeNum").valueAsNumber;
+
+  let container = new PIXI.Container();
+  app.stage.addChild(container);
+
+
+  for (i=0; i<Hexagon.holes; i++) {
+    hole(container, i);
+  }
+
+  container.x = app.screen.width/2;
+  container.y = app.screen.height/2;
+  reweight();
+}
 
 
 window.myFunction = myFunction;
@@ -655,6 +723,8 @@ window.animatehex = animatehex;
 window.randomize_color = randomize_color;
 window.pause = pause;
 window.gap = gap;
+window.paths = paths;
+window.addHoles = addHoles;
 window.weight_hexagon = weight_hexagon;
 
 
