@@ -498,11 +498,14 @@ function randomize_color() {
 
 function pause() {
   // toggle start / stop
+  PIXI.Ticker.shared.stop();
+  /*
   if (!PIXI.Ticker.shared.started) {
     PIXI.Ticker.shared.start();
   } else {
     PIXI.Ticker.shared.stop();
   }
+  */
 }
 
 function rotate() {
