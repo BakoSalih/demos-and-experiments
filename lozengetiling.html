@@ -75,7 +75,7 @@
 
 <script type="module">
 import { weight_hexagon } from './weight_hexagon.js';
-import { W_split, Reduction, Matching, gap} from './matching.js';
+import { W_split, Reduction, Matching, gap, gap2 } from './matching.js';
 
 var i;
 var j;
@@ -307,7 +307,8 @@ function setup() {
     const width = document.getElementById(`holeW${i}`).valueAsNumber;
     const X = document.getElementById(`holeX${i}`).valueAsNumber;
     const Y = document.getElementById(`holeY${i}`).valueAsNumber;
-    W = gap(W,a,b,c,width,X,Y);
+    const type = document.getElementById(`holeType${i}`).valueAsNumber;
+    W = gap(W,a,b,c,width,X,Y, type);
   }
   // compute reduction
   W = W_split(W);
@@ -530,7 +531,8 @@ function myFunction() {
     const width = document.getElementById(`holeW${i}`).valueAsNumber;
     const X = document.getElementById(`holeX${i}`).valueAsNumber;
     const Y = document.getElementById(`holeY${i}`).valueAsNumber;
-    W = gap(W,A,B,C,width,X,Y);
+    const type = document.getElementById(`holeType${i}`).valueAsNumber;
+    W = gap(W,A,B,C,width,X,Y, type);
   }
 
   W = W_split(W);
@@ -579,7 +581,8 @@ function reweight() {
     const width = document.getElementById(`holeW${i}`).valueAsNumber;
     const X = document.getElementById(`holeX${i}`).valueAsNumber;
     const Y = document.getElementById(`holeY${i}`).valueAsNumber;
-    W = gap(W,A,B,C,width,X,Y);
+    const type = document.getElementById(`holeType${i}`).valueAsNumber;
+    W = gap(W,A,B,C,width,X,Y,type);
   }
 
   W = W_split(W);
@@ -625,12 +628,19 @@ function onDragMove(e)
 function onDragEnd()
 {
     this.dragging = false;
-    // set the interaction data to null
-    this.data = null;
     const A = document.getElementById("Abox").valueAsNumber;
     const B = document.getElementById("Bbox").valueAsNumber;
     const C = document.getElementById("Cbox").valueAsNumber;
+
+    // get number of circle and get width
+    const num = this.number;
+    const width = document.getElementById(`holeW${num}`).valueAsNumber
+
+    if (width > 0) {
     reweight()
+    }
+    // set the interaction data to null
+    this.data = null;
 }
 
 function hole(container, num) {
@@ -693,6 +703,17 @@ function hole(container, num) {
   Iy.setAttribute("onchange", "myFunction()")
   buttongroup.appendChild(Iy);
 
+  buttongroup.innerHTML += `<br>Type: `;
+  let Itype = document.createElement("INPUT");
+  Itype.setAttribute("type", "number");
+  Itype.setAttribute("value", 1);
+  Itype.setAttribute("min", 1);
+  Itype.setAttribute("max", 3);
+  Itype.setAttribute("step", 1);
+  Itype.setAttribute("id", `holeType${num}`);
+  Itype.setAttribute("onchange", "myFunction()")
+  buttongroup.appendChild(Itype);
+
   div.appendChild(buttongroup);
 
   vertex.number = num;
@@ -719,7 +740,7 @@ function addHoles() {
 
   container.x = app.screen.width/2;
   container.y = app.screen.height/2;
-  reweight();
+  //reweight();
 }
 
 
