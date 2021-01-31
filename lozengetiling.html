@@ -404,9 +404,11 @@ function createLozenge(xPos, yPos, r, type, lineThickness = 1, paths = 0)
 
 
 // updates the lozenges using matching matrix M
-function drawHexagon(a,b,c,M,holes) {
+function drawHexagon(a,b,c,M,holes,Macc=[]) {
+
   const n = a+c;
   const m = b+c;
+
   for (i = 0; i < 2*n-1; i++) {
     for (j = 0; j < 2*m-1; j++) {
       // use Matching matrix M to make lozenges visible
@@ -415,6 +417,25 @@ function drawHexagon(a,b,c,M,holes) {
         if (M[i][j] && !holes[holes.length-1-i][j])  {
         //if (M[i][j])  {
           app.stage.lozenges[i][j].visible = true;
+
+          // for animate
+          if (Macc.length > 0) {
+            if (Macc[i][j]/Macc.totno > 0.999) {
+              app.stage.lozenges[i][j].tint = 0x91959a;
+            } else if (Macc[i][j]/Macc.totno > 0.9) {
+              app.stage.lozenges[i][j].tint = 0x0f1f4f;
+              //app.stage.lozenges[i][j].tint = (1-0.01*Macc[i][j]/Macc.totno)*0x91959a;
+            } else if (Macc[i][j]/Macc.totno > 0.7) {
+              app.stage.lozenges[i][j].tint = 0x778ff7;
+              //app.stage.lozenges[i][j].tint = (1-0.01*Macc[i][j]/Macc.totno)*0x91959a;
+            } else if (Macc[i][j]/Macc.totno < 0.7 && Macc[i][j]/Macc.totno > 0.5) {
+              app.stage.lozenges[i][j].tint = 0xeb5445;
+              //app.stage.lozenges[i][j].tint = (1-0.01*Macc[i][j]/Macc.totno)*0x91959a;
+            } else {
+              app.stage.lozenges[i][j].tint = 0xFFFFFF;
+            }
+            //app.stage.lozenges[i][j].tint = (1-Math.floor((Macc[i][j]/Macc.totno)*4)/4)*0xFFFFFF;
+          }
         } else {
           app.stage.lozenges[i][j].visible = false;
         }
@@ -438,21 +459,24 @@ function animatehex() {
   const A = document.getElementById("Abox").valueAsNumber;
   const B = document.getElementById("Bbox").valueAsNumber;
   const C = document.getElementById("Cbox").valueAsNumber;
-  // const size = W.length;
-  // let Mavg = [];
-  // for (var i=0; i<height; i++) {
-  //   Mavg[i] = [];
-  //   Mavg[i].length = height;
-  //   Mavg[i].fill(0);
-  // }
   // animate/stopped
   let ticker = PIXI.Ticker.shared;
   //ticker.autoStart = false;
-  ticker.maxFPS = 1;
+  // initialize accumulating matrix
+  let M_acc = Array2D(W[0].length);
+  M_acc.totno = 0;
+  //ticker.maxFPS = 30;
   if (!ticker.started) {
     ticker.add(() => {
+        //
         let M = Matching(P, W[0].length);
-        drawHexagon(A,B,C,M,W.holes);
+
+        //
+        M_acc.totno += 1;
+        addtoArray(M_acc, M);
+
+        // drawHexagon
+        drawHexagon(A,B,C,M,W.holes,M_acc);
     });
   }
 }
@@ -761,6 +785,30 @@ function qweight(N, a) {
   }
   return [bottom, top];
 }
+
+function Array2D(n) {
+  let M = [];
+  for (var i=0; i<n; i++) {
+    const row = new Array(n)
+    row.fill(0)
+    M.push(row);
+  }
+  return M;
+}
+
+function addtoArray(A,B) {
+  const n = A.length;
+  const m = A[0].length;
+
+  for (i=0;i<n;i++) {
+    for (j=0;j<n;j++) {
+      A[i][j] += B[i][j];
+    }
+  }
+
+  return A
+}
+
 window.myFunction = myFunction;
 window.regularHex = regularHex;
 window.rotate = rotate;
@@ -774,6 +822,7 @@ window.paths = paths;
 window.addHoles = addHoles;
 window.weight_hexagon = weight_hexagon;
 window.qweight = qweight;
+window.addtoArray = addtoArray;
 
 
 </script>
