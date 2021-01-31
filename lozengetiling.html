@@ -46,8 +46,8 @@
 
     <h2> Generate </h2>
     <button id="refresh" onclick="refresh()">Refresh</button>
-    <button id="animatehex" onclick="animatehex()">Animate</button>
-    <button id="pause" onclick="pause()">pause/start</button>
+    <button id="animatehex" onclick="animatehex()">Animate Average Matching</button>
+    <button id="pause" onclick="pause()">pause</button>
     <h2> Properties </h2>
     <div>
     <button id="rotate" onclick="rotate()">Rotate</button>
@@ -422,14 +422,17 @@ function drawHexagon(a,b,c,M,holes,Macc=[]) {
           if (Macc.length > 0) {
             if (Macc[i][j]/Macc.totno > 0.999) {
               app.stage.lozenges[i][j].tint = 0x91959a;
-            } else if (Macc[i][j]/Macc.totno > 0.9) {
+            } else if (Macc[i][j]/Macc.totno > 0.85) {
               app.stage.lozenges[i][j].tint = 0x0f1f4f;
               //app.stage.lozenges[i][j].tint = (1-0.01*Macc[i][j]/Macc.totno)*0x91959a;
-            } else if (Macc[i][j]/Macc.totno > 0.7) {
+            } else if (Macc[i][j]/Macc.totno > 0.66) {
               app.stage.lozenges[i][j].tint = 0x778ff7;
               //app.stage.lozenges[i][j].tint = (1-0.01*Macc[i][j]/Macc.totno)*0x91959a;
-            } else if (Macc[i][j]/Macc.totno < 0.7 && Macc[i][j]/Macc.totno > 0.5) {
+            } else if (Macc[i][j]/Macc.totno < 0.66 && Macc[i][j]/Macc.totno > 0.5) {
               app.stage.lozenges[i][j].tint = 0xeb5445;
+              //app.stage.lozenges[i][j].tint = (1-0.01*Macc[i][j]/Macc.totno)*0x91959a;
+            } else if (Macc[i][j]/Macc.totno < 0.5 && Macc[i][j]/Macc.totno > 0.05) {
+              app.stage.lozenges[i][j].tint = 0xfffde9;
               //app.stage.lozenges[i][j].tint = (1-0.01*Macc[i][j]/Macc.totno)*0x91959a;
             } else {
               app.stage.lozenges[i][j].tint = 0xFFFFFF;
@@ -586,6 +589,7 @@ function regularHex() {
 
 
 function reweight() {
+  pause()
   const A = document.getElementById("Abox").valueAsNumber;
   const B = document.getElementById("Bbox").valueAsNumber;
   const C = document.getElementById("Cbox").valueAsNumber;
