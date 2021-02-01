@@ -20,6 +20,7 @@ body {
   height: fit-content;
   overflow:auto;
   background-color: lightblue;
+  width: fit-content;
 }
 
 
@@ -28,4 +29,31 @@ h2 {
   padding: 2px;
   font-size: 14px;
   margin: auto;
+}
+
+#options1 {
+}
+
+
+#options2 {
+}
+
+.numinput {
+  width: 40px;
+}
+
+h3 {
+  padding: 0px;
+  font-size: 10px;
+  margin: 0px;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: auto auto auto;
+}
+
+.grid-item {
+  padding: 0px;
+  margin: 0px;
 }

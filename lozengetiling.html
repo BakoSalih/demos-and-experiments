@@ -14,48 +14,65 @@
   <div class="column", id="simulation">
   	<div id="sim"></div>
   </div>
-  <div class="options">
-    <h2> Hexagon parameters </h2>
-    <div id="inputA" class="input0">
-      A =
-      <input type="number" value="30" id="Abox" name="A" >
+  <div class="options" id="options1">
+    <h2> Hexagon Parameters </h2>
+    <h3> General hexagon, sides A,B,C</h3>
+    <div class="grid-container">
+      <div class="grid-item">
+        <div id="inputA" class="input0">
+        <h3> A: </h3>
+        <input type="number" value="30" id="Abox" name="A" class="numinput">
+        </div>
+      </div>
+      <div class="grid-item">
+        <div id="inputB" class="input0">
+          <h3> B: </h3>
+          <input type="number" value="30" id="Bbox" name="B" class="numinput">
+        </div>
+      </div>
+      <div class="grid-item">
+        <div id="inputC" class="input0">
+          <h3> C: </h3>
+          <input type="number" value="30" id="Cbox" name="C" class="numinput">
+        </div>
+      </div>
     </div>
-  	<div id="inputB" class="input0">
-      B =
-      <input type="number" value="30" id="Bbox" name="B" >
-    </div>
-  	<div id="inputC" class="input0">
-      C =
-      <input type="number" value="30" id="Cbox" name="C" >
-    </div>
+
+    <h3> Weight </h3>
   	<div id="inputW" class="input0">
-      weight =
-      <input type="number" value="0" id="cweight" name="Wweight" >
+      <select id="wtype" onchange="hidewform()">
+      <option value="uniform" selected="selected">Uniform</option>
+      <option value="qvolume">q-Volume</option>
+      <option value="periodic1x2">1x2 Periodic</option>
+      <option value="periodic2x2">2x2 Periodic</option>
+      <option value="periodic2x3">2x3 Periodic</option>
+      </select>
+      <input type="number" value="0" step="0.1" id="cweight" name="Wweight" class="numinput" style="display:none" />
     </div>
 
-    <button id="newhex", onclick="myFunction()">Generate</button>
 
-    <h2> Regular hexagon </h2>
+    <h3> Regular hexagon, sidelengths N</h3>
   	<div id="inputN", class="input0">
-      N =
-      <input type="number" value="30" id="Nbox" name="N" >
+      <input type="number" value="30" id="Nbox" name="N" class="numinput" onchange="regularHex()">
     </div>
 
-    <button id="regularhex" onclick="regularHex()">Generate</button>
 
-
-    <h2> Generate </h2>
-	<div>
-    <button id="refresh" onclick="refresh()">Refresh</button>
+    <h2> Generate Tilings</h2>
+    <div>
+    <button id="newhex", onclick="myFunction()">Generate Tiling</button>
     </div>
-	<div>
-	<button id="animatehex" onclick="animatehex()">Animate Average Matching</button>
-    <button id="pause" onclick="pause()">pause</button>
+    <div>
+       <button id="refresh" onclick="refresh()">Refresh Tiling</button>
+    </div>
+    <h3> Generate a large number of <br> tilings and display average </h3>
+	  <div>
+	    <button id="animatehex" onclick="animatehex()">Animate</button>
+        <button id="pause" onclick="pause()">Stop</button>
     </div>
 	<h2> Properties </h2>
-    <div>
+    <!-- <div>
     <button id="rotate" onclick="rotate()">Rotate</button>
-    </div>
+    </div> -->
     <div>
       <button id="randomize" onclick="randomize_color()">Randomize color</button>
     </div>
@@ -68,10 +85,10 @@
   </div>
 
 
-  <div class="options">
+  <div class="options" id="options2">
     <h2> Holes </h2>
     <div>
-    Holes <input type="number", id="holeNum", onchange="addHoles()", value="0", min="0"></input>
+    <input type="number", id="holeNum", onchange="addHoles()", value="0", min="0" class="numinput"></input>
     </div>
     <div id="holes"> </div>
   </div>
@@ -89,13 +106,18 @@ if(!PIXI.utils.isWebGLSupported()){
   type = "canvas"
 }
 //Create a Pixi Application
+// create 1:1 ratio
+const windowsize = Math.min(window.innerWidth,window.innerHeight);
+
 let app = new PIXI.Application({
-  width: window.innerWidth*0.5,
-  height: window.innerHeight*0.95,
+	autoResize: true,
+  width: windowsize,
+  height: windowsize,
   antialias: true,
   transparent: true
 }
 );
+
 
 // idea: Perhaps create Hexagon object that has all the current properties
 // of the hexagon for clarity
@@ -161,33 +183,6 @@ const ry = app.screen.height/(3*Math.max(A+C));
 const r = Math.min(rx,ry);
 
 
-
-
-
-
-
-
-// if (holeWidth > 0) {
-//   let container = new PIXI.Container();
-// 	app.stage.addChild(container);
-//   // all the vertices
-//   let vertex = new PIXI.Graphics();
-//   vertex.interactive = true;
-//   vertex.buttonMode = true;
-//   vertex.beginFill(0x000000);
-//   vertex.on('mousedown', onDown)
-//       .on('mousemove', onDragMove)
-//       .on('mouseup', onDragEnd)
-//       .on('mouseupoutside', onDragEnd);
-//       // .on('mouseup', onRelease)
-//       // .on('mouseupoutside',onRelease);
-//   vertex.drawCircle(0, 0, 4);
-//   vertex.endFill();
-//   vertex.x = -r/2;
-//   vertex.y = r*Math.sqrt(3)/2;
-// }
-
-
 // This `setup` function will run when the image has loaded
 // Paints the matching
 function setup() {
@@ -249,6 +244,7 @@ function setup() {
   app.stage.loz1 = [];
   app.stage.loz2 = [];
   app.stage.loz3 = [];
+  app.stage.vertices = [];
 
 
   for (i = 0; i < 2*n-1; i++) {
@@ -265,34 +261,46 @@ function setup() {
       // add lozenge to container and to lozenges for future access
       if ((i < 2*a && j < 2*b + i) || (i >= 2*a && j > i-2*a)) {
         let lozenge;
+        let lozvertex;
         if (j % 2 == 0 && i % 2 == 0) {
           // (even,even) position lozenge
           lozenge = createLozenge(x0, y0, r, 1, lineThickness, paths);
           app.stage.loz1.push(lozenge);
+
+          lozvertex = createVertex(x0,y0);
         } else if (j % 2 == 1 && i % 2 == 0) {
           // (even,odd) position lozenge
           lozenge = createLozenge(x0, y0, r, 2, lineThickness, paths);
           app.stage.loz2.push(lozenge);
+
+          lozvertex = createVertex(x0,y0);
         } else if (j % 2 == 0 && i % 2 == 1) {
           // (odd,even) position lozenge
           lozenge = createLozenge(x0, y0, r, 3, lineThickness, paths);
           app.stage.loz3.push(lozenge);
+
+          lozvertex = createVertex(x0,y0);
         } else {
           // (odd,odd) no lozenge
           lozenge = new PIXI.Graphics();
+
+          lozvertex = new PIXI.Graphics();
         }
 
         // hide all lozenges until the matching activates the relevant ones
         lozenge.visible = false;
         app.stage.lozenges[i][j] = lozenge;
         container.addChild(lozenge);
+
+        app.stage.vertices.push(lozvertex);
       }
     }
   }
 
   // create underlying weights
+  const wtype = document.getElementById("wtype").value;
   const cweight = document.getElementById("cweight").valueAsNumber;
-  W = weight_hexagon(qweight(2*(a+b+1), cweight),1,a,b,c)
+  W = weight_hexagon(choose_weight(wtype, cweight, b),1,a,b,c)
 
   // add the holes
 
@@ -320,19 +328,6 @@ function setup() {
 
   // get matching
   let M = Matching(P, W[0].length);
-
-
-  // var loz = new PIXI.Graphics();
-  // loz.beginFill(0x1cff00, 1);
-  // loz.lineStyle(1/2, 0x000000, lineThickness);
-  // loz.moveTo(width, height);
-  // loz.lineTo(0,0);
-  // loz.lineTo(-r*v[0], r*v[1]);
-  // loz.lineTo(r*10, r*10);
-  // loz.lineTo(0,0);
-  // loz.endFill();
-  // container.addChild(loz);
-
 
   // draw matching
   drawHexagon(a,b,c,M,W.holes);
@@ -406,6 +401,17 @@ function createLozenge(xPos, yPos, r, type, lineThickness = 1, paths = 0)
   return loz
 }
 
+function createVertex(xPos, yPos) // for drawing vertices
+{
+  let vertex = new PIXI.Graphics();
+  vertex.x = xPos;
+  vertex.y = yPos;
+  vertex.beginFill(0x000000);
+  vertex.drawCircle(0, 0, 1);
+  vertex.endFill();
+  return vertex
+}
+
 
 // updates the lozenges using matching matrix M
 function drawHexagon(a,b,c,M,holes,Macc=[]) {
@@ -426,16 +432,16 @@ function drawHexagon(a,b,c,M,holes,Macc=[]) {
           if (Macc.length > 0) {
             if (Macc[i][j]/Macc.totno > 0.999) {
               app.stage.lozenges[i][j].tint = 0x91959a;
-            } else if (Macc[i][j]/Macc.totno > 0.95) {
+            } else if (Macc[i][j]/Macc.totno > 0.85) {
               app.stage.lozenges[i][j].tint = 0x0f1f4f;
               //app.stage.lozenges[i][j].tint = (1-0.01*Macc[i][j]/Macc.totno)*0x91959a;
-            //} else if (Macc[i][j]/Macc.totno > 0.66) {
-            //  app.stage.lozenges[i][j].tint = 0x778ff7;
-            //  //app.stage.lozenges[i][j].tint = (1-0.01*Macc[i][j]/Macc.totno)*0x91959a;
-            //} else if (Macc[i][j]/Macc.totno < 0.66 && Macc[i][j]/Macc.totno > 0.5) {
-            //  app.stage.lozenges[i][j].tint = 0xeb5445;
-            //  //app.stage.lozenges[i][j].tint = (1-0.01*Macc[i][j]/Macc.totno)*0x91959a;
-            } else if (Macc[i][j]/Macc.totno < 0.95 && Macc[i][j]/Macc.totno > 0.05) {
+            } else if (Macc[i][j]/Macc.totno > 0.66) {
+              app.stage.lozenges[i][j].tint = 0x778ff7;
+              //app.stage.lozenges[i][j].tint = (1-0.01*Macc[i][j]/Macc.totno)*0x91959a;
+            } else if (Macc[i][j]/Macc.totno < 0.66 && Macc[i][j]/Macc.totno > 0.5) {
+              app.stage.lozenges[i][j].tint = 0xeb5445;
+              //app.stage.lozenges[i][j].tint = (1-0.01*Macc[i][j]/Macc.totno)*0x91959a;
+            } else if (Macc[i][j]/Macc.totno < 0.5 && Macc[i][j]/Macc.totno > 0.05) {
               app.stage.lozenges[i][j].tint = 0xfffde9;
               //app.stage.lozenges[i][j].tint = (1-0.01*Macc[i][j]/Macc.totno)*0x91959a;
             } else {
@@ -549,9 +555,11 @@ function myFunction() {
   // }
 
 
-  //W = weight_hexagon([[1],[1]],1,A,B,C)
+  // get initial weight
+  const wtype = document.getElementById("wtype").value;
   const cweight = document.getElementById("cweight").valueAsNumber;
-  W = weight_hexagon(qweight(2*(A+B+1), cweight),1,A,B,C)
+  W = weight_hexagon(choose_weight(wtype, cweight, B),1,A,B,C)
+
   // add the holes
   W.holes = [];
   for (var i=0; i<W.length; i++) {
@@ -577,6 +585,8 @@ function myFunction() {
   app.stage.removeChildAt(0);
   setup(A, B, C);
   drawHexagon(A, B, C, M, W.holes);
+
+
 }
 
 // change!!!
@@ -591,7 +601,6 @@ function regularHex() {
   document.getElementById("Bbox").setAttribute("value", N);
   document.getElementById("Cbox").setAttribute("value", N);
 
-  myFunction()
 }
 
 
@@ -601,8 +610,11 @@ function reweight() {
   const B = document.getElementById("Bbox").valueAsNumber;
   const C = document.getElementById("Cbox").valueAsNumber;
 
+  // get the weight
+  const wtype = document.getElementById("wtype").value;
   const cweight = document.getElementById("cweight").valueAsNumber;
-  W = weight_hexagon(qweight(2*(A+B+1), cweight),1,A,B,C)
+  W = weight_hexagon(choose_weight(wtype, cweight, B),1,A,B,C)
+
   // add the holes
   W.holes = [];
   for (var i=0; i<W.length; i++) {
@@ -625,6 +637,7 @@ function reweight() {
   let M = Matching(P, W[0].length);
 
   drawHexagon(A, B, C, M, W.holes);
+
 }
 
 
@@ -703,13 +716,13 @@ function hole(container, num) {
 
   // make title
   let div = document.getElementById("holes");
-  div.innerHTML += `<h2> Hole ${num} </h2>`
+  div.innerHTML += `<h2> Hole ${num+1} </h2>`
 
   let buttongroup = document.createElement("DIV");
 
   //document.body.appendChild(title)
 
-  buttongroup.innerHTML += `Width: `;
+  buttongroup.innerHTML += `<h3>Width<h3>`;
   let Iwidth = document.createElement("INPUT");
   Iwidth.setAttribute("type", "range");
   Iwidth.setAttribute("value", 0);
@@ -721,24 +734,26 @@ function hole(container, num) {
   buttongroup.appendChild(Iwidth);
 
 
-  buttongroup.innerHTML += `<br>X-pos: `;
+  buttongroup.innerHTML += `<h3>(X,Y) position<h3>`;
   let Ix = document.createElement("INPUT");
   Ix.setAttribute("type", "number");
   Ix.setAttribute("value", 0);
   Ix.setAttribute("id", `holeX${num}`);
   Ix.setAttribute("onchange", "myFunction()")
+  Ix.setAttribute("class", "numinput");
   buttongroup.appendChild(Ix);
 
 
-  buttongroup.innerHTML += `<br>Y-pos: `;
+  //buttongroup.innerHTML += `<h3>Y-pos<h3>`;
   let Iy = document.createElement("INPUT");
   Iy.setAttribute("type", "number");
   Iy.setAttribute("value", 0);
   Iy.setAttribute("id", `holeY${num}`);
-  Iy.setAttribute("onchange", "myFunction()")
+  Iy.setAttribute("onchange", "myFunction()");
+  Iy.setAttribute("class", "numinput");
   buttongroup.appendChild(Iy);
 
-  buttongroup.innerHTML += `<br>Type: `;
+  buttongroup.innerHTML += `<h3>Type<h3> `;
   let Itype = document.createElement("INPUT");
   Itype.setAttribute("type", "number");
   Itype.setAttribute("value", 1);
@@ -746,7 +761,8 @@ function hole(container, num) {
   Itype.setAttribute("max", 3);
   Itype.setAttribute("step", 1);
   Itype.setAttribute("id", `holeType${num}`);
-  Itype.setAttribute("onchange", "myFunction()")
+  Itype.setAttribute("onchange", "myFunction()");
+  Itype.setAttribute("class", "numinput");
   buttongroup.appendChild(Itype);
 
   div.appendChild(buttongroup);
@@ -797,6 +813,31 @@ function qweight(N, a) {
   return [bottom, top];
 }
 
+function choose_weight(type, a=0, N=1) {
+  let weight;
+  if (type == "uniform") {
+    weight = [[1],[1]];
+  } else if (type == "qvolume") {
+    const q = Math.exp(-a/N);
+    // make array
+    let bottom = new Array(N);
+    bottom.fill(1);
+    let top = new Array(N);
+    for (let k=0;k<N;k++) {
+      top[k] = q**k;
+    }
+    weight = [top, bottom];
+  } else if (type == "periodic1x2") {
+    weight = [[1, 1], [a, 1]];
+  } else if (type == "periodic2x2") {
+    weight = [[a, 1], [1, 1], [1, a], [1, a**2]];
+  } else if (type == "periodic2x3") {
+    weight = [[a,1,1], [a,1,1], [1,1,a], [1,1,a]];
+  }
+  return weight
+}
+
+
 function Array2D(n) {
   let M = [];
   for (var i=0; i<n; i++) {
@@ -820,6 +861,31 @@ function addtoArray(A,B) {
   return A
 }
 
+function addVertices() {
+  let vertexcontainer = new PIXI.Container();
+
+  for (i=0;i<app.stage.vertices.length;i++) {
+    vertexcontainer.addChild(app.stage.vertices[i]);
+  }
+
+  vertexcontainer.position = app.stage.children[0].position;
+  vertexcontainer.rotation = app.stage.children[0].rotation;
+
+
+  app.stage.addChild(vertexcontainer);
+}
+
+function hidewform() {
+  const wtype = document.getElementById("wtype").value;
+  if (wtype == "uniform") {
+    document.getElementById("cweight").style.display = "none";
+  } else {
+    document.getElementById("cweight").style.display = "inline";
+  }
+}
+
+
+
 window.myFunction = myFunction;
 window.regularHex = regularHex;
 window.rotate = rotate;
@@ -834,6 +900,7 @@ window.addHoles = addHoles;
 window.weight_hexagon = weight_hexagon;
 window.qweight = qweight;
 window.addtoArray = addtoArray;
+window.hidewform = hidewform;
 
 
 </script>
