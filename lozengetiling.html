@@ -432,17 +432,17 @@ function drawHexagon(a,b,c,M,holes,Macc=[]) {
           if (Macc.length > 0) {
             if (Macc[i][j]/Macc.totno > 0.999) {
               app.stage.lozenges[i][j].tint = 0x91959a;
-            } else if (Macc[i][j]/Macc.totno > 0.85) {
-              app.stage.lozenges[i][j].tint = 0x0f1f4f;
+            } else if (Macc[i][j]/Macc.totno > 0.9) {
+              app.stage.lozenges[i][j].tint = 0x000000;
               //app.stage.lozenges[i][j].tint = (1-0.01*Macc[i][j]/Macc.totno)*0x91959a;
             } else if (Macc[i][j]/Macc.totno > 0.66) {
               app.stage.lozenges[i][j].tint = 0x778ff7;
               //app.stage.lozenges[i][j].tint = (1-0.01*Macc[i][j]/Macc.totno)*0x91959a;
-            } else if (Macc[i][j]/Macc.totno < 0.66 && Macc[i][j]/Macc.totno > 0.5) {
-              app.stage.lozenges[i][j].tint = 0xeb5445;
-              //app.stage.lozenges[i][j].tint = (1-0.01*Macc[i][j]/Macc.totno)*0x91959a;
-            } else if (Macc[i][j]/Macc.totno < 0.5 && Macc[i][j]/Macc.totno > 0.05) {
-              app.stage.lozenges[i][j].tint = 0xfffde9;
+            } else if (Macc[i][j]/Macc.totno > 0.33) {
+              app.stage.lozenges[i][j].tint = 0xFFFFFF;
+            //   //app.stage.lozenges[i][j].tint = (1-0.01*Macc[i][j]/Macc.totno)*0x91959a;
+            } else if (Macc[i][j]/Macc.totno > 0.05) {
+              app.stage.lozenges[i][j].tint = 0xFFFFFF;
               //app.stage.lozenges[i][j].tint = (1-0.01*Macc[i][j]/Macc.totno)*0x91959a;
             } else {
               app.stage.lozenges[i][j].tint = 0xFFFFFF;
