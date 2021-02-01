@@ -300,7 +300,7 @@ function setup() {
   // create underlying weights
   const wtype = document.getElementById("wtype").value;
   const cweight = document.getElementById("cweight").valueAsNumber;
-  W = weight_hexagon(choose_weight(wtype, cweight, b),1,a,b,c)
+  W = weight_hexagon(choose_weight(wtype, cweight, (a+c+1)),1,a,b,c)
 
   // add the holes
 
@@ -558,7 +558,7 @@ function myFunction() {
   // get initial weight
   const wtype = document.getElementById("wtype").value;
   const cweight = document.getElementById("cweight").valueAsNumber;
-  W = weight_hexagon(choose_weight(wtype, cweight, B),1,A,B,C)
+  W = weight_hexagon(choose_weight(wtype, cweight, (C+B+1)),1,A,B,C)
 
   // add the holes
   W.holes = [];
@@ -613,7 +613,7 @@ function reweight() {
   // get the weight
   const wtype = document.getElementById("wtype").value;
   const cweight = document.getElementById("cweight").valueAsNumber;
-  W = weight_hexagon(choose_weight(wtype, cweight, B),1,A,B,C)
+  W = weight_hexagon(choose_weight(wtype, cweight, (C+B+1)),1,A,B,C)
 
   // add the holes
   W.holes = [];
