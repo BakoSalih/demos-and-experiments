@@ -48,6 +48,7 @@
       <option value="periodic2x3">2x3 Periodic</option>
       </select>
       <input type="number" value="0" step="0.1" id="cweight" name="Wweight" class="numinput" style="display:none" />
+
     </div>
 
 
@@ -96,7 +97,7 @@
 
 <script type="module">
 import { weight_hexagon } from './weight_hexagon.js';
-import { W_split, Reduction, Matching, gap, gap2 } from './matching.js';
+import { Reduction, Matching, gap } from './matching.js';
 
 var i;
 var j;
@@ -191,9 +192,6 @@ function setup() {
   const b = document.getElementById("Bbox").valueAsNumber;
   const c = document.getElementById("Cbox").valueAsNumber;
 
-	let container = new PIXI.Container();
-	app.stage.addChildAt(container,0);
-
   // edge exist?
   let lineThickness
   if (Hexagon.edgeShow) {
@@ -227,6 +225,11 @@ function setup() {
   // center of hexagon
   const x_center = r*(a * v[0] + b * u[0] + c * w[0]);
   const y_center = r*(a * v[1] + b * u[1] + c * w[1]);
+
+
+  // create container
+  let container = new PIXI.Container();
+  app.stage.addChildAt(container,0);
 
   // put hexagon in the middle
   container.x = width/2;
@@ -323,8 +326,8 @@ function setup() {
     W = gap(W,a,b,c,width,X,Y, type);
   }
   // compute reduction
-  W = W_split(W);
-  P = Reduction(W, W.im);
+  // W = W_split(W);
+  P = Reduction(W);
 
   // get matching
   let M = Matching(P, W[0].length);
@@ -541,9 +544,9 @@ function myFunction() {
   // constants for the size of the hexagon
 
   //app.stage.edgeExist = 1;
-  const A = document.getElementById("Abox").valueAsNumber;
-  const B = document.getElementById("Bbox").valueAsNumber;
-  const C = document.getElementById("Cbox").valueAsNumber;
+  // const A = document.getElementById("Abox").valueAsNumber;
+  // const B = document.getElementById("Bbox").valueAsNumber;
+  // const C = document.getElementById("Cbox").valueAsNumber;
 
   // const hole = document.getElementById("holes").valueAsNumber;
   // const X = document.getElementById("holeX").valueAsNumber;
@@ -555,36 +558,36 @@ function myFunction() {
   // }
 
 
-  // get initial weight
-  const wtype = document.getElementById("wtype").value;
-  const cweight = document.getElementById("cweight").valueAsNumber;
-  W = weight_hexagon(choose_weight(wtype, cweight, (C+B+1)),1,A,B,C)
-
-  // add the holes
-  W.holes = [];
-  for (var i=0; i<W.length; i++) {
-    W.holes[i] = [];
-    W.holes[i].length = W.length;
-    W.holes[i].fill(0);
-  }
-
-  // add holes to W
-  for (i=0;i<Hexagon.holes;i++) {
-    const width = document.getElementById(`holeW${i}`).valueAsNumber;
-    const X = document.getElementById(`holeX${i}`).valueAsNumber;
-    const Y = document.getElementById(`holeY${i}`).valueAsNumber;
-    const type = document.getElementById(`holeType${i}`).valueAsNumber;
-    W = gap(W,A,B,C,width,X,Y, type);
-  }
-
-  W = W_split(W);
-  P = Reduction(W, W.im);
-  let M = Matching(P, W[0].length);
-
-
+  // // get initial weight
+  // const wtype = document.getElementById("wtype").value;
+  // const cweight = document.getElementById("cweight").valueAsNumber;
+  // W = weight_hexagon(choose_weight(wtype, cweight, (C+B+1)),1,A,B,C)
+  //
+  // // add the holes
+  // W.holes = [];
+  // for (var i=0; i<W.length; i++) {
+  //   W.holes[i] = [];
+  //   W.holes[i].length = W.length;
+  //   W.holes[i].fill(0);
+  // }
+  //
+  // // add holes to W
+  // for (i=0;i<Hexagon.holes;i++) {
+  //   const width = document.getElementById(`holeW${i}`).valueAsNumber;
+  //   const X = document.getElementById(`holeX${i}`).valueAsNumber;
+  //   const Y = document.getElementById(`holeY${i}`).valueAsNumber;
+  //   const type = document.getElementById(`holeType${i}`).valueAsNumber;
+  //   W = gap(W,A,B,C,width,X,Y, type);
+  // }
+  //
+  // W = W_split(W);
+  // P = Reduction(W, W.im);
+  // let M = Matching(P, W[0].length);
+  //
+  //
   app.stage.removeChildAt(0);
-  setup(A, B, C);
-  drawHexagon(A, B, C, M, W.holes);
+  setup();
+  // drawHexagon(A, B, C, M, W.holes);
 
 
 }
@@ -632,8 +635,9 @@ function reweight() {
     W = gap(W,A,B,C,width,X,Y,type);
   }
 
-  W = W_split(W);
-  P = Reduction(W, W.im);
+  //W = W_split(W);
+  //P = Reduction(W, W.im);
+  P = Reduction(W);
   let M = Matching(P, W[0].length);
 
   drawHexagon(A, B, C, M, W.holes);
@@ -730,7 +734,7 @@ function hole(container, num) {
   Iwidth.setAttribute("step", "2");
   Iwidth.setAttribute("min", "0");
   Iwidth.setAttribute("max", `${max}`);
-  Iwidth.setAttribute("onchange", "myFunction()")
+  Iwidth.setAttribute("onchange", "reweight()")
   buttongroup.appendChild(Iwidth);
 
 
@@ -739,7 +743,7 @@ function hole(container, num) {
   Ix.setAttribute("type", "number");
   Ix.setAttribute("value", 0);
   Ix.setAttribute("id", `holeX${num}`);
-  Ix.setAttribute("onchange", "myFunction()")
+  Ix.setAttribute("onchange", "reweight()")
   Ix.setAttribute("class", "numinput");
   buttongroup.appendChild(Ix);
 
@@ -749,7 +753,7 @@ function hole(container, num) {
   Iy.setAttribute("type", "number");
   Iy.setAttribute("value", 0);
   Iy.setAttribute("id", `holeY${num}`);
-  Iy.setAttribute("onchange", "myFunction()");
+  Iy.setAttribute("onchange", "reweight()");
   Iy.setAttribute("class", "numinput");
   buttongroup.appendChild(Iy);
 
@@ -884,8 +888,13 @@ function hidewform() {
   }
 }
 
+function createLozengeGrid() {
+
+}
 
 
+
+window.reweight = reweight;
 window.myFunction = myFunction;
 window.regularHex = regularHex;
 window.rotate = rotate;
