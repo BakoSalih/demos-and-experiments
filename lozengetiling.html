@@ -46,8 +46,17 @@
       <option value="periodic1x2">1x2 Periodic</option>
       <option value="periodic2x2">2x2 Periodic</option>
       <option value="periodic2x3">2x3 Periodic</option>
+      <option value="qracah">real q-Racah</option>
       </select>
-      <input type="number" value="0" step="0.1" id="cweight" name="Wweight" class="numinput" style="display:none" />
+      <input type="number" value="0" step="0.1" id="cweight" name="Wweight"
+             class="numinput" style="display:none" onchange="qracahInput()"/>
+      <div>
+      <input type="range" step="0.01" id="kappa" name="kappaw" style="display:none;width:100px" />
+      </div>
+      <div>
+      <input type="numinput" step="0.01" id="kappa1"  style="display:none" class="numinput"/>
+      <input type="numinput" step="0.01" id="kappa2"  style="display:none" class="numinput"/>
+      </div>
 
     </div>
 
@@ -99,8 +108,7 @@
 import { weight_hexagon } from './weight_hexagon.js';
 import { Reduction, Matching, gap } from './matching.js';
 
-var i;
-var j;
+
 
 let type = "WebGL"
 if(!PIXI.utils.isWebGLSupported()){
@@ -130,6 +138,7 @@ var Hexagon = { a:30,
                 c:30,
                 holes: 0,
                 edgeShow: true,
+                verticesShow: false,
                 paths: false,
                 rotated: Math.PI/6,
                 u: [1,0],
@@ -171,7 +180,7 @@ app.stage.edgeExist = 1;
 //app.stage.holes = 0;
 
 // // make cells white for beginning
-// for (i=0;i<app.stage.loz1.length;i++) {
+// for (let i=0;i<app.stage.loz1.length;i++) {
 //   app.stage.loz1[i].tint = 0xFFFFFF;
 //   app.stage.loz2[i].tint = 0xFFFFFF;
 //   app.stage.loz3[i].tint = 0xFFFFFF;
@@ -239,7 +248,7 @@ function setup() {
   container.rotation = app.stage.rotated;
 
   app.stage.lozenges = [];
-  for (i=0; i<2*n-1; i++) {
+  for (let i=0; i<2*n-1; i++) {
     const row = new Array(2*m-1);
     app.stage.lozenges.push(row);
   }
@@ -247,11 +256,15 @@ function setup() {
   app.stage.loz1 = [];
   app.stage.loz2 = [];
   app.stage.loz3 = [];
-  app.stage.vertices = [];
 
+  if (Hexagon.vertiverticesShow) {
+    app.stage.vertices = [];
+  }
 
-  for (i = 0; i < 2*n-1; i++) {
-    for (j = 0; j < 2*m-1; j++) {
+  // TODo don't draw vertices if not needed.
+
+  for (let i = 0; i < 2*n-1; i++) {
+    for (let j = 0; j < 2*m-1; j++) {
 
       // current coordinate of hexagon center
       const x_cord = r*(j * u[0] + i * v[0]);
@@ -270,24 +283,31 @@ function setup() {
           lozenge = createLozenge(x0, y0, r, 1, lineThickness, paths);
           app.stage.loz1.push(lozenge);
 
-          lozvertex = createVertex(x0,y0);
+          if (Hexagon.vertiverticesShow) {
+            lozvertex = createVertex(x0,y0);
+          }
         } else if (j % 2 == 1 && i % 2 == 0) {
           // (even,odd) position lozenge
           lozenge = createLozenge(x0, y0, r, 2, lineThickness, paths);
           app.stage.loz2.push(lozenge);
 
-          lozvertex = createVertex(x0,y0);
+          if (Hexagon.vertiverticesShow) {
+            lozvertex = createVertex(x0,y0);
+          }
         } else if (j % 2 == 0 && i % 2 == 1) {
           // (odd,even) position lozenge
           lozenge = createLozenge(x0, y0, r, 3, lineThickness, paths);
           app.stage.loz3.push(lozenge);
-
-          lozvertex = createVertex(x0,y0);
+          if (Hexagon.vertiverticesShow) {
+            lozvertex = createVertex(x0,y0);
+          }
         } else {
           // (odd,odd) no lozenge
           lozenge = new PIXI.Graphics();
 
-          lozvertex = new PIXI.Graphics();
+          if (Hexagon.vertiverticesShow) {
+            lozvertex = new PIXI.Graphics();
+          }
         }
 
         // hide all lozenges until the matching activates the relevant ones
@@ -295,30 +315,35 @@ function setup() {
         app.stage.lozenges[i][j] = lozenge;
         container.addChild(lozenge);
 
-        app.stage.vertices.push(lozvertex);
+        if (Hexagon.vertiverticesShow) {
+          app.stage.vertices.push(lozvertex);
+        }
       }
     }
   }
 
   // create underlying weights
+  W = [];
+  //console.log(W);
   const wtype = document.getElementById("wtype").value;
   const cweight = document.getElementById("cweight").valueAsNumber;
-  W = weight_hexagon(choose_weight(wtype, cweight, (a+c+1)),1,a,b,c)
-
+  const winput = choose_weight(wtype, cweight, (a+c+1));
+  W = weight_hexagon(winput,1,a,b,c);
+  //console.log(W);
   // add the holes
 
   // give W a matrix with positions of holes, initialize first
 
 
   W.holes = [];
-  for (var i=0; i<W.length; i++) {
+  for (let i=0; i<W.length; i++) {
     W.holes[i] = [];
     W.holes[i].length = W.length;
     W.holes[i].fill(0);
   }
 
   // add holes to W
-  for (i=0;i<Hexagon.holes;i++) {
+  for (let i=0;i<Hexagon.holes;i++) {
     const width = document.getElementById(`holeW${i}`).valueAsNumber;
     const X = document.getElementById(`holeX${i}`).valueAsNumber;
     const Y = document.getElementById(`holeY${i}`).valueAsNumber;
@@ -330,6 +355,8 @@ function setup() {
   P = Reduction(W);
 
   // get matching
+
+  //MatchingTest(P, W[0].length);
   let M = Matching(P, W[0].length);
 
   // draw matching
@@ -422,8 +449,8 @@ function drawHexagon(a,b,c,M,holes,Macc=[]) {
   const n = a+c;
   const m = b+c;
 
-  for (i = 0; i < 2*n-1; i++) {
-    for (j = 0; j < 2*m-1; j++) {
+  for (let i = 0; i < 2*n-1; i++) {
+    for (let j = 0; j < 2*m-1; j++) {
       // use Matching matrix M to make lozenges visible
       // use holes matrix to hide lozenges that make up holes
       if ((i < 2*a && j < 2*b + i) || (i >= 2*a && j > i-2*a)) {
@@ -502,7 +529,7 @@ function randomize_color() {
   const color2 = Math.random() * 0xFFFFFF;
   const color3 = Math.random() * 0xFFFFFF;
 
-  for (i=0;i<app.stage.loz1.length;i++) {
+  for (let i=0;i<app.stage.loz1.length;i++) {
     app.stage.loz1[i].tint = color1;
     app.stage.loz2[i].tint = color2;
     app.stage.loz3[i].tint = color3;
@@ -541,61 +568,12 @@ function paths() {
 }
 
 function myFunction() {
-  // constants for the size of the hexagon
-
-  //app.stage.edgeExist = 1;
-  // const A = document.getElementById("Abox").valueAsNumber;
-  // const B = document.getElementById("Bbox").valueAsNumber;
-  // const C = document.getElementById("Cbox").valueAsNumber;
-
-  // const hole = document.getElementById("holes").valueAsNumber;
-  // const X = document.getElementById("holeX").valueAsNumber;
-  // const Y = document.getElementById("holeY").valueAsNumber;
-  // if (hole > Math.floor((B+C)/2)) {
-  //   hole = Math.floor((B+C)/2);
-  //   document.getElementById("holes").setAttribute("value", hole);
-  //   document.getElementById("holes").setAttribute("max", hole);
-  // }
-
-
-  // // get initial weight
-  // const wtype = document.getElementById("wtype").value;
-  // const cweight = document.getElementById("cweight").valueAsNumber;
-  // W = weight_hexagon(choose_weight(wtype, cweight, (C+B+1)),1,A,B,C)
-  //
-  // // add the holes
-  // W.holes = [];
-  // for (var i=0; i<W.length; i++) {
-  //   W.holes[i] = [];
-  //   W.holes[i].length = W.length;
-  //   W.holes[i].fill(0);
-  // }
-  //
-  // // add holes to W
-  // for (i=0;i<Hexagon.holes;i++) {
-  //   const width = document.getElementById(`holeW${i}`).valueAsNumber;
-  //   const X = document.getElementById(`holeX${i}`).valueAsNumber;
-  //   const Y = document.getElementById(`holeY${i}`).valueAsNumber;
-  //   const type = document.getElementById(`holeType${i}`).valueAsNumber;
-  //   W = gap(W,A,B,C,width,X,Y, type);
-  // }
-  //
-  // W = W_split(W);
-  // P = Reduction(W, W.im);
-  // let M = Matching(P, W[0].length);
-  //
-  //
   app.stage.removeChildAt(0);
   setup();
-  // drawHexagon(A, B, C, M, W.holes);
-
-
 }
 
 // change!!!
 function regularHex() {
-
-  //app.stage.edgeExist = 1;
   // constants for the size of the hexagon
   const N = document.getElementById("Nbox").valueAsNumber;
 
@@ -603,7 +581,6 @@ function regularHex() {
   document.getElementById("Abox").setAttribute("value", N);
   document.getElementById("Bbox").setAttribute("value", N);
   document.getElementById("Cbox").setAttribute("value", N);
-
 }
 
 
@@ -620,14 +597,14 @@ function reweight() {
 
   // add the holes
   W.holes = [];
-  for (var i=0; i<W.length; i++) {
+  for (let i=0; i<W.length; i++) {
     W.holes[i] = [];
     W.holes[i].length = W.length;
     W.holes[i].fill(0);
   }
 
   // add holes to W
-  for (i=0;i<Hexagon.holes;i++) {
+  for (let i=0;i<Hexagon.holes;i++) {
     const width = document.getElementById(`holeW${i}`).valueAsNumber;
     const X = document.getElementById(`holeX${i}`).valueAsNumber;
     const Y = document.getElementById(`holeY${i}`).valueAsNumber;
@@ -647,8 +624,6 @@ function reweight() {
 
 function onDown(e) {
   this.data = e.data;
-  // console.log(app.screen.width/2);
-  // console.log(this.data.global.x);
   this.dragging = true;
 }
 
@@ -789,7 +764,7 @@ function addHoles() {
   app.stage.addChild(container);
 
 
-  for (i=0; i<Hexagon.holes; i++) {
+  for (let i=0; i<Hexagon.holes; i++) {
     hole(container, i);
   }
 
@@ -819,6 +794,10 @@ function qweight(N, a) {
 
 function choose_weight(type, a=0, N=1) {
   let weight;
+  const A = document.getElementById("Abox").valueAsNumber;
+  const B = document.getElementById("Bbox").valueAsNumber;
+  const C = document.getElementById("Cbox").valueAsNumber;
+  const kappa = document.getElementById("kappa").valueAsNumber;
   if (type == "uniform") {
     weight = [[1],[1]];
   } else if (type == "qvolume") {
@@ -837,6 +816,16 @@ function choose_weight(type, a=0, N=1) {
     weight = [[a, 1], [1, 1], [1, a], [1, a**2]];
   } else if (type == "periodic2x3") {
     weight = [[a,1,1], [a,1,1], [1,1,a], [1,1,a]];
+  } else if (type == "qracah") {
+    const q = Math.exp(-a/N);
+    // make array
+    let bottom = new Array(N);
+    bottom.fill(1);
+    let top = new Array(N);
+    for (let k=0;k<N;k++) {
+      top[k] = kappa*q**(k-(C+1)/2) - 1/(kappa*q**(k-(C+1)/2));
+    }
+    weight = [top, bottom];
   }
   return weight
 }
@@ -844,7 +833,7 @@ function choose_weight(type, a=0, N=1) {
 
 function Array2D(n) {
   let M = [];
-  for (var i=0; i<n; i++) {
+  for (let i=0; i<n; i++) {
     const row = new Array(n)
     row.fill(0)
     M.push(row);
@@ -856,8 +845,8 @@ function addtoArray(A,B) {
   const n = A.length;
   const m = A[0].length;
 
-  for (i=0;i<n;i++) {
-    for (j=0;j<n;j++) {
+  for (let i=0;i<n;i++) {
+    for (let j=0;j<n;j++) {
       A[i][j] += B[i][j];
     }
   }
@@ -868,7 +857,7 @@ function addtoArray(A,B) {
 function addVertices() {
   let vertexcontainer = new PIXI.Container();
 
-  for (i=0;i<app.stage.vertices.length;i++) {
+  for (let i=0;i<app.stage.vertices.length;i++) {
     vertexcontainer.addChild(app.stage.vertices[i]);
   }
 
@@ -881,17 +870,46 @@ function addVertices() {
 
 function hidewform() {
   const wtype = document.getElementById("wtype").value;
+
+
   if (wtype == "uniform") {
     document.getElementById("cweight").style.display = "none";
   } else {
     document.getElementById("cweight").style.display = "inline";
   }
+  if (wtype == "qracah") {
+    document.getElementById("kappa").style.display = "inline";
+    document.getElementById("kappa1").style.display = "inline";
+    document.getElementById("kappa2").style.display = "inline";
+  } else {
+    document.getElementById("kappa").style.display = "none";
+    document.getElementById("kappa2").style.display = "none";
+    document.getElementById("kappa1").style.display = "none";
+  }
 }
 
-function createLozengeGrid() {
-
+function qracahInput() {
+  const a = document.getElementById("cweight").valueAsNumber
+  const N = document.getElementById("Abox").valueAsNumber;
+  const B = document.getElementById("Bbox").valueAsNumber;
+  const T = B+N;
+  const q = Math.exp(-a/N);
+  if (q > 1) {
+    document.getElementById("kappa").setAttribute("max", q**(-N+1/2));
+    document.getElementById("kappa").setAttribute("min", q**((T-1)/2));
+    document.getElementById("kappa2").setAttribute("value", q**(-N+1/2));
+    document.getElementById("kappa1").setAttribute("value", q**((T-1)/2));
+    document.getElementById("kappa").style.display = "inline";
+  } else if (q < 1) {
+    document.getElementById("kappa1").setAttribute("value", q**(-N+1/2));
+    document.getElementById("kappa2").setAttribute("value", q**((T-1)/2));
+    document.getElementById("kappa").setAttribute("max", q**(-N+1/2));
+    document.getElementById("kappa").setAttribute("min", q**((T-1)/2));
+  }
 }
 
+function qracahupdate() {
+}
 
 
 window.reweight = reweight;
@@ -910,7 +928,7 @@ window.weight_hexagon = weight_hexagon;
 window.qweight = qweight;
 window.addtoArray = addtoArray;
 window.hidewform = hidewform;
-
+window.qracahInput = qracahInput;
 
 </script>
 
