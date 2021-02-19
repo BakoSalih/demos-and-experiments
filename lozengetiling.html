@@ -466,20 +466,20 @@ function animatehex() {
   let ticker = PIXI.Ticker.shared;
   //ticker.autoStart = false;
   // initialize accumulating matrix
-  let M_acc = Array2D(W[0].length);
-  M_acc.totno = 0;
-  ticker.maxFPS = 60;
+  // let M_acc = Array2D(W[0].length);
+  // M_acc.totno = 0;
+  ticker.maxFPS = 30;
   if (!ticker.started) {
     ticker.add(() => {
         //
         let M = Matching(P, W[0].length);
 
-        //
-        M_acc.totno += 1;
-        addtoArray(M_acc, M);
+        // //
+        // M_acc.totno += 1;
+        // addtoArray(M_acc, M);
 
         // drawHexagon
-        drawHexagon(M,W.holes,M_acc);
+        drawHexagon(M,W.holes);
     });
   }
 }
