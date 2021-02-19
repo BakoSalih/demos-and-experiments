@@ -88,7 +88,10 @@
     <button id="rotate" onclick="rotate()">Rotate</button>
     </div> -->
     <div>
-      <button id="randomize" onclick="randomize_color()">Randomize color</button>
+      <button id="randomize" onclick="randomize_color()">Randomize colors</button>
+    </div>
+    <div>
+      <button id="randomize" onclick="default_color()">Default colors</button>
     </div>
 
     <div>
@@ -337,7 +340,6 @@ function createLozenge(xPos, yPos, r, type, lineThickness = 1, paths = 0)
       loz.lineTo(3*r/2, -r*Math.sqrt(3)/2);
     }
 
-
   } else if (type == 2) { // top lozenge
     loz.x = xPos + r/2;
     loz.y = yPos + r*Math.sqrt(3)/2;
@@ -492,10 +494,6 @@ function animatehex() {
 }
 
 function prob_color() {
-  // const color1 = Math.random() * 0xFFFFFF;
-  // const color2 = Math.random() * 0xFFFFFF;
-  // const color3 = Math.random() * 0xFFFFFF;
-
   let C = Coloring(P,W[0].length);
 
   let lozenges = app.stage.lozenges;
@@ -523,28 +521,36 @@ function prob_color() {
     //if (c >= 0.5) {lozenges[k].tint = `0x00${colhex}${colhex}`;};
   }
 
-
-
-  // for (let k=0, len=lozenges.length; k<len; k++) {
-  //   const type = lozenges[k].type;
-  //   switch (type) {
-  //     case 1:
-  //       lozenges[k].tint = color1;
-  //       break;
-  //     case 2:
-  //       lozenges[k].tint = color2;
-  //       break;
-  //     case 3:
-  //       lozenges[k].tint = color3;
-  //       break;
-  //   }
-  // }
 }
 
 function randomize_color() {
   const color1 = Math.random() * 0xFFFFFF;
   const color2 = Math.random() * 0xFFFFFF;
   const color3 = Math.random() * 0xFFFFFF;
+
+  let lozenges = app.stage.lozenges;
+
+  for (let k=0, len=lozenges.length; k<len; k++) {
+    const type = lozenges[k].type;
+    switch (type) {
+      case 1:
+        lozenges[k].tint = color1;
+        break;
+      case 2:
+        lozenges[k].tint = color2;
+        break;
+      case 3:
+        lozenges[k].tint = color3;
+        break;
+    }
+  }
+}
+
+
+function default_color() {
+  const color1 = 0x1cff00;
+  const color2 = 0xfc0606;
+  const color3 = 0x0555db;
 
   let lozenges = app.stage.lozenges;
 
@@ -603,7 +609,6 @@ function myFunction() {
 
   let div = document.getElementById("holes");
   div.innerHTML = '';
-
   setup();
 }
 
@@ -621,6 +626,7 @@ function regularHex() {
 
 function reweight() {
   pause()
+  default_color();
   if (!document.getElementById("autorefresh").checked) {
     return;
   }
@@ -960,6 +966,7 @@ window.refresh = refresh;
 window.animatehex = animatehex;
 window.prob_color = prob_color;
 window.randomize_color = randomize_color;
+window.default_color = default_color;
 window.pause = pause;
 window.gap = gap;
 window.paths = paths;
