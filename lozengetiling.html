@@ -70,7 +70,10 @@
     <div>
     <button id="newhex", onclick="myFunction()">Generate</button>
     </div>
-
+    <h3> Rematch (no reduction step) </h3>
+	  <div>
+    <button id="refresh" onclick="refresh()">Refresh Tiling</button>
+</div>
     <h3> Generate a large number of <br> tilings and display average </h3>
 	  <div>
 	    <button id="animatehex" onclick="animatehex()">Animate</button>
@@ -101,7 +104,11 @@
     <h2> Holes </h2>
     <div>
     <input type="number", id="holeNum", onchange="addHoles()", value="0", min="0" class="numinput"></input>
-    <button id="refresh" onclick="refresh()">Refresh Tiling</button>
+    <button id="refresh" onclick="reweight()">Generate w/ Holes</button>
+    </div>
+
+    <div>
+    <input type="checkbox" id="autorefresh" checked>Auto generate</button>
     </div>
     <div id="holes"> </div>
   </div>
@@ -613,7 +620,11 @@ function regularHex() {
 
 
 function reweight() {
-  //pause()
+  pause()
+  if (!document.getElementById("autorefresh").checked) {
+    return;
+  }
+
   const A = document.getElementById("Abox").valueAsNumber;
   const B = document.getElementById("Bbox").valueAsNumber;
   const C = document.getElementById("Cbox").valueAsNumber;
