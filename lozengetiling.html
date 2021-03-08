@@ -13,7 +13,7 @@
 
 <div class="row">
   <div>
-  <h1>Lozenge tiling application</h1>
+  <h1>Lozenge tilings</h1>
 
   </div>
 
@@ -494,15 +494,15 @@ function rotate() {
   let container = app.stage.children[0];
   if (container.rotation == 0) {
     container.rotation = Math.PI/6;
-    if (app.stage.children.length > 1) {
-      app.stage.children[1].rotation = Math.PI/6;
-    }
+    // if (app.stage.children.length > 1) {
+    //   app.stage.children[1].rotation = Math.PI/6;
+    // }
     Hexagon.rotated = Math.PI/6;
   } else {
     container.rotation = 0;
-    if (app.stage.children.length > 1) {
-      app.stage.children[1].rotation = 0;
-    }
+    // if (app.stage.children.length > 1) {
+    //   app.stage.children[1].rotation = 0;
+    // }
     Hexagon.rotated = 0;
   }
 }
@@ -590,47 +590,47 @@ function onDragMove(e)
     {
       var newPosition = this.data.getLocalPosition(this.parent);
       const r = Hexagon.r;
+      //
+      // let x = (3*newPosition.x - Math.sqrt(3) * newPosition.y)/(12*r);
+      // let y = (-newPosition.x - Math.sqrt(3) * newPosition.y)/(4*r);
+      //
+      // x = Math.round(x);
+      // y = Math.round(y);
+      //
+      // this.position.x = (3*x-y)*r;
+      // this.position.y = -Math.sqrt(3)*(x+y)*r;
+      //
+      // const num = this.number;
+      // document.getElementById(`holeX${num}`).setAttribute("value", 2*x);
+      // document.getElementById(`holeY${num}`).setAttribute("value", y);
+      if (Hexagon.rotated == 0) {
 
-      let x = (3*newPosition.x - Math.sqrt(3) * newPosition.y)/(12*r);
-      let y = (-newPosition.x - Math.sqrt(3) * newPosition.y)/(4*r);
+        let x = (3*newPosition.x - Math.sqrt(3) * newPosition.y)/(12*r);
+        let y = (-newPosition.x - Math.sqrt(3) * newPosition.y)/(4*r);
 
-      x = Math.round(x);
-      y = Math.round(y);
+        x = Math.round(x);
+        y = Math.round(y);
 
-      this.position.x = (3*x-y)*r;
-      this.position.y = -Math.sqrt(3)*(x+y)*r;
+        this.position.x = (3*x-y)*r;
+        this.position.y = -Math.sqrt(3)*(x+y)*r;
 
-      const num = this.number;
-      document.getElementById(`holeX${num}`).setAttribute("value", 2*x);
-      document.getElementById(`holeY${num}`).setAttribute("value", y);
-      // if (Hexagon.rotated == 0) {
-      //
-      //   let x = (3*newPosition.x - Math.sqrt(3) * newPosition.y)/(12*r);
-      //   let y = (-newPosition.x - Math.sqrt(3) * newPosition.y)/(4*r);
-      //
-      //   x = Math.round(x);
-      //   y = Math.round(y);
-      //
-      //   this.position.x = (3*x-y)*r;
-      //   this.position.y = -Math.sqrt(3)*(x+y)*r;
-      //
-      //   const num = this.number;
-      //   document.getElementById(`holeX${num}`).setAttribute("value", 2*x);
-      //   document.getElementById(`holeY${num}`).setAttribute("value", y);
-      //
-      // } else {
-      //   const xscale = 2*r*Math.sqrt(3);
-      //   const yscale = 2*r;
-      //   const x = Math.round(newPosition.x/(xscale));
-      //   const y = Math.round((newPosition.y)/(yscale));
-      //
-      //   this.position.x = x*xscale;
-      //   this.position.y = y*yscale;
-      //
-      //   const num = this.number;
-      //   document.getElementById(`holeX${num}`).setAttribute("value", 2*x);
-      //   document.getElementById(`holeY${num}`).setAttribute("value", -y);
-      // }
+        const num = this.number;
+        document.getElementById(`holeX${num}`).setAttribute("value", 2*x);
+        document.getElementById(`holeY${num}`).setAttribute("value", y);
+
+      } else {
+        const xscale = 2*r*Math.sqrt(3);
+        const yscale = 2*r;
+        const x = Math.round(newPosition.x/(xscale));
+        const y = Math.round((newPosition.y)/(yscale));
+
+        this.position.x = x*xscale;
+        this.position.y = y*yscale;
+
+        const num = this.number;
+        document.getElementById(`holeX${num}`).setAttribute("value", 2*x);
+        document.getElementById(`holeY${num}`).setAttribute("value", -y);
+      }
     }
 
 }
@@ -866,7 +866,7 @@ function addVertices() {
     vertexcontainer.addChild(app.stage.vertices[i]);
   }
   vertexcontainer.position = app.stage.children[0].position;
-  vertexcontainer.rotation = app.stage.children[0].rotation;
+  //vertexcontainer.rotation = Hexagon.rotated;
   app.stage.addChild(vertexcontainer);
 }
 
@@ -1034,6 +1034,7 @@ window.Rainbow = Rainbow;
 window.colorpick = colorpick;
 window.renew_color = renew_color;
 window.randomHex = randomHex;
+window.Hexagon = Hexagon;
 
 </script>
 
