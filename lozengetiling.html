@@ -119,6 +119,18 @@
     <div>
     <input type="checkbox" id="paths" onclick="paths()">Show paths</button>
     </div>
+    <h3> Zoom/pan </h3>
+    <div>
+      <button onclick="zoom_in()">Zoom in</button>
+      <button onclick="zoom_out()">Zoom out</button>
+      <br>
+      <button onclick="move('up')">&#8593;</button>
+      <button onclick="move('right')">&#8594;</button>
+      <button onclick="move('down')">&#8595;</button>
+      <button onclick="move('left')">&#8592;</button>
+      <br>
+      <button onclick="pan_reset()">Reset view</button>
+    </div>
   </div>
   <div class="column middle", id="simulation">
     <div id="sim"></div>
@@ -152,7 +164,7 @@ if(!PIXI.utils.isWebGLSupported()){
 
 // const windowsize = Math.min(window.innerWidth,window.innerHeight);
 // change size when window is resized
-window.addEventListener('resize', changeHexSize);
+// window.addEventListener('resize', changeHexSize);
 let widthx = document.getElementById("sim").offsetWidth;
 let heightx = document.getElementById("sim").offsetHeight;
 
@@ -507,6 +519,8 @@ function rotate() {
   }
 }
 
+
+
 function edges() {
   Hexagon.lineThickness = document.getElementById("edges").checked;
 }
@@ -516,6 +530,7 @@ function paths() {
 }
 
 function myFunction() {
+  pan_reset();
   app.stage.children = [];
 
   document.getElementById("holeNum").value = "0";
@@ -658,7 +673,7 @@ function hole(container, num) {
   let vertex = new PIXI.Graphics();
   vertex.interactive = true;
   vertex.buttonMode = true;
-  vertex.beginFill(0x000000);
+  vertex.beginFill(0x00bde7);
   vertex.on('mousedown', onDown)
         .on('touchstart', onDown)
       .on('mousemove', onDragMove)
@@ -669,7 +684,8 @@ function hole(container, num) {
       .on('touchendoutside', onDragEnd);
       // .on('mouseup', onRelease)
       // .on('mouseupoutside',onRelease);
-  vertex.drawCircle(0, 0, 5);
+  vertex.lineStyle(1,0x000000);
+  vertex.drawCircle(0, 0, 15);
   vertex.endFill();
   // vertex.x = -Hexagon.r/2;
   // vertex.y = Hexagon.r*Math.sqrt(3)/2;
@@ -743,7 +759,7 @@ function addHoles() {
   let div = document.getElementById("holes");
   div.innerHTML = '';
   if (app.stage.children.length > 1) {
-  app.stage.removeChildAt(1);
+    app.stage.removeChildAt(1);
   }
 
   Hexagon.holes = document.getElementById("holeNum").valueAsNumber;
@@ -978,7 +994,6 @@ function renew_color() {
         break;
       case 3:
         lozenges[k].tint = Hexagon.loz_colors[2];
-        break;
     }
   }
 }
@@ -1011,6 +1026,111 @@ function prob_color() {
 
 }
 
+
+var step = -10;
+function zoom_in() {
+  if (app.stage.children[1]) {
+    app.stage.children[1].visible = false;
+  }
+  app.stage.children[0].scale.x += 0.5;
+  app.stage.children[0].scale.y += 0.5;
+  step *= 3/2;
+}
+
+function zoom_out() {
+  if (app.stage.children[0].scale.x > 1 && app.stage.children[0].scale.y > 1) {
+    app.stage.children[0].scale.x -= 0.5;
+    app.stage.children[0].scale.y -= 0.5;
+    step *= 2/3;
+  } else {
+    if (app.stage.children[1]) {
+      app.stage.children[1].visible = true;
+    }
+  }
+}
+
+function move(dir) {
+  console.log(step);
+  //let step = -10;
+  switch (dir) {
+    case "left":
+      app.stage.children[0].position.x += -step;
+      if (app.stage.children[1]) {
+        app.stage.children[1].position.x += -step;
+      }
+      break;
+    case "right":
+      app.stage.children[0].position.x += step;
+      if (app.stage.children[1]) {
+        app.stage.children[1].position.x += step;
+      }
+      break;
+    case "up":
+      app.stage.children[0].position.y += -step;
+      if (app.stage.children[1]) {
+        app.stage.children[1].position.y += -step;
+      }
+      break;
+    case "down":
+      app.stage.children[0].position.y += step;
+      if (app.stage.children[1]) {
+        app.stage.children[1].position.y += step;
+      }
+  }
+}
+
+function pan_reset() {
+  app.stage.children[0].scale.x = 1;
+  app.stage.children[0].scale.y = 1;
+  app.stage.children[0].position.x = widthx/2;
+  app.stage.children[0].position.y = heightx/2;
+  step = -10;
+  if (app.stage.children[1]) {
+    app.stage.children[1].visible = true;
+  }
+}
+
+
+var panning = false;
+function pan() {
+  let hexcontainer = app.stage.children[0];
+  if (!hexcontainer.interactive) {
+    hexcontainer.interactive = true;
+    hexcontainer.buttonMode = true;
+  } else {
+    hexcontainer.interactive = false;
+    hexcontainer.buttonMode = false;
+  }
+  hexcontainer.on('mousedown', onDownPan)
+      .on('mousemove', onDragMovePan)
+      .on('mouseup', onDragEndPan)
+      .on('mouseupoutside', onDragEndPan)
+}
+
+// hexcontainer.on('mousedown', zoom_in);
+
+function onDownPan(e) {
+  this.data = e.data;
+  this.dragging = true;
+}
+function onDragMovePan(e) {
+  let hexcontainer = app.stage.children[0];
+	if (this.dragging) {
+    var newPosition = this.data.getLocalPosition(this.parent);
+    this.position.x = newPosition.x;
+    this.position.y = newPosition.y;
+  }
+
+}
+function onDragEndPan()
+{
+    this.dragging = false;
+    this.data = null;
+}
+
+
+
+
 window.reweight = reweight;
 window.myFunction = myFunction;
 window.regularHex = regularHex;
@@ -1034,7 +1154,11 @@ window.Rainbow = Rainbow;
 window.colorpick = colorpick;
 window.renew_color = renew_color;
 window.randomHex = randomHex;
-window.Hexagon = Hexagon;
+window.zoom_in = zoom_in;
+window.zoom_out = zoom_out;
+window.pan = pan;
+window.move = move;
+window.pan_reset = pan_reset;
 
 </script>
 
