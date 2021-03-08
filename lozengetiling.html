@@ -12,6 +12,11 @@
 <body>
 
 <div class="row">
+  <div>
+  <h1>Lozenge tiling application</h1>
+
+  </div>
+
   <div class="column left" id="options1">
     <h2> Hexagon Parameters </h2>
     <h3> General hexagon, sides A,B,C</h3>
@@ -19,19 +24,19 @@
       <div class="grid-item">
         <div id="inputA" class="input0">
         <h3> A: </h3>
-        <input type="number" value="50" id="Abox" name="A" class="numinput">
+        <input type="number" value="50" min="0" id="Abox" name="A" class="numinput">
         </div>
       </div>
       <div class="grid-item">
         <div id="inputB" class="input0">
           <h3> B: </h3>
-          <input type="number" value="50" id="Bbox" name="B" class="numinput">
+          <input type="number" value="50" min="0"  id="Bbox" name="B" class="numinput">
         </div>
       </div>
       <div class="grid-item">
         <div id="inputC" class="input0">
           <h3> C: </h3>
-          <input type="number" value="50" id="Cbox" name="C" class="numinput">
+          <input type="number" value="50" min="0"  id="Cbox" name="C" class="numinput">
         </div>
       </div>
     </div>
@@ -255,8 +260,8 @@ function setup() {
 function createHexagon() {
   // let width = window.innerWidth;
   // let height = window.innerHeight;
-  let width = document.getElementById("sim").offsetWidth;
-  let height  = document.getElementById("sim").offsetHeight;
+  let width = app.resizeTo.offsetWidth;
+  let height  = app.resizeTo.offsetHeight;
 
   // get hexagon parameters
   const a = document.getElementById("Abox").valueAsNumber;
@@ -272,10 +277,10 @@ function createHexagon() {
   const v = Hexagon.v;
   const w = Hexagon.w;
 
-  // length of unit to fit the screen / normalize
-  const rx = width/(2*(2*b+c));
-  const ry = height/(2*(a+c));
-  const r = Math.min(rx,ry);
+  // length of unit to fit the screen / normalize into canvas
+  const rx = width/(-a * v[0] + b * u[0] + c * w[0]);
+  const ry = height/(a * v[1] + c * w[1]);
+  const r = 0.9*Math.min(rx/2,ry/2);
 
   // save r
   Hexagon.r = r;
@@ -341,10 +346,13 @@ function createHexagon() {
       }
     }
   }
-
-  // let vertex2 = createVertex(-x_center,y_center);
+  // {let vertex2 = createVertex(x_center,y_center);
+  // container.addChild(vertex2);}
+  // {let vertex2 = createVertex(0,0);
+  // container.addChild(vertex2);}
+  // {let vertex2 = createVertex(400,400);
+  // container.addChild(vertex2);}
   // let vertex2 = createVertex(-r, -Math.sqrt(3) * r);
-  // container.addChild(vertex2);
   // // let vertex3 = createVertex(-x_center+ r*(2*a * v[0]),y_center- r*(2*a * v[1]));
   // let vertex3 = createVertex(3*r, -Math.sqrt(3) * r);
   // container.addChild(vertex3);
@@ -489,7 +497,7 @@ function rotate() {
     if (app.stage.children.length > 1) {
       app.stage.children[1].rotation = Math.PI/6;
     }
-    Hexagon.rotated = Math.Pi/6;
+    Hexagon.rotated = Math.PI/6;
   } else {
     container.rotation = 0;
     if (app.stage.children.length > 1) {
@@ -652,9 +660,13 @@ function hole(container, num) {
   vertex.buttonMode = true;
   vertex.beginFill(0x000000);
   vertex.on('mousedown', onDown)
+        .on('touchstart', onDown)
       .on('mousemove', onDragMove)
+      .on('touchmove', onDragMove)
       .on('mouseup', onDragEnd)
-      .on('mouseupoutside', onDragEnd);
+      .on('mouseupoutside', onDragEnd)
+      .on('touchend', onDragEnd)
+      .on('touchendoutside', onDragEnd);
       // .on('mouseup', onRelease)
       // .on('mouseupoutside',onRelease);
   vertex.drawCircle(0, 0, 5);
@@ -670,13 +682,13 @@ function hole(container, num) {
 
   // make title
   let div = document.getElementById("holes");
-  div.innerHTML += `<h2> Hole ${num+1} </h2>`
+  //div.innerHTML += `<h2> Hole ${num+1} </h2>`
 
   let buttongroup = document.createElement("DIV");
 
   //document.body.appendChild(title)
-
-  buttongroup.innerHTML += `<h3>Width<h3>`;
+  buttongroup.setAttribute("class","hole");
+  buttongroup.innerHTML += `<h3>Hole ${num+1}: Width<h3>`;
   let Iwidth = document.createElement("INPUT");
   Iwidth.setAttribute("type", "range");
   Iwidth.setAttribute("value", 0);
@@ -1002,7 +1014,6 @@ function prob_color() {
 window.reweight = reweight;
 window.myFunction = myFunction;
 window.regularHex = regularHex;
-window.rotate = rotate;
 window.edges = edges;
 window.refresh = refresh;
 window.rotate = rotate;
