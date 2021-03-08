@@ -1087,6 +1087,8 @@ function pan_reset() {
   step = -10;
   if (app.stage.children[1]) {
     app.stage.children[1].visible = true;
+    app.stage.children[1].position.x = widthx/2;
+    app.stage.children[1].position.y = heightx/2;
   }
 }
 
