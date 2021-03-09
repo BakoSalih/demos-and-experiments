@@ -1,15 +1,19 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&display=swap'); */
+
 body {
   background-color: lightgray;
-  font-family: Arial,  sans-serif;
+  font-family: Helvetica, Arial,  sans-serif;
   padding: 0px;
   margin: 0px
 }
 
 html {padding: 0px;}
-
 * {
   box-sizing: border-box;
   padding: 5px;
+}
+*:focus {
+    outline: 0 !important;
 }
 .row {
   background-color: #e7e7e7;
@@ -18,11 +22,28 @@ html {padding: 0px;}
   height: 100%;
   margin: 0 auto;
   padding: 0px;
-  width: 1220px;
+  width: 1320px;
 }
 
 .column {
   float: left;
+}
+
+button  {
+  background-color: #4c65af;
+  border: 1px solid black;
+  border-radius: 4px;
+  color: white;
+  padding: 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+button:hover{
+  background-color: #001b6b;
 }
 
 .options {
@@ -30,15 +51,27 @@ html {padding: 0px;}
 }
 
 .left, .right {
-  width: 10%;
-  min-width: 200px;
+  width: 15%;
+  min-width: 225px;
   min-height: 800px;
   background-color: lightblue;
-  margin: 0;
+  margin: 10px;
+  padding:  10px 0px;
+  border: 1px solid black;
+  border-radius: 10px;
+}
+
+.left {
+    min-width: 240px;
+    min-height: 800px;
+    height: 800px;
+    overflow-x: hidden;
 }
 
 .right {
-
+    min-height: 800px;
+    height: 800px;
+    overflow-x: hidden;
     float: right;
 }
 
@@ -68,7 +101,7 @@ canvas {
 
 
 h2 {
-  padding: 2px;
+  padding: 5px 0px;
   font-size: 16px;
   margin: auto 0px;
   padding: 5px 0px;
@@ -76,18 +109,16 @@ h2 {
 
 
 h3 {
-  padding: 0px;
+  padding: 5px 0px;
   font-size: 11px;
   margin: 0px;
 }
 
-.numinput {
-  width: 50px;
-}
+
 
 .grid-container {
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: auto;
 }
 
 .grid-item {
@@ -96,7 +127,7 @@ h3 {
 }
 
 button {
-  margin: 2px;
+  margin: 1px;
 }
 
 #cbox {
@@ -108,11 +139,114 @@ button {
   bottom: 10px;
 }
 
+#holes {
+  margin: 0px;
+  padding: 0px;
+}
+
 .hole {
   background-color: #d7d7d7;
   margin: 5px;
   border: 1px solid black;
 }
+
+.holeinput {
+  width: 50px;
+}
+
+
+.togglebutton {
+  background-color: #35d433;
+  color:black;
+}
+
+.togglebutton:hover {
+  background-color: #063605;
+}
+
+.togglebuttonpressed {
+  background-color: #063605;
+}
+
+/* Style the button that is used to open and close the collapsible content */
+.collapsible {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 11px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.active, .collapsible:hover {
+  background-color: #ccc;
+}
+
+/* Style the collapsible content. Note: hidden by default */
+.content {
+  padding: 18px;
+  display: none;
+  overflow: hidden;
+  background-color: #f1f1f1;
+}
+
+.colbox {
+  stroke-width:1;
+  stroke:rgb(0,0,0);
+  cursor:pointer;
+}
+
+
+.numinput {
+  width: 50px;
+}
+
+.input0 {
+  background-color: #4c65af;
+  padding: 1px;
+  border: 1px solid black;
+  border-radius: 4px;
+  margin: 0px 2px 2px 0px;
+  width: fit-content;
+  height: fit-content;
+
+}
+.input0 p {
+  color: white;
+  text-align: center;
+  display: inline;
+  font-size: 15px;
+}
+
+.input0 input {
+  border: 0px solid black;
+  height: 30px;
+  width: 50px;
+}
+
+#Abox, #Bbox, #Cbox {
+  width: 35px;
+}
+
+
+
+/* #edgebutton, #pathbutton {
+  background-color: #35d433;
+}
+
+
+#edgebutton:hover, #pathbutton:hover {
+  background-color: #025d00;
+  border: 3px solid black;
+  padding: 12px 12px;
+} */
+
+
+
 
 /* .options {
   position:absolute;
