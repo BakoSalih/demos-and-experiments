@@ -24,15 +24,15 @@
         <div>
       <div id="inputN" class="input0">
         <p>N</p>
-        <input type="number" value="50" id="Nbox" name="N" class="numinput">
+        <input type="number" value="40" id="Nbox" name="N" class="numinput">
       </div>
       <div id="inputA" class="input0">
       <p>A</p>
-      <input type="number" value="1", step="1" id="Abox" name="A" class="numinput">
+      <input type="number" value="1", step="0.1" min="1" id="Abox" name="A" class="numinput">
         <p>B</p>
-        <input type="number" value="1", step="1"  id="Bbox" name="B" class="numinput">
+        <input type="number" value="1", step="0.1" min="1"  id="Bbox" name="B" class="numinput">
         <p>C</p>
-        <input type="number" value="1", step="1"  id="Cbox" name="C" class="numinput">
+        <input type="number" value="1", step="0.1" min="1"  id="Cbox" name="C" class="numinput">
       </div>
 
     </div>
@@ -164,7 +164,7 @@ if(!PIXI.utils.isWebGLSupported()){
 var Hexagon = { a:1,
                 b:1,
                 c:1,
-                n:50,
+                n:40,
                 holes: 0,
                 lineThickness: 1,
                 verticesShow: false,
