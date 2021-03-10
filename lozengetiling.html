@@ -91,8 +91,9 @@
       <rect x="60" y="0" width="20" height="20" class="colbox" id="colorbox3" onclick="colorpick(this)" style="fill:#0555db;" />
       </svg>
       <br>
-        <button id="randomize" onclick="randomize_color()">Randomize</button>
-        <button id="randomize" onclick="default_color()">Default</button>
+        <button id="randomize" onclick="switch_color('random')">Randomize</button>
+        <button id="randomize" onclick="switch_color('default')">Default</button>
+        <button id="randomize" onclick="switch_color('white')">No colors</button>
     <div id="picker" style="visibility: hidden;margin:2px"></div>
     <!-- </div>
     <div> -->
@@ -102,7 +103,7 @@
       <h2> Drawing options </h2>
       <button id="rotate" onclick="rotate()">Rotate</button>
       <h3> Toggle edges & paths </h3>
-      <button id="edgebutton" class="togglebuttonpressed" onclick="edges()">Edges</button>
+      <button id="edgebutton" class="togglebuttonpressed" onclick="edges()">Corners</button>
       <button id="pathbutton" class="togglebutton" onclick="paths()">Paths</button>
       <!-- <button id="edgebutton" class="togglebutton" onclick="edges()">Draw Edges</button>
       <button id="pathbutton" class="togglebutton" onclick="paths()">Draw Paths</button> -->
@@ -176,6 +177,22 @@ tippy('#redraw', {
         placement: 'bottom',
         maxWidth: 200,
         delay: [1000, 100],
+        theme: 'material'
+      });
+
+tippy('#edgebutton', {
+        content: 'Controls whether a lozenge has a black border or not',
+        placement: 'bottom',
+        maxWidth: 200,
+        delay: [500, 100],
+        theme: 'material'
+      });
+
+tippy('#pathbutton', {
+        content: 'Show paths passing through the lozenges',
+        placement: 'bottom',
+        maxWidth: 200,
+        delay: [500, 100],
         theme: 'material'
       });
 
@@ -692,6 +709,13 @@ function reDraw() {
 
   let div = document.getElementById("holes");
   div.innerHTML = '';
+
+  if (Hexagon.n > 50) {
+    Hexagon.draw_edges = false;
+    document.getElementById("edgebutton")
+      .setAttribute("class", "togglebutton");
+  }
+
   setup();
 }
 
@@ -1221,8 +1245,47 @@ function default_color() {
   renew_color()
 }
 
-function prob_color() {
+function switch_color(opt) {
+  switch (opt) {
+    case "default":
+      Hexagon.loz_colors[0] = 0x1cff00;
+      Hexagon.loz_colors[1] = 0xfc0606;
+      Hexagon.loz_colors[2] = 0x0555db;
 
+      document.getElementById("colorbox1").style.fill = "#1cff00";
+      document.getElementById("colorbox2").style.fill  = "#fc0606";
+      document.getElementById("colorbox3").style.fill  = "#0555db";
+      renew_color()
+      break;
+    case "random":
+      // pick random colors
+      const color1 = randomHex();
+      const color2 = randomHex();
+      const color3 = randomHex();
+
+      Hexagon.loz_colors[0] = '0x' + color1;
+      Hexagon.loz_colors[1] = '0x' + color2;
+      Hexagon.loz_colors[2] = '0x' + color3;
+
+      document.getElementById("colorbox1").style.fill = "#"+color1;
+      document.getElementById("colorbox2").style.fill  = "#"+color2;
+      document.getElementById("colorbox3").style.fill  = "#"+color3;
+      renew_color()
+      break;
+    case "white":
+      Hexagon.loz_colors[0] = 0xFFFFFF;
+      Hexagon.loz_colors[1] = 0xFFFFFF;
+      Hexagon.loz_colors[2] = 0xFFFFFF;
+
+      document.getElementById("colorbox1").style.fill = "#FFFFFF";
+      document.getElementById("colorbox2").style.fill  = "#FFFFFF";
+      document.getElementById("colorbox3").style.fill  = "#FFFFFF";
+      renew_color()
+      break;
+  }
+}
+
+function prob_color() {
   let C = Coloring(P,W[0].length);
 
   let lozenges = app.stage.lozenges;
@@ -1379,6 +1442,7 @@ window.qracahupdate = qracahupdate;
 window.Rainbow = Rainbow;
 window.colorpick = colorpick;
 window.renew_color = renew_color;
+window.switch_color = switch_color;
 window.randomHex = randomHex;
 window.zoom_in = zoom_in;
 window.zoom_out = zoom_out;
