@@ -51,8 +51,6 @@ button:hover{
 }
 
 .left, .right {
-  width: 15%;
-  min-width: 225px;
   min-height: 800px;
   background-color: lightblue;
   margin: 10px;
@@ -62,13 +60,15 @@ button:hover{
 }
 
 .left {
-    min-width: 240px;
+    width: 10%;
+    min-width: 255px;
     min-height: 800px;
     height: 800px;
     overflow-x: hidden;
 }
 
 .right {
+    min-width: 160px;
     min-height: 800px;
     height: 800px;
     overflow-x: hidden;
@@ -209,27 +209,27 @@ button {
   background-color: #4c65af;
   padding: 1px;
   border: 1px solid black;
-  border-radius: 4px;
+  border-radius: 5px;
   margin: 0px 2px 2px 0px;
   width: fit-content;
   height: fit-content;
-
 }
 .input0 p {
   color: white;
   text-align: center;
   display: inline;
-  font-size: 15px;
+  font-size: 12px;
 }
 
 .input0 input {
   border: 0px solid black;
   height: 30px;
+  font-size: 12px;
   width: 50px;
 }
 
 #Abox, #Bbox, #Cbox {
-  width: 40px;
+  width: 42px;
 }
 
 
