@@ -1,13 +1,8 @@
 /* @import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&display=swap'); */
 
 body {
-<<<<<<< HEAD
   background-color: #fff;
   font-family: "Segoe UI",Roboto,"Helvetica Neue", Arial,  sans-serif;
-=======
-  background-color: lightgray;
-  font-family: Helvetica, Arial,  sans-serif;
->>>>>>> e9392a00776fa72d2259db648556cb5d9724874f
   padding: 0px;
   margin: 0px
 }
@@ -22,7 +17,6 @@ html {padding: 0px;}
 }
 .row {
   background-color: #e7e7e7;
-<<<<<<< HEAD
 
   background-image: linear-gradient(#ffffff, #dfdfdf, #d0d0d0);
   border-left: 2px solid black;
@@ -31,35 +25,6 @@ html {padding: 0px;}
   margin: 0 auto;
   padding: 0px;
   width: 1320px;
-=======
-  border-left: 2px solid black;
-  border-right: 2px solid black;
-  height: 100%;
-  margin: 0 auto;
-  padding: 0px;
-  width: 1320px;
-}
-
-.column {
-  float: left;
-}
-
-button  {
-  background-color: #4c65af;
-  border: 1px solid black;
-  border-radius: 4px;
-  color: white;
-  padding: 10px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-button:hover{
-  background-color: #001b6b;
->>>>>>> e9392a00776fa72d2259db648556cb5d9724874f
 }
 
 .column {
@@ -88,7 +53,6 @@ button {
   margin: 1px;
 }
 .options {
-<<<<<<< HEAD
   background-color: white;
 }
 
@@ -139,64 +103,9 @@ button {
 }
 canvas {
     padding:0px;
-=======
-  background-color: lightblue;
 }
 
-.left, .right {
-  min-height: 800px;
-  background-color: lightblue;
-  margin: 10px;
-  padding:  10px 0px;
-  border: 1px solid black;
-  border-radius: 10px;
-}
 
-.left {
-    width: 10%;
-    min-width: 255px;
-    min-height: 800px;
-    height: 800px;
-    overflow-x: hidden;
-}
-
-.right {
-    min-width: 160px;
-    min-height: 800px;
-    height: 800px;
-    overflow-x: hidden;
-    float: right;
-}
-
-.middle {
-  width: 800px;
-  height: 800px;
-  margin: 0 0;
-}
-
-.row:after {
-  content: "";
-  display: table;
-  clear: both;
->>>>>>> e9392a00776fa72d2259db648556cb5d9724874f
-}
-
-#simulation {
-  padding:0px;
-  height: 800px;
-}
-#sim {
-  padding:0px;
-  height: 800px;
-}
-canvas {
-    padding:0px;
-}
-
-<<<<<<< HEAD
-=======
-
->>>>>>> e9392a00776fa72d2259db648556cb5d9724874f
 h2 {
   padding: 5px 0px;
   font-size: 16px;
@@ -223,7 +132,6 @@ h3 {
   margin: 0px;
 }
 
-<<<<<<< HEAD
 
 #cbox {
   width: 100px;
@@ -268,48 +176,6 @@ h3 {
 .togglebuttonpressed {
   background-color: #212529;
   color:white;
-=======
-button {
-  margin: 1px;
-}
-
-#cbox {
-  width: 100px;
-  height: 100px;
-  background-color: white;
-  position: absolute;
-  left: 10px;
-  bottom: 10px;
-}
-
-#holes {
-  margin: 0px;
-  padding: 0px;
-}
-
-.hole {
-  background-color: #d7d7d7;
-  margin: 5px;
-  border: 1px solid black;
-}
-
-.holeinput {
-  width: 50px;
-}
-
-
-.togglebutton {
-  background-color: #35d433;
-  color:black;
-}
-
-.togglebutton:hover {
-  background-color: #063605;
-}
-
-.togglebuttonpressed {
-  background-color: #063605;
->>>>>>> e9392a00776fa72d2259db648556cb5d9724874f
 }
 
 /* Style the button that is used to open and close the collapsible content */
@@ -350,11 +216,7 @@ button {
 }
 
 .input0 {
-<<<<<<< HEAD
   background-color: #212529;
-=======
-  background-color: #4c65af;
->>>>>>> e9392a00776fa72d2259db648556cb5d9724874f
   padding: 1px;
   border: 1px solid black;
   border-radius: 5px;
