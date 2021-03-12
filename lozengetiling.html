@@ -786,11 +786,16 @@ function onDragEnd()
 }
 
 function hole(container, num) {
+  // choose random color
+  var rainbow = new Rainbow();
+  rainbow.setSpectrum('#ffffff','#000000');
+  let color = rainbow.colorAt(10*num);
+
   // all the vertices
   let vertex = new PIXI.Graphics();
   vertex.interactive = true;
   vertex.buttonMode = true;
-  vertex.beginFill(0x00bde7);
+  vertex.beginFill('0x'+ color);
   vertex.on('mousedown', onDown)
         .on('touchstart', onDown)
       .on('mousemove', onDragMove)
@@ -801,8 +806,8 @@ function hole(container, num) {
       .on('touchendoutside', onDragEnd);
       // .on('mouseup', onRelease)
       // .on('mouseupoutside',onRelease);
-  vertex.lineStyle(1,0x000000);
-  vertex.drawCircle(0, 0, 10);
+  vertex.lineStyle(2,0x000000);
+  vertex.drawCircle(0, 0, 8);
   vertex.endFill();
 
 
@@ -824,6 +829,7 @@ function hole(container, num) {
 
   //document.body.appendChild(title)
   buttongroup.setAttribute("class","hole");
+  buttongroup.setAttribute("style","background-color: #" + color);
   buttongroup.setAttribute("id", `holegroup${num}`);
   buttongroup.innerHTML += `<h3>Hole ${num+1}: Width</h3>`;
   let Iwidth = document.createElement("INPUT");
