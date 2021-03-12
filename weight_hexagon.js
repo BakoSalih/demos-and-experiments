@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 export function weight_hexagon(w,A,B,C) {
 
 // make zero-filled array W
@@ -442,3 +443,6 @@ export function gap(W,A,B,C,m,x=0,y=0,type=1,n) {
   }
   return W
 }
+=======
+export function weight_hexagon(e,t,o,r){const l=2*(t+o+r-1);for(var f=[],n=0;n<l;n++)f[n]=[],f[n].length=l,f[n].fill(0);const s=e.length,i=e[0].length;for(var h=0;h<l;h++)for(var c=0;c<l;c++)if(g(h,c))if(h%2==0){const t=h/2;f[l-1-c][h]=e[s-1-c%s][t%i]}else c%2==0&&(f[l-1-c][h]=1);else a=c,h>=2*(o+r)-1&&a>=2*(t+r)-1&&u(h,c)?f[l-1-c][h]=1:u(h,c)&&(c+h)%2==1&&(f[l-1-c][h]=1);var a;return f;function u(e,t){var o=!1;const r=l-1-t;return 0==e&&0==t?o=!0:0==e&&t>0?o=0==f[r+1][e]:e>0&&0==t?o=(e+t)%2==1?0==f[r][e-1]:0==f[r][e-1]&&0==f[r-1][e-1]:e>0&&t==l-1?o=(e+t)%2==1?0==f[r][e-1]&&0==f[r+1][e-1]&&0==f[r+1][e]:0==f[r][e-1]&&0==f[r+1][e]:e>0&&t>0&&t<l-1&&(o=(e+t)%2==1?0==f[r][e-1]&&0==f[r+1][e-1]&&0==f[r+1][e]:0==f[r][e-1]&&0==f[r-1][e-1]&&0==f[r+1][e]),o}function g(e,l){var f=!1;return e<2*Math.min(o,r)?f=l>=0&&l<2*t+e:e>=2*r&&e<2*o?f=l>=0&&l<2*(t+r)-1:e>=2*o&&e<2*r?f=l>=e-2*o+1&&l<2*t+e:e>=2*Math.max(o,r)&&e<2*(o+r)-1&&(f=l>=e-2*o+1&&l<2*(t+r)-1),f}}export function gap(e,t,o,r,l,f=0,n=0,s=1,i){const h=e.length;if(l>0){const c=o+r-1+2*f,a=h-(t+r)-2*n-f;if(1==s)for(let t=0;t<i;t++)for(let o=0;o<l;o++){const r=a-1-2*t,l=c+1+2*o;e[r][l]=1,e[r+1][l]=0,e[r-1][l]=0,e[r][l+1]=0,e[r][l-1]=0,e.holes[r][l]=1}else if(2==s)for(let t=0;t<i;t++)for(let o=0;o<l;o++){const r=a-1-2*t,l=c+2*(o+t)+2;e[r][l]=1,e[r][l-1]=0,e[r][l+1]=0,e[r+1][l+1]=0,e[r-1][l-1]=0,e.holes[r][l]=1}else if(3==s)for(let t=0;t<i;t++)for(let o=0;o<l;o++){const r=a-2*(t+o)-2,l=c+1+2*o;e[r][l]=1,e[r-1][l]=0,e[r-1][l+1]=0,e[r+1][l]=0,e[r+1][l-1]=0,e.holes[r][l]=1}if(4==s)for(let t=-2*l;t<=2*l;t++)for(let o=-4*l;o<=4*l;o++)o>=-2*l+t&&o<=2*l+t&&(e[a-t][c+o]=0,e.holes[a-t][c+o]=1);else if(5==s)for(let t=-2*l;t<=2*l;t++)for(let o=-2*l;o<=2*l;o++)e[a-t][c+o]=0,e.holes[a-t][c+o]=1;else if(6==s)for(let t=-2*l;t<=2*l;t++)for(let o=-4*l;o<=4*l;o++)o>=-2*l+t&&o<=2*l+t&&(e[a-o][c+t]=0,e.holes[a-o][c+t]=1)}return e}
+>>>>>>> e9392a00776fa72d2259db648556cb5d9724874f
