@@ -108,7 +108,7 @@
       <h2> Drawing options </h2>
       <button id="rotate" onclick="rotate()">Rotate</button>
       <h3> Toggle edges & paths </h3>
-      <button id="edgebutton" class="togglebutton" onclick="edges()">Corners</button>
+      <button id="edgebutton" class="togglebuttonpressed" onclick="edges()">Corners</button>
       <button id="pathbutton" class="togglebutton" onclick="paths()">Paths</button>
       <!-- <button id="edgebutton" class="togglebutton" onclick="edges()">Draw Edges</button>
       <button id="pathbutton" class="togglebutton" onclick="paths()">Draw Paths</button> -->
@@ -234,7 +234,6 @@ var Hexagon = { a:80,
                 weight_old: [0, "uniform"],
                 parameters_old: [1,1,1,50,0],
                 changed: false,
-                theme: "default",
                 // constants for the grid directions
                 u: [1,0],
                 v: [-1/2, Math.sqrt(3)/2],
@@ -338,12 +337,7 @@ function setup() {
   // draw matching
   drawHexagon(M,W.holes);
 
-  // add container for hole controls
-  Hexagon.holes = 0;
-  let container = new PIXI.Container();
-  app.stage.addChildAt(container,1);
-  container.x = app.screen.width/2;
-  container.y = app.screen.height/2;
+
 
 
 }
@@ -538,8 +532,25 @@ function createVertex(xPos, yPos) {
 }
 
 
+// updates the lozenges using matching matrix M
+function drawHexagon(M,holes,M_acc = []) {
+  let lozenges = app.stage.lozenges;
+  for (let k=0, len=lozenges.length; k<len; k++) {
+    const i = lozenges[k].i;
+    const j = lozenges[k].j;
+    if (M[i][j] && !holes[holes.length-1-i][j])  {
+      lozenges[k].visible = true;
+    } else {
+      lozenges[k].visible = false;
+    }
+  }
+}
 
 function refresh() {
+  // just create a new matching (same Weight/Reduction matrix)
+  // const A = document.getElementById("Abox").valueAsNumber;
+  // const B = document.getElementById("Bbox").valueAsNumber;
+  // const C = document.getElementById("Cbox").valueAsNumber;
   M = Matching(P, W[0].length);
   drawHexagon(M,W.holes);
 }
@@ -591,6 +602,7 @@ function edges(choice="toggle") {
       Hexagon.draw_edges = true;
       document.getElementById("edgebutton")
         .setAttribute("class", "togglebuttonpressed");
+        //.setAttribute("id", "background-color: #025d00;border: 3px solid black;padding: 12px 12px;");
     }
   } else if (choice=="edges") {
     Hexagon.draw_edges = true;
@@ -606,26 +618,17 @@ function edges(choice="toggle") {
 }
 
 // function for toggling paths on and off
-function paths(choice="toggle") {
-  //Hexagon.lineThickness = document.getElementById("edges").checked;
-  if (choice == "toggle") {
-    if (Hexagon.draw_paths) {
-      Hexagon.draw_paths = false;
-      document.getElementById("pathbutton")
-        .setAttribute("class", "togglebutton");
-    } else {
-      Hexagon.draw_paths = true;
-      document.getElementById("pathbutton")
-        .setAttribute("class", "togglebuttonpressed");
-    }
-  } else if (choice=="edges") {
-    Hexagon.draw_paths = true;
-    document.getElementById("pathbutton")
-      .setAttribute("class", "togglebuttonpressed");
-  } else if (choice=="no edge") {
+function paths(choice=0) {
+  //Hexagon.paths = document.getElementById("paths").checked;
+  if (Hexagon.draw_paths) {
     Hexagon.draw_paths = false;
     document.getElementById("pathbutton")
       .setAttribute("class", "togglebutton");
+  } else {
+    Hexagon.draw_paths = true;
+    document.getElementById("pathbutton")
+      .setAttribute("class", "togglebuttonpressed");
+      //.setAttribute("id", "background-color: #025d00;border: 3px solid black;padding: 12px 12px;");
   }
   regraphics();
 }
@@ -644,11 +647,12 @@ function reDraw() {
       Hexagon.draw_edges = false;
       document.getElementById("edgebutton")
         .setAttribute("class", "togglebutton");
-      }
-    setup();
+  }
+  setup();
   } else {
     reweight();
   }
+
   Hexagon.changed = false;
 }
 
@@ -660,6 +664,7 @@ function regraphics() {
 
 function reweight() {
   pause();
+  default_color();
   if (!document.getElementById("autorefresh").checked) {
     return;
   }
@@ -779,7 +784,7 @@ function onDragEnd()
     const width = document.getElementById(`holeW${num}`).valueAsNumber
 
     if (width > 0) {
-      reDraw()
+      reweight()
     }
     // set the interaction data to null
     this.data = null;
@@ -802,12 +807,8 @@ function hole(container, num) {
       // .on('mouseup', onRelease)
       // .on('mouseupoutside',onRelease);
   vertex.lineStyle(1,0x000000);
-  vertex.drawCircle(0, 0, 10);
+  vertex.drawCircle(0, 0, 15);
   vertex.endFill();
-
-
-  vertex.number = num;
-  container.addChildAt(vertex,0);
   // vertex.x = -Hexagon.r/2;
   // vertex.y = Hexagon.r*Math.sqrt(3)/2;
 
@@ -824,7 +825,6 @@ function hole(container, num) {
 
   //document.body.appendChild(title)
   buttongroup.setAttribute("class","hole");
-  buttongroup.setAttribute("id", `holegroup${num}`);
   buttongroup.innerHTML += `<h3>Hole ${num+1}: Width</h3>`;
   let Iwidth = document.createElement("INPUT");
   Iwidth.setAttribute("type", "range");
@@ -833,7 +833,7 @@ function hole(container, num) {
   Iwidth.setAttribute("step", "1");
   Iwidth.setAttribute("min", "0");
   Iwidth.setAttribute("max", `${max}`);
-  Iwidth.setAttribute("onchange", "reDraw()")
+  Iwidth.setAttribute("onchange", "reweight()")
   buttongroup.appendChild(Iwidth);
 
 
@@ -845,7 +845,7 @@ function hole(container, num) {
   Iheight.setAttribute("step", "1");
   Iheight.setAttribute("min", "1");
   Iheight.setAttribute("max", `${max}`);
-  Iheight.setAttribute("onchange", "reDraw()")
+  Iheight.setAttribute("onchange", "reweight()")
   buttongroup.appendChild(Iheight);
 
 
@@ -856,7 +856,7 @@ function hole(container, num) {
   Ix.setAttribute("id", `holeX${num}`);
   Ix.setAttribute("class", 'holeinput');
   Ix.setAttribute("step", "2");
-  Ix.setAttribute("onchange", "reDraw()")
+  Ix.setAttribute("onchange", "reweight()")
   // Ix.setAttribute("class", "numinput");
   buttongroup.appendChild(Ix);
 
@@ -867,7 +867,7 @@ function hole(container, num) {
   Iy.setAttribute("value", 0);
   Iy.setAttribute("id", `holeY${num}`);
   Iy.setAttribute("class", 'holeinput');
-  Iy.setAttribute("onchange", "reDraw()");
+  Iy.setAttribute("onchange", "reweight()");
   // Iy.setAttribute("class", "numinput");
   buttongroup.appendChild(Iy);
 
@@ -880,36 +880,37 @@ function hole(container, num) {
   Itype.setAttribute("step", 1);
   Itype.setAttribute("class", 'holeinput');
   Itype.setAttribute("id", `holeType${num}`);
-  Itype.setAttribute("onchange", "reDraw()");
+  Itype.setAttribute("onchange", "reweight()");
   // Itype.setAttribute("class", "numinput");
   buttongroup.appendChild(Itype);
 
   div.appendChild(buttongroup);
 
+  vertex.number = num;
 
+  container.addChild(vertex);
 }
 
 function addHoles() {
-  // change in number of holes
-  const current_holes = document.getElementById("holeNum").valueAsNumber
-  const holechange = current_holes - Hexagon.holes;
   let div = document.getElementById("holes");
-  let container = app.stage.children[1];
-
-  if (holechange > 0) { // add prescribed holes
-    for (let i=0; i<holechange; i++) {
-      hole(container, Hexagon.holes+i);
-    }
-  } else if (holechange < 0) { // remove holes
-    for (let i=Hexagon.holes; i>current_holes; i--) {
-      // remove buttongroup for hole
-      document.getElementById(`holegroup${i-1}`).remove();
-    }
-    // remove hole controller, last element is first in container
-    container.removeChildren(0,-holechange);
-  } else {
+  div.innerHTML = '';
+  if (app.stage.children.length > 1) {
+    app.stage.removeChildAt(1);
   }
+
   Hexagon.holes = document.getElementById("holeNum").valueAsNumber;
+
+  let container = new PIXI.Container();
+  app.stage.addChild(container);
+
+
+  for (let i=0; i<Hexagon.holes; i++) {
+    hole(container, i);
+  }
+
+  container.x = app.screen.width/2;
+  container.y = app.screen.height/2;
+  //reweight();
 }
 
 
@@ -1145,27 +1146,23 @@ function randomHex(prefix='') {
   return hex;
 }
 
-// updates the lozenges using matching matrix M
-function drawHexagon(M,holes,M_acc = []) {
-  let lozenges = app.stage.lozenges;
-  for (let k=0, len=lozenges.length; k<len; k++) {
-    const i = lozenges[k].i;
-    const j = lozenges[k].j;
-    if (M[i][j] && !holes[holes.length-1-i][j])  {
-      lozenges[k].visible = true;
-    } else {
-      lozenges[k].visible = false;
-    }
-  }
-  if (Hexagon.theme == "probability") {
-    prob_color();
-  }
+function randomize_color() {
+  // pick random colors
+  const color1 = randomHex();
+  const color2 = randomHex();
+  const color3 = randomHex();
+
+  Hexagon.loz_colors[0] = '0x' + color1;
+  Hexagon.loz_colors[1] = '0x' + color2;
+  Hexagon.loz_colors[2] = '0x' + color3;
+
+  document.getElementById("colorbox1").style.fill = "#"+color1;
+  document.getElementById("colorbox2").style.fill  = "#"+color2;
+  document.getElementById("colorbox3").style.fill  = "#"+color3;
+  renew_color()
 }
 
-
-
 function renew_color() {
-  Hexagon.theme = "default";
   let lozenges = app.stage.lozenges;
   for (let k=0, len=lozenges.length; k<len; k++) {
     const type = lozenges[k].type;
@@ -1182,9 +1179,18 @@ function renew_color() {
   }
 }
 
+function default_color() {
+  Hexagon.loz_colors[0] = 0x1cff00;
+  Hexagon.loz_colors[1] = 0xfc0606;
+  Hexagon.loz_colors[2] = 0x0555db;
+
+  document.getElementById("colorbox1").style.fill = "#1cff00";
+  document.getElementById("colorbox2").style.fill  = "#fc0606";
+  document.getElementById("colorbox3").style.fill  = "#0555db";
+  renew_color()
+}
 
 function switch_color(opt) {
-  Hexagon.theme = "default";
   switch (opt) {
     case "default":
       Hexagon.loz_colors[0] = 0x1cff00;
@@ -1225,7 +1231,6 @@ function switch_color(opt) {
 }
 
 function prob_color() {
-  Hexagon.theme = "probability";
   let C = Coloring(P,W[0].length);
 
   let lozenges = app.stage.lozenges;
@@ -1374,6 +1379,8 @@ window.refresh = refresh;
 window.rotate = rotate;
 window.animatehex = animatehex;
 window.prob_color = prob_color;
+window.randomize_color = randomize_color;
+window.default_color = default_color;
 window.pause = pause;
 window.gap = gap;
 window.paths = paths;
@@ -1384,6 +1391,7 @@ window.hidewform = hidewform;
 window.qracahupdate = qracahupdate;
 window.Rainbow = Rainbow;
 window.colorpick = colorpick;
+window.renew_color = renew_color;
 window.switch_color = switch_color;
 window.randomHex = randomHex;
 window.zoom_in = zoom_in;
