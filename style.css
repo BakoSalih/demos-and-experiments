@@ -1,55 +1,130 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&display=swap'); */
+
 body {
-  background-color: lightgray;
-  font-family: Verdana, Arial,  sans-serif;
-
+  background-color: #fff;
+  font-family: "Segoe UI",Roboto,"Helvetica Neue", Arial,  sans-serif;
+  padding: 0px;
+  margin: 0px
 }
 
-.row {
-  display: flex;
-}
-
+html {padding: 0px;}
 * {
+  box-sizing: border-box;
   padding: 5px;
+}
+*:focus {
+    outline: 0 !important;
+}
+.row {
+  background-color: #e7e7e7;
+
+  background-image: linear-gradient(#ffffff, #dfdfdf, #d0d0d0);
+  border-left: 2px solid black;
+  border-right: 2px solid black;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0px;
+  width: 1320px;
 }
 
 .column {
-  width: fit-content;
-  margin: 0 auto;
+  float: left;
 }
 
+button  {
+  background-color: white;
+  border: 2px solid #212529;
+  border-radius: 4px;
+  color: black;
+  padding: 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+button:hover{
+  background-color: #212529;
+  color: white;
+}
+
+button {
+  margin: 1px;
+}
 .options {
-  height: fit-content;
-  overflow:auto;
-  background-color: lightblue;
-  width: fit-content;
+  background-color: white;
 }
 
+.left, .right {
+  min-height: 800px;
+  background-color: white;
+  margin: 10px;
+  padding:  10px 0px;
+  border: 2px solid #777777;
+  border-radius: .25rem;
+}
+
+.left {
+    width: 10%;
+    min-width: 255px;
+    min-height: 800px;
+    height: 800px;
+    overflow-x: hidden;
+}
+
+.right {
+    min-width: 160px;
+    min-height: 800px;
+    height: 800px;
+    overflow-x: hidden;
+    float: right;
+}
+
+.middle {
+  width: 800px;
+  height: 800px;
+  margin: 0 0;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+#simulation {
+  padding:0px;
+  height: 800px;
+}
+#sim {
+  padding:0px;
+  height: 800px;
+}
+canvas {
+    padding:0px;
+}
 
 
 h2 {
-  padding: 2px;
-  font-size: 14px;
-  margin: auto;
+  padding: 5px 0px;
+  font-size: 16px;
+  margin: auto 0px;
+  padding: 5px 0px;
 }
 
-#options1 {
-}
-
-
-
-.numinput {
-  width: 40px;
-}
 
 h3 {
-  padding: 0px;
-  font-size: 10px;
+  padding: 5px 0px;
+  font-size: 11px;
   margin: 0px;
 }
 
+
+
 .grid-container {
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: auto;
 }
 
 .grid-item {
@@ -57,10 +132,140 @@ h3 {
   margin: 0px;
 }
 
-.options {
-  position:absolute;
+
+#cbox {
+  width: 100px;
+  height: 100px;
+  background-color: white;
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
 }
 
-#options2 {
-  right: 10px;
+#holes {
+  margin: 0px;
+  padding: 0px;
 }
+
+.hole {
+  background-color: #eeeeee;
+  margin: 5px;
+  border: 1px solid black;
+}
+
+.holeinput {
+  width: 50px;
+}
+
+
+.togglebutton {
+  background-color: white;
+  color:black;
+}
+
+.togglebutton:hover {
+  background-color: #212529;
+  color:white;
+}
+
+.togglebuttonpressed:hover {
+  background-color: white;
+  color:black;
+}
+
+.togglebuttonpressed {
+  background-color: #212529;
+  color:white;
+}
+
+/* Style the button that is used to open and close the collapsible content */
+.collapsible {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 11px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.active, .collapsible:hover {
+  background-color: #ccc;
+}
+
+/* Style the collapsible content. Note: hidden by default */
+.content {
+  padding: 18px;
+  display: none;
+  overflow: hidden;
+  background-color: #f1f1f1;
+}
+
+.colbox {
+  stroke-width:1;
+  stroke:rgb(0,0,0);
+  cursor:pointer;
+}
+
+
+.numinput {
+  width: 50px;
+}
+
+.input0 {
+  background-color: #212529;
+  padding: 1px;
+  border: 1px solid black;
+  border-radius: 5px;
+  margin: 0px 2px 2px 0px;
+  width: fit-content;
+  height: fit-content;
+}
+.input0 p {
+  color: white;
+  text-align: center;
+  display: inline;
+  font-size: 12px;
+}
+
+.input0 input {
+  border: 0px solid black;
+  height: 30px;
+  font-size: 12px;
+  width: 50px;
+}
+
+#Abox, #Bbox, #Cbox {
+  width: 42px;
+}
+
+
+
+/* #edgebutton, #pathbutton {
+  background-color: #35d433;
+}
+
+
+#edgebutton:hover, #pathbutton:hover {
+  background-color: #025d00;
+  border: 3px solid black;
+  padding: 12px 12px;
+} */
+
+
+
+
+/* .options {
+  position:absolute;
+} */
+
+/* #options2 {
+  right: 10px;
+} */
+
+/* .row {
+  display: flex;
+} */

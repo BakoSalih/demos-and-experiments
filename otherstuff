@@ -1,0 +1,38 @@
+function gap100() {
+  pause();
+  default_color();
+  const A = Hexagon.a,
+        B = Hexagon.b,
+        C = Hexagon.c;
+  // const A = document.getElementById("Abox").valueAsNumber;
+  // const B = document.getElementById("Bbox").valueAsNumber;
+  // const C = document.getElementById("Cbox").valueAsNumber;
+
+  // get the weight
+  const wtype = document.getElementById("wtype").value;
+  const cweight = document.getElementById("cweight").valueAsNumber;
+  //W = weight_hexagon(choose_weight(wtype, cweight, (C+B+1)),1,A,B,C)
+  W = weight_hexagon(choose_weight(),A,B,C)
+
+  // add the holes
+  W.holes = [];
+  for (let i=0; i<W.length; i++) {
+    W.holes[i] = [];
+    W.holes[i].length = W.length;
+    W.holes[i].fill(0);
+  }
+
+  // add holes to W
+  for (let i=0;i<200;i++) {
+    let xrand = Math.floor(A*Math.random()-A/2);
+    let yrand = Math.floor(A*Math.random()-A/2);
+    if (Math.sqrt(xrand**2 + yrand**2) <= A/3) {
+    W = gap(W,A,B,C,2,2*xrand,yrand,1);
+    }
+  }
+
+  P = Reduction(W);
+  M = Matching(P, W[0].length);
+
+  drawHexagon( M, W.holes);
+}
