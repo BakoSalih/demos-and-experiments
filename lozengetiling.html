@@ -13,15 +13,15 @@
 
 <div class="row">
   <div>
-  <h1>Lozenge tilings</h1>
+  <h1 style="padding:20px">Lozenge tilings</h1>
   </div>
 
   <div class="column left" id="options1">
-    <div>
+    <div style="margin:5px;">
 
         <div>
-          <h2> Parameters </h2>
-          <h3> </h3>
+          <h2> Hexagon parameters </h2>
+          <h3> Size of hexagon</h3>
       <div id="inputN" class="input0">
         <p>N</p>
         <input type="number" value="80" id="Nbox" name="N" class="numinput">
@@ -37,6 +37,7 @@
 
     </div>
       <div id="inputW">
+      <h3> Weight </h3>
         <select id="wtype" onchange="hidewform()">
         <option value="uniform" selected="selected">Uniform</option>
         <option value="qvolume">q-Volume</option>
@@ -47,15 +48,15 @@
         <option value="racah">Racah</option>
         <option value="custom">Custom</option>
         </select>
-        <input type="number" value="0.1" step="0.1" id="cweight" name="Wweight"
+        <input type="number" value="0.1" step="0.1" id="cweight" onchange="reDraw()" name="Wweight"
                class="numinput" style="display:none"/>
         <div id="rows" style="display:none;">
           <br>
         row
-        <input type="number" value="1", step="1" min="1"  id="rownums"
+        <input type="number" value="1", step="1" min="1"  id="rownums"  onchange="reDraw()"
         onchange="addrow()" name="rownums" class="numinput" style="display:none">
         col
-        <input type="number" value="1", step="1" min="1"  id="kappa" style="display:none;width:50px;" />
+        <input type="number" value="1", step="1" min="1"  id="kappa"  onchange="reDraw()" style="display:none;width:50px;" />
         </div>
       </div>
 
@@ -87,8 +88,7 @@
       <h2> Display options </h2>
     </div>
     <div class="content">
-      <h2> Color options </h2>
-      <h3> Pick lozenge colors </h3>
+      <h3> Color options </h3>
       <svg width="100" height="20" style="padding:0px;margin:4px;" >
       <rect x="0" y="0" width="20" height="20" class="colbox" id="colorbox1" onclick="colorpick(this)" style="fill:#1cff00;" />
       <rect x="30" y="0" width="20" height="20" class="colbox"id="colorbox2" onclick="colorpick(this)" style="fill:#fc0606;" />
@@ -96,17 +96,15 @@
       </svg>
       <br>
         <button id="randomizecol" onclick="switch_color('random')">Randomize</button>
+        <br>
         <button id="defaultcol" onclick="switch_color('default')">Default</button>
         <button id="whitecol" onclick="switch_color('white')">No colors</button>
     <div id="picker" style="visibility: hidden;margin:2px"></div>
     <!-- </div>
     <div> -->
       <!-- <input type="checkbox" id="edges" onclick="edges()" checked>Show edges -->
-
-
-      <h2> Drawing options </h2>
+      <h3> Other options </h3>
       <button id="rotate" onclick="rotate()">Rotate</button>
-      <h3> Toggle edges & paths </h3>
       <button id="edgebutton" class="togglebutton" onclick="edges()">Corners</button>
       <button id="pathbutton" class="togglebutton" onclick="paths()">Paths</button>
       <!-- <button id="edgebutton" class="togglebutton" onclick="edges()">Draw Edges</button>
