@@ -27,7 +27,7 @@
         <div>
       <div id="inputN" class="input0">
         <p>N</p>
-        <input type="number" value="40" id="Nbox" name="N" class="numinput">
+        <input type="number" value="80" id="Nbox" name="N" class="numinput">
       </div>
       <div id="inputA" class="input0">
       <p>A</p>
@@ -48,20 +48,25 @@
         <option value="periodic2x3">2x3 Periodic</option>
         <!-- <option value="qracah">real q-Racah</option> -->
         <option value="racah">Racah</option>
+        <option value="custom">Custom</option>
         </select>
-        <input type="number" value="0" step="0.1" id="cweight" name="Wweight"
+        <input type="number" value="0.1" step="0.1" id="cweight" name="Wweight"
                class="numinput" style="display:none"/>
-        <div>
-        <!-- <input type="range" id="kappa" min="0.0001" max="4" step="0.01" name="kappaw" style="display:none;width:100px" onchange="qracahupdate()" />
-        <input type="number" id="kappanum" style="display:none;width:40px" /> -->
+        <div id="rows" style="display:none;">
+          <br>
+        row
+        <input type="number" value="1", step="1" min="1"  id="rownums"
+        onchange="addrow()" name="rownums" class="numinput" style="display:none">
+        col
+        <input type="number" value="1", step="1" min="1"  id="kappa" style="display:none;width:50px;" />
         </div>
       </div>
 
       <h2> Generate Tilings</h2>
       <div>
       <button id="redraw", onclick="reDraw()">Redraw</button>
-      <h3> Reweight (same hexagon dims)</h3>
-      <button id="reweight" onclick="reweight()">Reweight</button>
+      <!-- <h3> Reweight (same hexagon dims)</h3>
+      <button id="reweight" onclick="reweight()">Reweight</button> -->
       <!-- </div> -->
 
       <h3> Rematch (same weight) </h3>
@@ -147,17 +152,10 @@
 
 </div>
 
-<!-- <div class="row">
-  <div>
-  <h1>What is a lozenge tiling?</h1>
-  </div>
+<script> </script>
 
-</div> -->
-<script type="module">
-import { weight_hexagon, gap} from './weight_hexagon.js';
-import { Reduction, Matching, Coloring } from './matching.js';
-import { Rainbow } from './rainbowvis.js';
 
+<script>
 tippy('#newhex', {
         content: 'Redraw entire scene',
         placement: 'right',
@@ -196,6 +194,19 @@ tippy('#pathbutton', {
         theme: 'material'
       });
 
+</script>
+
+
+<!-- <div class="row">
+  <div>
+  <h1>What is a lozenge tiling?</h1>
+  </div>
+
+</div> -->
+<script type="module">
+import { weight_hexagon, gap} from './weight_hexagon.js';
+import { Reduction, Matching, Coloring } from './matching.js';
+import { Rainbow } from './rainbowvis.js';
 
 let type = "WebGL"
 if(!PIXI.utils.isWebGLSupported()){
@@ -205,10 +216,10 @@ if(!PIXI.utils.isWebGLSupported()){
 // create 1:1 ratio
 
 // Hexagon parameters
-var Hexagon = { a:40,
-                b:40,
-                c:40,
-                n:40,
+var Hexagon = { a:80,
+                b:80,
+                c:80,
+                n:80,
                 holes: 0,
                 lineThickness: 1,
                 verticesShow: false,
@@ -216,12 +227,13 @@ var Hexagon = { a:40,
                 rotated: 0,
                 loz_colors: [0x1cff00, 0xfc0606, 0x0555db],
                 //loz_colors: [0xFFFFFF, 0xFFFFFF, 0xFFFFFF],
-                draw_edges: true,
+                draw_edges: false,
                 draw_paths: false,
-                weight_q: 0,
+                weight_q: 0.1,
                 weight_type: "uniform",
                 weight_old: [0, "uniform"],
                 parameters_old: [1,1,1,50,0],
+                changed: false,
                 // constants for the grid directions
                 u: [1,0],
                 v: [-1/2, Math.sqrt(3)/2],
@@ -245,6 +257,8 @@ function changeHexagon() {
   Hexagon.a = Math.ceil(n*Hexagon.a);
   Hexagon.b = Math.ceil(n*Hexagon.b);
   Hexagon.c = Math.ceil(n*Hexagon.c);
+
+  Hexagon.changed = true;
 }
 
 document.getElementById("cweight").addEventListener('change', function() {
@@ -272,45 +286,36 @@ let app = new PIXI.Application({
   resolution: 2
 }
 );
-// idea: Perhaps create Hexagon object that has all the current properties
-// of the hexagon for clarity
-// hexagon dimension: A,B,C
-// hexagon number of holes:
-//
 
-
-
-
-//Add the canvas that Pixi automatically created for you to the HTML document
+// Add the Pixi canvas that to the HTML document
 document.getElementById("sim").appendChild(app.view);
-// initial probability
+
+// initialize weight, probability and matching matrix
 var W;
 var P;
 var M;
-//load an image and run the `setup` function when it's done
+let sprites = {};
+// load and run the `setup` function when it's done
 const loader = new PIXI.Loader();
 loader
-.load(setup());
-// This `setup` function will run when the image has loaded
-// Paints the matching
+// .add('images/loz_sprites.json')
+// .add('images/loz_edges.json')
+.load(setup);
+
+
+// Paints the first matching
 function setup() {
+
   // create the hexagon
   createHexagon()
 
+  // get hexagon parameters
   const a = Hexagon.a,
         b = Hexagon.b,
         c = Hexagon.c;
-  // const a = document.getElementById("Abox").valueAsNumber;
-  // const b = document.getElementById("Bbox").valueAsNumber;
-  // const c = document.getElementById("Cbox").valueAsNumber;
 
   // create underlying weights
   W = [];
-
-  //console.log(W);
-  // const wtype = document.getElementById("wtype").value;
-  // const cweight = document.getElementById("cweight").valueAsNumber;
-  //const winput = choose_weight(wtype, cweight, (b+c+1));
   const winput = choose_weight();
   W = weight_hexagon(winput,a,b,c);
 
@@ -323,15 +328,6 @@ function setup() {
     W.holes[i].fill(0);
   }
 
-  // // add holes to W
-  // for (let i=0;i<Hexagon.holes;i++) {
-  //   const width = document.getElementById(`holeW${i}`).valueAsNumber;
-  //   const X = document.getElementById(`holeX${i}`).valueAsNumber;
-  //   const Y = document.getElementById(`holeY${i}`).valueAsNumber;
-  //   const type = document.getElementById(`holeType${i}`).valueAsNumber;
-  //   W = gap(W,a,b,c,width,X,Y, type);
-  // }
-
   // compute reduction
   P = Reduction(W);
 
@@ -340,23 +336,16 @@ function setup() {
 
   // draw matching
   drawHexagon(M,W.holes);
-  //drawHexagon(a,b,c,M,W.holes);
-  //
-  // {
-  // let renderer = PIXI.autoDetectRenderer();
-  // let renderTexture = PIXI.RenderTexture.create({ width: 800, height: 600 });
-  // let graphics = createLozenge(200,200, 10*r, 1);
-  // texture.render(graphics);
-  // let s = new PIXI.Sprite(texture);
-  //
-  // }
+
+
+
+
 }
 
 
 
 function createHexagon() {
-  // let width = window.innerWidth;
-  // let height = window.innerHeight;
+  // createHexagon draws the Hexagon lozenges
   let width = app.resizeTo.offsetWidth;
   let height  = app.resizeTo.offsetHeight;
 
@@ -364,10 +353,6 @@ function createHexagon() {
   const a = Hexagon.a,
         b = Hexagon.b,
         c = Hexagon.c;
-  // const a = document.getElementById("Abox").valueAsNumber;
-  // const b = document.getElementById("Bbox").valueAsNumber;
-  // const c = document.getElementById("Cbox").valueAsNumber;
-
 
   // constants for the grid directions
   const u = Hexagon.u;
@@ -391,15 +376,12 @@ function createHexagon() {
   // draw paths
   const paths = Hexagon.draw_paths;
 
-  // app window size and padding
-  // const height = app.screen.height;
-  // const width = app.screen.width;
-
   // center of hexagon
   const x_center = r*(a * v[0] + b * u[0] + c * w[0]);
   const y_center = r*(a * v[1] + b * u[1] + c * w[1]);
 
   // create container
+  //let container = new PIXI.ParticleContainer((2*(a+c)-1)*(2*(b+c)-1), {tint: true});
   let container = new PIXI.Container();
   app.stage.addChildAt(container,0);
 
@@ -410,9 +392,9 @@ function createHexagon() {
   // rotate hexagon if chosen
   container.rotation = Hexagon.rotated;
 
+
   // store lozenges
   app.stage.lozenges = [];
-
   for (let i = 0; i < 2*(a+c)-1; i++) {
     for (let j = 0; j < 2*(b+c)-1; j++) {
       // add lozenge to container and to lozenges for future access
@@ -454,7 +436,7 @@ function createHexagon() {
   }
   // {let vertex2 = createVertex(x_center,y_center);
   // container.addChild(vertex2);}
-  // {let vertex2 = createVertex(0,0);
+  // {let vertex2 = createVertex(-300,-300);
   // container.addChild(vertex2);}
   // {let vertex2 = createVertex(400,400);
   // container.addChild(vertex2);}
@@ -474,9 +456,11 @@ function changeHexSize() {
   drawHexagon(M,W.holes);
 }
 
+
+
 function createLozenge(xPos, yPos, r, type, lineThickness = 1, paths = false)
 {
-  var loz = new PIXI.Graphics();
+  let loz = new PIXI.Graphics();
   loz.x = xPos;
   loz.y = yPos;
   if (type == 1) { //
@@ -484,7 +468,7 @@ function createLozenge(xPos, yPos, r, type, lineThickness = 1, paths = false)
     // loz.y = yPos + r*Math.sqrt(3)/2;
     loz.beginFill(0xFFFFFF, 1);
     loz.tint = Hexagon.loz_colors[0];
-    loz.lineStyle(1/2, 0x000000, lineThickness);
+    loz.lineStyle(1, 0x000000, lineThickness);
     loz.moveTo(0, 0);
     loz.lineTo(2*r, 0);
     loz.lineTo(r, -r*Math.sqrt(3));
@@ -499,37 +483,12 @@ function createLozenge(xPos, yPos, r, type, lineThickness = 1, paths = false)
       loz.lineTo(3*r/2, -r*Math.sqrt(3)/2);
     }
 
-
-    // diagonal line
-    // if (true) {
-    //   loz.lineStyle(1, 0x000000);
-    //   // loz.moveTo(-r/4,-3*r*Math.sqrt(3)/4);
-    //   // loz.lineTo(r, -r*Math.sqrt(3)/4);
-    //   loz.moveTo(r/2, -r*Math.sqrt(3)/2);
-    //   loz.lineTo(-r/4, -3*r*Math.sqrt(3)/4);
-    //   loz.lineTo(5*r/4, -r*Math.sqrt(3)/4);
-    //   // loz.beginFill(0x000000);
-    //   // loz.drawCircle(-r/4, -3*r*Math.sqrt(3)/4, 2);
-    //   // loz.drawCircle(5*r/4, -r*Math.sqrt(3)/4,2);
-    //   // loz.endFill();
-    // }
-
-    // if (true) {
-    //   loz.beginFill(0x000000);
-    //   loz.drawCircle(r/2, -r*Math.sqrt(3)/2, 2);
-    //   loz.endFill();
-    // }
-
-    // loz.beginFill(0x000000, 1);
-    // loz.drawCircle(r/2,-r*Math.sqrt(3)/2, 1);
-    // loz.endFill();
-
   } else if (type == 2) { // top lozenge
     loz.x += r;
     // loz.y = yPos + r*Math.sqrt(3)/2;
     loz.beginFill(0xFFFFFF, 1);
     loz.tint = Hexagon.loz_colors[1];
-    loz.lineStyle(1/2, 0x000000, lineThickness);
+    loz.lineStyle(1, 0x000000, lineThickness);
     loz.moveTo(0, 0);
     loz.lineTo(r, -r*Math.sqrt(3));
     loz.lineTo(-r, -r*Math.sqrt(3));
@@ -537,29 +496,12 @@ function createLozenge(xPos, yPos, r, type, lineThickness = 1, paths = false)
     loz.lineTo(0,0);
     loz.endFill();
 
-    // if we want paths we set tint to 0 and draw a line in middle
-    // if (paths) {
-    //   loz.tint = 0xFFFFFF;
-    // }
-
-
-    // diagonal line
-    // if (true) {
-    //   loz.lineStyle(1, 0x000000);
-    //   loz.moveTo(-r/2, -r*Math.sqrt(3)/2);
-    //   loz.lineTo(r/4, -3*r*Math.sqrt(3)/4);
-    //   loz.lineTo(-5*r/4, -r*Math.sqrt(3)/4);
-    // }
-    // loz.beginFill(0x000000, 1);
-    // loz.drawCircle(-r/2,-r*Math.sqrt(3)/2, 1);
-    // loz.endFill();
-
   } else if (type == 3) { //
     loz.x += r/2;
     loz.y += r*Math.sqrt(3)/2;
     loz.beginFill(0xFFFFFF, 1);
     loz.tint = Hexagon.loz_colors[2];
-    loz.lineStyle(1/2, 0x000000, lineThickness);
+    loz.lineStyle(1, 0x000000, lineThickness);
     loz.moveTo(0, 0);
     loz.lineTo(r, -r*Math.sqrt(3));
     loz.lineTo(0, -2*r*Math.sqrt(3));
@@ -574,15 +516,6 @@ function createLozenge(xPos, yPos, r, type, lineThickness = 1, paths = false)
       loz.moveTo(-r/2, -r*Math.sqrt(3)/2);
       loz.lineTo(r/2, -3*r*Math.sqrt(3)/2);
     }
-
-    // if (true) {
-    //   loz.lineStyle(1, 0x000000);
-    //   loz.moveTo(0, -3*r*Math.sqrt(3)/2);
-    //   loz.lineTo(0, -r*Math.sqrt(3)/2);
-    // }
-    // loz.beginFill(0x000000, 1);
-    // loz.drawCircle(0, -r*Math.sqrt(3), 1);
-    // loz.endFill();
 
   }
   return loz
@@ -702,55 +635,32 @@ function paths(choice=0) {
 
 function reDraw() {
   pan_reset();
-  app.stage.children = [];
+  if (Hexagon.changed) {
+    app.stage.children = [];
+    document.getElementById("holeNum").value = "0";
+    Hexagon.holes = 0;
 
-  document.getElementById("holeNum").value = "0";
-  Hexagon.holes = 0;
+    let div = document.getElementById("holes");
+    div.innerHTML = '';
 
-  let div = document.getElementById("holes");
-  div.innerHTML = '';
-
-  if (Hexagon.n > 50) {
-    Hexagon.draw_edges = false;
-    document.getElementById("edgebutton")
-      .setAttribute("class", "togglebutton");
+    if (Hexagon.n > 30) {
+      Hexagon.draw_edges = false;
+      document.getElementById("edgebutton")
+        .setAttribute("class", "togglebutton");
+  }
+  setup();
+  } else {
+    reweight();
   }
 
-  setup();
+  Hexagon.changed = false;
 }
 
 function regraphics() {
-
   app.stage.removeChildAt(0);
   createHexagon();
   drawHexagon(M, W.holes);
 }
-
-// function redraw() {
-//   let weight_changed = Hexagon.weight_old != [Hexagon.weight_q, Hexagon.weight_type, Hexagon.holes];
-//   let parameters_changed = [Hexagon.a,Hexagon.b,Hexagon.c,Hexagon.n];
-//
-//   if (weight_changed && ) {
-//     weight
-//   }
-//
-//
-//
-//
-// }
-
-
-
-// // change!!!
-// function regularHex() {
-//   // constants for the size of the hexagon
-//   const N = Hexagon.n;
-//
-//   // set A,B,C
-//   document.getElementById("Abox").setAttribute("value", N);
-//   document.getElementById("Bbox").setAttribute("value", N);
-//   document.getElementById("Cbox").setAttribute("value", N);
-// }
 
 function reweight() {
   pause();
@@ -762,16 +672,9 @@ function reweight() {
   const A = Hexagon.a,
         B = Hexagon.b,
         C = Hexagon.c;
-  // const A = document.getElementById("Abox").valueAsNumber;
-  // const B = document.getElementById("Bbox").valueAsNumber;
-  // const C = document.getElementById("Cbox").valueAsNumber;
 
-  // get the weight
-  //const wtype = document.getElementById("wtype").value;
-  //const cweight = document.getElementById("cweight").valueAsNumber;
-  //W = weight_hexagon(choose_weight(wtype, cweight, (C+B+1)),1,A,B,C)
+  // get the base weight
   W = weight_hexagon(choose_weight(),A,B,C);
-
 
   // add the holes
   W.holes = [];
@@ -876,10 +779,6 @@ function onDragMove(e)
 function onDragEnd()
 {
     this.dragging = false;
-    // const A = document.getElementById("Abox").valueAsNumber;
-    // const B = document.getElementById("Bbox").valueAsNumber;
-    // const C = document.getElementById("Cbox").valueAsNumber;
-
     // get number of circle and get width
     const num = this.number;
     const width = document.getElementById(`holeW${num}`).valueAsNumber
@@ -916,9 +815,6 @@ function hole(container, num) {
   const A = Hexagon.a,
         B = Hexagon.b,
         C = Hexagon.c;
-  // const A = document.getElementById("Abox").valueAsNumber;
-  // const B = document.getElementById("Bbox").valueAsNumber;
-  // const C = document.getElementById("Cbox").valueAsNumber;
   const max = Math.min(A+B,A+C)/2;
 
   // make title
@@ -1047,7 +943,8 @@ function choose_weight() {
   // const A = document.getElementById("Abox").valueAsNumber;
   // const B = document.getElementById("Bbox").valueAsNumber;
   // const C = document.getElementById("Cbox").valueAsNumber;
-  // const kappa = document.getElementById("kappa").valueAsNumber;
+  const kappa = document.getElementById("kappa").valueAsNumber;
+  const nums = document.getElementById("rownums").valueAsNumber;
   if (type == "uniform") {
     weight = [[1],[1]];
   } else if (type == "qvolume") {
@@ -1094,6 +991,52 @@ function choose_weight() {
         top[k] = kappa*q**k - 1/(kappa*q**k);
       }
       weight = [top, bottom];
+  } else if (type == "custom") {
+    // let rows = document.getElementById("rownums").valueAsNumber
+    // let c = Math.ceil(Math.random(2)+0.5);
+    // let d = Math.random(1);
+    // weight = [[a,a**c,d**(c+1)], [a,a**c,c**(c+1)]];
+    weight = []
+    // //bottom.fill(1);
+    let xmod = Math.round(nums);
+    let ymod = Math.round(kappa);
+    //console.log([xmod, ymod])
+    for (let i=0;i<N;i++) {
+      let row = [];
+      for (let k=0;k<N;k++) {
+        if (i % ymod == 0 && k % xmod == 0) {
+          row.push(1);
+        } else if (i % ymod == 0 && k % xmod > 0) {
+          row.push(a**(k % xmod));
+        } else if (i % ymod > 0 && k % xmod == 0) {
+          row.push(a**(i % ymod));
+        } else {
+          row.push(0.5*(a**(i % ymod)+a**(k % xmod)));
+        }
+      }
+      weight.push(row);
+    }
+  } else if (type == "weird1") {
+    weight = []
+    // //bottom.fill(1);
+    let xmod = 3;
+    let ymod = 3;
+    //console.log([xmod, ymod])
+    for (let i=0;i<N;i++) {
+      let row = [];
+      for (let k=0;k<N;k++) {
+        if (i % ymod == 0 && k % xmod == 0) {
+          row.push(1);
+        } else if (i % ymod == 0 && k % xmod > 0) {
+          row.push(1);
+        } else if (i % ymod > 0 && k % xmod == 0) {
+          row.push(a**(i % xmod - k % ymod));
+        } else {
+          row.push(1);
+        }
+      }
+      weight.push(row);
+    }
   }
   return weight
 }
@@ -1128,13 +1071,15 @@ function hidewform() {
   } else {
     document.getElementById("cweight").style.display = "inline";
   }
-  // if (wtype == "qracah") {
-  //   document.getElementById("kappa").style.display = "inline";
-  //   document.getElementById("kappanum").style.display = "inline";
-  // } else {
-  //   document.getElementById("kappa").style.display = "none";
-  //   document.getElementById("kappanum").style.display = "none";
-  // }
+  if (wtype == "custom") {
+    document.getElementById("rownums").style.display = "inline";
+    document.getElementById("rows").style.display = "inline";
+    document.getElementById("kappa").style.display = "inline";
+  } else {
+    document.getElementById("rownums").style.display = "none";
+    document.getElementById("rows").style.display = "none";
+    document.getElementById("kappa").style.display = "none";
+  }
  }
 
 function qracahupdate() {
@@ -1307,16 +1252,18 @@ function zoom_in() {
   if (app.stage.children[1]) {
     app.stage.children[1].visible = false;
   }
-  app.stage.children[0].scale.x += 0.5;
-  app.stage.children[0].scale.y += 0.5;
-  step *= 3/2;
+  app.stage.children[0].scale.x *= 2;
+  app.stage.children[0].scale.y *= 2;
+  step *= 2;
 }
 
 function zoom_out() {
   if (app.stage.children[0].scale.x > 1 && app.stage.children[0].scale.y > 1) {
-    app.stage.children[0].scale.x -= 0.5;
-    app.stage.children[0].scale.y -= 0.5;
-    step *= 2/3;
+    app.stage.children[0].scale.x *= 0.5;
+    app.stage.children[0].scale.y *= 0.5;
+    app.stage.children[0].position.x = widthx/2;
+    app.stage.children[0].position.y = heightx/2;
+    step *= 0.5;
   } else {
     if (app.stage.children[1]) {
       app.stage.children[1].visible = true;
@@ -1325,7 +1272,6 @@ function zoom_out() {
 }
 
 function move(dir) {
-  console.log(step);
   //let step = -10;
   switch (dir) {
     case "left":
@@ -1406,6 +1352,10 @@ function onDragEndPan()
 }
 
 
+function addrow() {
+
+}
+
 // Collapsible menus
 {
 let coll = document.getElementsByClassName("collapsible");
@@ -1453,6 +1403,7 @@ window.pan_reset = pan_reset;
 window.changeHexagon = changeHexagon;
 window.Hexagon = Hexagon;
 window.regraphics = regraphics;
+window.addrow = addrow;
 
 </script>
 
