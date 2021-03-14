@@ -439,7 +439,7 @@ function reweight(auto=false) {
     const X = document.getElementById(`holeX${i}`).valueAsNumber;
     const Y = document.getElementById(`holeY${i}`).valueAsNumber;
     const type = document.getElementById(`holeType${i}`).valueAsNumber;
-    W = gap(W,A,B,C,width,X,Y,type,height);
+    W = gap(W,A,B,C,width,X,Y,type,height,Hexagon.shape);
   }
 
   P = Reduction(W);
@@ -801,7 +801,7 @@ function animatehex() {
 
 function rotate() {
   let container = app.stage.children[0];
-  if (container.rotation == 0) {
+  if (container.rotation == 0 && Hexagon.shape == "hexagon") {
     container.rotation = Math.PI/6;
     // if (app.stage.children.length > 1) {
     //   app.stage.children[1].rotation = Math.PI/6;
@@ -926,7 +926,7 @@ function onDragMove(e)
       // const num = this.number;
       // document.getElementById(`holeX${num}`).setAttribute("value", 2*x);
       // document.getElementById(`holeY${num}`).setAttribute("value", y);
-      if (Hexagon.rotated == 0) {
+      if (Hexagon.rotated == 0 && Hexagon.shape == "hexagon") {
 
         let x = (3*newPosition.x - Math.sqrt(3) * newPosition.y)/(12*r);
         let y = (-newPosition.x - Math.sqrt(3) * newPosition.y)/(4*r);
@@ -959,6 +959,21 @@ function onDragMove(e)
         // const num = this.number;
         // document.getElementById(`holeX${num}`).setAttribute("value", x+y);
         // document.getElementById(`holeY${num}`).setAttribute("value", -y);
+
+      } else if (Hexagon.shape == "aztec") {
+
+        let x = (newPosition.x)/(r);
+        let y = (newPosition.y)/(r);
+
+        x = Math.round(x);
+        y = Math.round(y);
+
+        this.position.x = r*x;
+        this.position.y = y*r;
+
+        const num = this.number;
+        document.getElementById(`holeX${num}`).setAttribute("value", x);
+        document.getElementById(`holeY${num}`).setAttribute("value", -y);
 
       } else {
         const xscale = 2*r*Math.sqrt(3);
