@@ -1,7 +1,7 @@
 /* @import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&display=swap'); */
 
 body {
-  background-color: #fff;
+  background-image: linear-gradient(#ffffff, #dfdfdf, #d0d0d0);
   font-family: "Segoe UI",Roboto,"Helvetica Neue", Arial,  sans-serif;
   padding: 0px;
   margin: 0px
@@ -16,9 +16,8 @@ html {padding: 0px;}
     outline: 0 !important;
 }
 .row {
-  background-color: #e7e7e7;
-
-  background-image: linear-gradient(#ffffff, #dfdfdf, #d0d0d0);
+  background-color: white;
+  /* background-image: linear-gradient(#ffffff, #dfdfdf, #d0d0d0); */
   border-left: 2px solid black;
   border-right: 2px solid black;
   height: 100%;
@@ -31,7 +30,7 @@ html {padding: 0px;}
   float: left;
 }
 
-button  {
+button, .hole button {
   background-color: white;
   border: 2px solid #212529;
   border-radius: 4px;
@@ -66,16 +65,19 @@ button {
 }
 
 .left {
-    width: 10%;
-    min-width: 255px;
+    width: 200px;
+    min-width: 1000px;
     min-height: 800px;
     height: 800px;
     overflow-x: hidden;
 }
 
 .right {
-    min-width: 160px;
+    min-width: 210px;
     min-height: 800px;
+    padding:  5px ;
+    margin: 0px 10px;
+    width: 230px;
     height: 800px;
     overflow-x: hidden;
     float: right;
@@ -83,7 +85,7 @@ button {
 
 .middle {
   width: 800px;
-  height: 800px;
+  height: 1000px;
   margin: 0 0;
 }
 
@@ -148,9 +150,20 @@ h3 {
 }
 
 .hole {
+  color:black,
   background-color: #eeeeee;
   margin: 5px;
   border: 1px solid black;
+}
+
+.hole .input0
+
+.hole h3 {
+  color:black
+}
+
+.hole button {
+  color:black
 }
 
 .holeinput {
@@ -240,7 +253,38 @@ h3 {
   width: 42px;
 }
 
+#wtype {
+  width: 150px;
+}
 
+#topbar, #box, #simbox {
+  padding:5px 10px;
+  margin: 5px auto;
+  width: 1000px;
+}
+
+#simbox {
+  width: 800px;
+  border: 0px solid black;
+}
+
+.tab {
+  display: inline-block;
+}
+
+#box p, #simbox p {
+  color:black;
+}
+
+#whitecolbutton {
+  fill:transparent;
+  stroke-width:1;
+  stroke:rgb(0,0,0);
+  cursor:pointer;
+}
+
+#holesbutton {
+}
 
 /* #edgebutton, #pathbutton {
   background-color: #35d433;

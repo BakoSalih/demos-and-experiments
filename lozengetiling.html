@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.1.3/pixi.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
+  <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light-border.css"/>
 
 </head>
 <body>
@@ -16,137 +17,137 @@
   <h1 style="padding:20px">Lozenge tilings</h1>
   </div>
 
-  <div class="column left" id="options1">
-    <div style="margin:5px;">
-
-        <div>
-          <h2> Hexagon parameters </h2>
-          <h3> Size of hexagon</h3>
-      <div id="inputN" class="input0">
-        <p>N</p>
-        <input type="number" value="80" id="Nbox" name="N" class="numinput">
-      </div>
-      <div id="inputA" class="input0">
+  <div>
+    <div id="topbar" class="input0">
+      <p>Generate</p>
+      <button id="redraw", onclick="reDraw()">Redraw Hexagon</button>
+      <button id="rematch" onclick="refresh()">New Tiling</button>
+      <p>N</p>
+      <input type="number" value="80" id="Nbox" name="N" class="numinput">
       <p>A</p>
       <input type="number" value="1", step="0.1" min="1" id="Abox" name="A" class="numinput">
-        <p>B</p>
-        <input type="number" value="1", step="0.1" min="1"  id="Bbox" name="B" class="numinput">
-        <p>C</p>
-        <input type="number" value="1", step="0.1" min="1"  id="Cbox" name="C" class="numinput">
+      <p>B</p>
+      <input type="number" value="1", step="0.1" min="1"  id="Bbox" name="B" class="numinput">
+      <p>C</p>
+      <input type="number" value="1", step="0.1" min="1"  id="Cbox" name="C" class="numinput">
+      <p>Weight</p>
+      <select id="wtype" onchange="hidewform()" >
+      <option value="uniform" selected="selected">Uniform</option>
+      <option value="qvolume">q-Volume</option>
+      <option value="periodic1x2">1x2 Periodic</option>
+      <option value="periodic2x2">2x2 Periodic</option>
+      <option value="periodic2x3">2x3 Periodic</option>
+      <!-- <option value="qracah">real q-Racah</option> -->
+      <option value="racah">Racah</option>
+      <option value="custom">Custom</option>
+      </select>
+      <input type="number" value="0.1" step="0.1" id="cweight" onchange="reDraw()" name="Wweight"
+             class="numinput" style="display:none"/>
+      <div id="rows" style="display:none;">
+      <input type="number" value="1", step="1" min="1"  id="rownums"  onchange="reDraw()"
+      onchange="addrow()" name="rownums" class="numinput" style="display:none">
+      <input type="number" value="1", step="1" min="1"  id="kappa"  onchange="reDraw()" style="display:none;width:50px;" />
       </div>
-
+      <button id="holebutton" >Holes </button>
     </div>
-      <div id="inputW">
-      <h3> Weight </h3>
-        <select id="wtype" onchange="hidewform()">
-        <option value="uniform" selected="selected">Uniform</option>
-        <option value="qvolume">q-Volume</option>
-        <option value="periodic1x2">1x2 Periodic</option>
-        <option value="periodic2x2">2x2 Periodic</option>
-        <option value="periodic2x3">2x3 Periodic</option>
-        <!-- <option value="qracah">real q-Racah</option> -->
-        <option value="racah">Racah</option>
-        <option value="custom">Custom</option>
-        </select>
-        <input type="number" value="0.1" step="0.1" id="cweight" onchange="reDraw()" name="Wweight"
-               class="numinput" style="display:none"/>
-        <div id="rows" style="display:none;">
-          <br>
-        row
-        <input type="number" value="1", step="1" min="1"  id="rownums"  onchange="reDraw()"
-        onchange="addrow()" name="rownums" class="numinput" style="display:none">
-        col
-        <input type="number" value="1", step="1" min="1"  id="kappa"  onchange="reDraw()" style="display:none;width:50px;" />
-        </div>
-      </div>
 
-      <div>
-      <h3> Generate </h3>
-      <button id="redraw", onclick="reDraw()">Redraw Hexagon</button>
-      <!-- <h3> Reweight (same hexagon dims)</h3>
-      <button id="reweight" onclick="reweight()">Reweight</button> -->
-      <!-- </div> -->
+  </div>
 
-      <!-- <h3> Rematch (same weight) </h3> -->
-  	  <!-- <div> -->
+  <div id="simbox" class="input0" style="background-color: white;color:black;width:1000px;height:800px;">
+    <div id="sim"></div>
+  </div>
 
-      <button id="rematch" onclick="refresh()">New Tiling</button>
+
+  <div>
+    <div id="box" class="input0" style="background-color: white;">
+      <div class="tab">
+        <button id="animatehex" onclick="animatehex()" style="width:120px">Start Animation</button>
       </div>
-  	  <div>
-      <h3> Many tilings in an animation</h3>
-  	    <button id="animatehex" onclick="animatehex()">Start</button>
-          <!-- <button id="pause" onclick="pause()">Stop</button> -->
-      </div>
-      <div>
-        <h3>Color lozenges by probability </h3>
-        <!-- <h3> This colors each lozenge by <br> its exact probability of occuring</h3> -->
+      <div class="tab">
         <button id="probcolor" class="togglebutton" onclick="toggle_prob_color()">Probability color</button>
       </div>
-    </div>
+      <div class="tab">
+        <button id="customcolor">Customize color</button>
 
-    <div class="collapsible">
-      <h2> Display options </h2>
-    </div>
-    <div class="content">
-      <h3> Color options </h3>
-      <svg width="100" height="20" style="padding:0px;margin:4px;" >
-      <rect x="0" y="0" width="20" height="20" class="colbox" id="colorbox1" onclick="colorpick(this)" style="fill:#1cff00;" />
-      <rect x="30" y="0" width="20" height="20" class="colbox"id="colorbox2" onclick="colorpick(this)" style="fill:#fc0606;" />
-      <rect x="60" y="0" width="20" height="20" class="colbox" id="colorbox3" onclick="colorpick(this)" style="fill:#0555db;" />
-      </svg>
-      <br>
-        <button id="randomizecol" onclick="switch_color('random')">Randomize</button>
-        <br>
-        <button id="defaultcol" onclick="switch_color('default')">Default</button>
-        <button id="whitecol" onclick="switch_color('white')">No colors</button>
-    <div id="picker" style="visibility: hidden;margin:2px"></div>
-    <!-- </div>
-    <div> -->
-      <!-- <input type="checkbox" id="edges" onclick="edges()" checked>Show edges -->
-      <h3> Other options </h3>
+      </div>
+
+      <div class="tab">
+
       <button id="rotate" onclick="rotate()">Rotate</button>
       <button id="edgebutton" class="togglebutton" onclick="edges()">Corners</button>
       <button id="pathbutton" class="togglebutton" onclick="paths()">Paths</button>
-      <!-- <button id="edgebutton" class="togglebutton" onclick="edges()">Draw Edges</button>
-      <button id="pathbutton" class="togglebutton" onclick="paths()">Draw Paths</button> -->
-    </div>
-    <!--
-    </div>
-    <div> -->
-    <!-- <input type="checkbox" id="paths" onclick="paths()">Show paths -->
-    <div class="collapsible">
-      <h2> Zoom/pan </h2>
-    </div>
-    <div class="content">
-      <button onclick="zoom_in()">Zoom in</button>
-      <button onclick="zoom_out()">Zoom out</button>
-      <br>
-      <button onclick="move('left')">&#8592;</button>
-      <button onclick="move('up')">&#8593;</button>
-      <button onclick="move('down')">&#8595;</button>
-      <button onclick="move('right')">&#8594;</button>
-      <br>
-      <button onclick="pan_reset()">Reset view</button>
+      </div>
+
     </div>
   </div>
 
-  <div class="column middle", id="simulation">
-    <div id="sim"></div>
+
+
+
+
+    <!-- <div class="column left" id="options1">
+      <div class="collapsible">
+        <h2> Display options </h2>
+      </div>
+
+        <h3> Other options </h3>
+        <button id="rotate" onclick="rotate()">Rotate</button>
+        <button id="edgebutton" class="togglebutton" onclick="edges()">Corners</button>
+        <button id="pathbutton" class="togglebutton" onclick="paths()">Paths</button>
+      <div class="collapsible">
+        <h2> Zoom/pan </h2>
+      </div>
+      <div class="content">
+        <button onclick="zoom_in()">Zoom in</button>
+        <button onclick="zoom_out()">Zoom out</button>
+        <br>
+        <button onclick="move('left')">&#8592;</button>
+        <button onclick="move('up')">&#8593;</button>
+        <button onclick="move('down')">&#8595;</button>
+        <button onclick="move('right')">&#8594;</button>
+        <br>
+        <button onclick="pan_reset()">Reset view</button>
+      </div>
+    </div> -->
+
+
+
+</div>
+
+<div >
+
+
+</div>
+
+<!-- <input type="checkbox" id="autorefresh" checked> Auto generate  </button> -->
+
+<div id="holechoice" style="display: none">
+  <div>
+  <h2> Holes </h2>
+  <input type="number", id="holeNum", onchange="addHoles()", value="0", min="0" class="numinput"></input>
   </div>
-  <div class="column right" id="options2">
-    <div>
-    <h2> Holes </h2>
-    <input type="number", id="holeNum", onchange="addHoles()", value="0", min="0" class="numinput"></input>
-    <!-- <button id="refresh" onclick="reweight()">Generate w/ Holes</button> -->
-    <input type="checkbox" id="autorefresh" checked> Auto generate  </button>
-    </div>
-    <div id="holes"> </div>
+  <div id="holes"> </div>
+</div>
 
-  </div>
-
-
-
-
+<div id="coloropts" class="content" style="display: none">
+  <h3> Color options </h3>
+    <button id="randomizecol" onclick="switch_color('random')" style="padding:5px;color:white;background-color:#212529;">Randomize</button>
+    <!-- <button id="defaultcol" onclick="switch_color('default')">Default</button> -->
+    <!-- <button id="whitecol" onclick="switch_color('white')">Uncolored</button> -->
+    <svg width="66" style="height:40px;padding:0px 5px;margin:0px;vertical-align: middle"  >
+      <line x1="0" y1="25%" x2="20" y2="75%" style="stroke:rgb(255,0,0);stroke-width:2;cursor:pointer;" onclick="switch_color('white')"/>
+      <rect x="0" y="25%" width="20" height="50%" id="whitecolbutton" onclick="switch_color('white')"/>
+      <polygon points="33,25 33,30 38,30 53,15 53,10 48,10" style="fill:#fc0606;stroke:black;stroke-width:1;cursor:pointer;"  onclick="switch_color('default')"/>
+      <polygon points="33,10 33,25 48,10" style="fill:#1cff00;stroke:black;stroke-width:1;cursor:pointer;"  onclick="switch_color('default')"/>
+      <polygon points="38,30 53,30 53,15" style="fill:#0555db;stroke:black;stroke-width:1;cursor:pointer;"  onclick="switch_color('default')"/>
+    </svg>
+    <h3> Choose colors manually </h3>
+    <svg width="100" style="height:40px;padding:0px 5px;margin:0px;" >
+    <rect x="0" y="25%" width="20" height="50%" class="colbox" id="colorbox1" onclick="colorpick(this)" style="fill:#1cff00;" />
+    <rect x="33%" y="25%" width="20" height="50%" class="colbox"id="colorbox2" onclick="colorpick(this)" style="fill:#fc0606;" />
+    <rect x="66%" y="25%" width="20" height="50%" class="colbox" id="colorbox3" onclick="colorpick(this)" style="fill:#0555db;" />
+    </svg>
+<div id="picker" style="visibility: hidden;margin:2px"></div>
 </div>
 
 <script> </script>
@@ -156,77 +157,73 @@
 <script src="https://unpkg.com/@popperjs/core@2"></script>
 <script src="https://unpkg.com/tippy.js@6"></script>
 <script>
+tippy.setDefaultProps({
+  placement: 'bottom',
+  maxWidth: 200,
+  delay: [500, 100],
+  theme: 'light-border'
+});
+
+
 tippy('#inputN', {
         content: 'N determines the scale, there will be A*N, B*N, C*N lozenges per side respectively',
-        placement: 'right',
-        maxWidth: 200,
-        delay: [1000, 100],
-        theme: 'material'
       });
 tippy('#inputA', {
-        content: 'The ratio between A (the bottom-left edge), B (the bottom edge) and C (the right-most edge)',
-        placement: 'right',
-        maxWidth: 200,
-        delay: [1000, 100],
-        theme: 'material'
+        content: 'The ratio between A (the bottom-left edge), B (the bottom edge) and C (the right-most edge)'
       });
 tippy('#redraw', {
-        content: 'This redraws the hexagon with new parameters and/or weight',
-        placement: 'bottom',
-        maxWidth: 200,
-        delay: [500, 100],
-        theme: 'material'
+        content: 'This redraws the hexagon with new parameters and/or weight'
       });
 tippy('#wtype', {
-        content: 'Choose the desired weight on the lozenges',
-        placement: 'right',
-        maxWidth: 200,
-        delay: [500, 100],
-        theme: 'material'
+        content: 'Choose the desired weight on the lozenges'
       });
 
 tippy('#rematch', {
-        content: 'Produces another lozenge tiling with the same hexagon parameters and weight',
-        placement: 'right',
-        maxWidth: 200,
-        delay: [500, 100],
-        theme: 'material'
+        content: 'Produces another lozenge tiling with the same hexagon parameters and weight'
       });
 
 tippy('#animatehex', {
-        content: 'Generate new tilings automatically.',
-        placement: 'right',
-        maxWidth: 200,
-        delay: [500, 100],
-        theme: 'material'
+        content: 'Generate new tilings automatically.'
       });
-
 tippy('#probcolor', {
-        content: 'This colors each lozenge by its exact probability of occuring in a tiling',
-        placement: 'right',
-        maxWidth: 200,
-        delay: [500, 100],
-        theme: 'material'
+        content: 'This colors each lozenge by its exact probability of occuring in a tiling'
       });
-
 tippy('#edgebutton', {
-  allowHTML: true,
-  content: 'Controls whether a lozenge has a black border or not',
-        placement: 'bottom',
-        maxWidth: 200,
-        delay: [500, 100],
-        theme: 'material'
+        allowHTML: true,
+        content: 'Controls whether a lozenge has a black border or not'
       });
 
 tippy('#pathbutton', {
-        content: 'Show paths passing through the lozenges',
-        placement: 'bottom',
-        maxWidth: 200,
-        delay: [500, 100],
-        theme: 'material'
+        content: 'Show paths passing through the lozenges'
+      });
+
+let colordiv = document.getElementById("coloropts").innerHTML;
+tippy('#customcolor', {
+        allowHTML: true,
+        interactive: true,
+        content: colordiv,
+        delay: 0,
+        animation: false,
+        trigger: 'click',
+        hideOnClick: 'toggle',
+        theme: 'light-border'
       });
 
 
+let holediv = document.getElementById("holechoice").innerHTML;
+tippy('#holebutton', {
+        allowHTML: true,
+        interactive: true,
+        content: holediv,
+        delay: 0,
+        animation: false,
+        placement:"right",
+        trigger: 'click',
+        hideOnClick: 'toggle',
+        theme: 'material',
+        onHidden() { ToggleHoleControls(true) },
+        onShow() { ToggleHoleControls(false) }
+      });
 
 </script>
 
@@ -389,9 +386,9 @@ function setup() {
 function reweight(auto=false) {
   // // pause if animation
   // PIXI.Ticker.shared.stop();
-  if (auto && !document.getElementById("autorefresh").checked) {
-    return;
-  }
+  // if (auto && !document.getElementById("autorefresh").checked) {
+  //   return;
+  // }
   // remove old matrices;
   P = [];
   M = [];
@@ -644,7 +641,7 @@ function animatehex() {
     if (ticker.started) {
       ticker.stop();
       // change button name
-      ani_button.innerHTML = "Animate";
+      ani_button.innerHTML = "Resume";
     } else {
       ticker.start();
       // change button name
@@ -863,12 +860,16 @@ function hole(container, num) {
       .on('mouseup', onDragEnd)
       .on('mouseupoutside', onDragEnd)
       .on('touchend', onDragEnd)
-      .on('touchendoutside', onDragEnd);
+      .on('touchendoutside', onDragEnd)
+      .on('click', function(e) {
+
+      });
       // .on('mouseup', onRelease)
       // .on('mouseupoutside',onRelease);
-  vertex.lineStyle(2,0x000000);
-  vertex.drawCircle(0, 0, 8);
+  vertex.lineStyle(1, 0x000000);
+  vertex.drawCircle(0, 0, 10);
   vertex.endFill();
+  vertex.hitArea = new PIXI.Circle(0,0,15);
 
 
   vertex.number = num;
@@ -889,11 +890,12 @@ function hole(container, num) {
 
   //document.body.appendChild(title)
   buttongroup.setAttribute("class","hole");
-  buttongroup.setAttribute("style","background-color: #" + color);
+  buttongroup.setAttribute("style",`background-color: #${color};padding:10px`);
   buttongroup.setAttribute("id", `holegroup${num}`);
   buttongroup.innerHTML += `<h3>Hole ${num+1}: Width</h3>`;
   let Iwidth = document.createElement("INPUT");
   Iwidth.setAttribute("type", "range");
+  Iwidth.style.width = "150px";
   Iwidth.setAttribute("value", 0);
   Iwidth.setAttribute("id", `holeW${num}`);
   Iwidth.setAttribute("step", "1");
@@ -906,6 +908,7 @@ function hole(container, num) {
   buttongroup.innerHTML += `<h3>Height</h3>`;
   let Iheight = document.createElement("INPUT");
   Iheight.setAttribute("type", "range");
+  Iheight.style.width = "150px";
   Iheight.setAttribute("value", 1);
   Iheight.setAttribute("id", `holeH${num}`);
   Iheight.setAttribute("step", "1");
@@ -1061,7 +1064,7 @@ function choose_weight() {
     // let c = Math.ceil(Math.random(2)+0.5);
     // let d = Math.random(1);
     // weight = [[a,a**c,d**(c+1)], [a,a**c,c**(c+1)]];
-    weight = []
+    weight = [];
     // //bottom.fill(1);
     let xmod = Math.round(nums);
     let ymod = Math.round(kappa);
@@ -1107,17 +1110,6 @@ function choose_weight() {
 }
 
 
-function Array2D(n) {
-  let M = [];
-  for (let i=0; i<n; i++) {
-    const row = new Array(n)
-    row.fill(0)
-    M.push(row);
-  }
-  return M;
-}
-
-
 
 function addVertices() {
   let vertexcontainer = new PIXI.Container();
@@ -1160,12 +1152,10 @@ function colorpick(elem) {
     //var colbox = document.getElementById("colorbox1");
     var colorPicker = new iro.ColorPicker("#picker", {
       // Set the size of the color picker
-      width: 150,
+      width: 120,
       id: 'colorwheel'+boxnum,
       // Set the initial color to pure red
-      color: current_color,
-      padding: 0,
-      margin: 5
+      color: current_color
     });
     colorPicker.on(["color:init", "color:change"], function(color){
     // Show the current color in different formats
@@ -1410,6 +1400,17 @@ for (let i = 0; i < coll.length; i++) {
 }
 }
 
+function ToggleHoleControls(toggle) {
+  if (app.stage.children[1]) {
+    if (toggle) {
+      app.stage.children[1].visible = false;
+    } else {
+      app.stage.children[1].visible = true;
+    }
+  }
+}
+
+window.ToggleHoleControls = ToggleHoleControls;
 window.hidewform = hidewform;
 window.reDraw = reDraw;
 window.refresh = refresh;
