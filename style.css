@@ -259,13 +259,14 @@ h3 {
 
 #topbar, #box, #simbox {
   padding:5px 10px;
-  margin: 5px auto;
-  width: 1000px;
+  margin: 5px 50px;
+  width: 1200px;
 }
 
 #simbox {
-  width: 800px;
-  border: 0px solid black;
+  width: 900px;
+  margin: 10px 0px 10px 50px;
+  border: 1px solid black;
 }
 
 .tab {
