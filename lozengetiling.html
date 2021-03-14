@@ -765,11 +765,7 @@ function createVertex(xPos, yPos) {
 
 
 function refresh() {
-  if (Hexagon.shape == "hexagon") {
-    M = Matching(P, W[0].length);
-  } else if (Hexagon.shape == "aztec") {
-    M = MatchingAztec(W[0].length);
-  }
+  M = Matching(P, W[0].length);
   drawHexagon(M,W.holes);
 }
 
