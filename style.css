@@ -43,6 +43,8 @@ button, .hole button {
   cursor: pointer;
 }
 
+
+
 button:hover{
   background-color: #212529;
   color: white;
@@ -155,8 +157,6 @@ h3 {
   margin: 5px;
   border: 1px solid black;
 }
-
-.hole .input0
 
 .hole h3 {
   color:black
@@ -297,7 +297,9 @@ h3 {
   padding: 12px 12px;
 } */
 
-
+.hole .holeinput {
+  border: 1px solid black;
+}
 
 
 /* .options {

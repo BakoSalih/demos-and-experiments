@@ -20,7 +20,8 @@
   <div>
     <div id="topbar" class="input0">
       <p>Generate</p>
-      <button id="redraw", onclick="reDraw()">Redraw Hexagon</button>
+
+      <button id="redraw", onclick="reDraw()">Redraw Figure</button>
       <button id="rematch" onclick="refresh()">New Tiling</button>
       <p>N</p>
       <input type="number" value="80" id="Nbox" name="N" class="numinput">
@@ -77,6 +78,13 @@
       <button id="edgebutton" class="togglebutton" onclick="edges()">Corners</button>
       <button id="pathbutton" class="togglebutton" onclick="paths()">Paths</button>
       </div>
+
+
+      <p>Try Aztec! (beta)</p>
+      <select id="shape">
+      <option value="hexagon" selected="selected">Hexagon</option>
+      <option value="aztec">Aztec</option>
+      </select>
 
     </div>
   </div>
@@ -216,8 +224,9 @@ tippy('#holebutton', {
         interactive: true,
         content: holediv,
         delay: 0,
+        maxWidth: 500,
         animation: false,
-        placement:"right",
+        placement:"bottom",
         trigger: 'click',
         hideOnClick: 'toggle',
         theme: 'material',
@@ -235,7 +244,7 @@ tippy('#holebutton', {
 
 </div> -->
 <script type="module">
-import { weight_hexagon, gap} from './weight_hexagon.js';
+import { weight_hexagon, weight_aztec, gap} from './weight_hexagon.js';
 import { Reduction, Matching, Coloring } from './matching.js';
 import { Rainbow } from './rainbowvis.js';
 
@@ -267,6 +276,7 @@ var Hexagon = { a:80,
                 changed: false,
                 theme: "default",
                 animating: false,
+                shape: "hexagon",
                 // constants for the grid directions
                 u: [1,0],
                 v: [-1/2, Math.sqrt(3)/2],
@@ -302,6 +312,10 @@ document.getElementById("wtype").addEventListener('change', function() {
   Hexagon.weight_type = this.value;
 });
 
+document.getElementById("shape").addEventListener('change', function() {
+  Hexagon.shape = this.value;
+  Hexagon.changed = true;
+});
 
 // const windowsize = Math.min(window.innerWidth,window.innerHeight);
 // change size when window is resized
@@ -342,7 +356,11 @@ loader
 function setup() {
 
   // create the hexagon
-  createHexagon()
+  if (Hexagon.shape == "hexagon") {
+    createHexagon();
+  } else if (Hexagon.shape == "aztec") {
+    createAztec();
+  }
 
   // add container for hole controls
   Hexagon.holes = 0;
@@ -399,7 +417,12 @@ function reweight(auto=false) {
         C = Hexagon.c;
 
   // get the base weight
-  W = weight_hexagon(choose_weight(),A,B,C);
+  if (Hexagon.shape == "hexagon") {
+    W = weight_hexagon(choose_weight(),A,B,C);
+  } else if (Hexagon.shape == "aztec") {
+    W = weight_aztec(choose_weight(), A);
+  }
+
 
   // add the holes
   W.holes = [];
@@ -421,11 +444,20 @@ function reweight(auto=false) {
 
   P = Reduction(W);
   M = Matching(P, W[0].length);
+
   drawHexagon(M, W.holes);
 }
 
 
 function createHexagon() {
+  if (Hexagon.shape == "hexagon") {
+    createHexagon2();
+  } else if (Hexagon.shape == "aztec") {
+    createAztec();
+  }
+}
+
+function createHexagon2() {
   // createHexagon draws the Hexagon lozenges
   let width = app.resizeTo.offsetWidth;
   let height  = app.resizeTo.offsetHeight;
@@ -602,6 +634,124 @@ function createLozenge(xPos, yPos, r, type, lineThickness = 1, paths = false)
   return loz
 }
 
+
+function createAztec() {
+  // createHexagon draws the Hexagon domino
+  let width = app.resizeTo.offsetWidth;
+  let height  = app.resizeTo.offsetHeight;
+
+  // drawing options;
+  // draw edges
+  let lineThickness = Hexagon.lineThickness;
+  if (!Hexagon.draw_edges) {
+    lineThickness = 0;
+  }
+  // draw paths
+  const paths = Hexagon.draw_paths;
+
+  // get hexagon parameters
+  const a = Hexagon.a;
+
+  // length of unit to fit the screen / normalize into canvas
+  const r = 0.9*Math.min(width,height)/(Math.sqrt(2)*a);
+
+  // save r
+  Hexagon.r = r;
+
+  // center of hexagon
+  const x_center = r*a/Math.sqrt(2);
+  const y_center = r*a/Math.sqrt(2);
+
+  // create container
+  //let container = new PIXI.ParticleContainer((2*(a+c)-1)*(2*(b+c)-1), {tint: true});
+  let container = new PIXI.Container();
+  app.stage.addChildAt(container,0);
+
+  // put hexagon in the middle
+  container.x = width/2;
+  container.y = height/2;
+
+  // rotate hexagon if chosen
+  container.rotation = Hexagon.rotated;
+
+
+  // store domino
+  app.stage.lozenges = [];
+  for (let i = 0; i < 2*a; i++) {
+    for (let j = 0; j < 2*a; j++) {
+      // add domino to container and to dominos for future access
+
+        // current coordinate of hexagon center
+        const x_cord = r*j/Math.sqrt(2);
+        const y_cord = r*i/Math.sqrt(2);
+
+        // transform up-down
+        const x0 = -x_center + x_cord;
+        const y0 = y_center - y_cord;
+
+        let domino;
+        if ((i+j) % 2) {
+          // (even,even) position domino
+          domino = createDomino(x0, y0, r, 1, lineThickness, paths);
+          domino.type = 1;
+        } else {
+          // (even,odd) position domino
+          domino = createDomino(x0, y0, r, 2, lineThickness, paths);
+          domino.type = 2;
+        }
+        // hide all dominos until the matching activates the relevant ones
+        domino.visible = false;
+        // give coord to domino
+        domino.i = i;
+        domino.j = j;
+        app.stage.lozenges.push(domino);
+        container.addChild(domino);
+    }
+  }
+}
+
+function rotation2D(theta, v) {
+  rotation = [[ Math.cos(theta), Math.sin(theta) ], [-Math.sin(theta), Math.cos(theta) ]]
+
+
+  return
+}
+
+function createDomino(xPos, yPos, r, type, lineThickness = 1, paths = false)
+{
+  let domino = new PIXI.Graphics();
+  domino.x = xPos;
+  domino.y = yPos;
+  // rescale r
+  r = r/(2*Math.sqrt(2));
+  if (type == 1) {
+    domino.beginFill(0xFFFFFF, 1);
+    domino.tint = Hexagon.loz_colors[0];
+    domino.lineStyle(1, 0x000000, lineThickness);
+    domino.moveTo(-3*r, r);
+    domino.lineTo(-r, 3*r);
+    domino.lineTo(3*r, -r);
+    domino.lineTo(r, -3*r);
+    domino.lineTo(-3*r, r);
+    domino.endFill();
+    if (paths == 1) {
+    }
+  } else if (type == 2) {
+    domino.beginFill(0xFFFFFF, 1);
+    domino.tint = Hexagon.loz_colors[1];
+    domino.lineStyle(1, 0x000000, lineThickness);
+    domino.moveTo(r,3*r);
+    domino.lineTo(3*r, r);
+    domino.lineTo(-r, -3*r);
+    domino.lineTo(-3*r,-r);
+    domino.lineTo(r,3*r);
+    domino.endFill();
+    if (paths == 1) {
+    }
+  }
+  return domino
+}
+
 function createVertex(xPos, yPos) {
   let vertex = new PIXI.Graphics();
   vertex.x = xPos;
@@ -615,7 +765,11 @@ function createVertex(xPos, yPos) {
 
 
 function refresh() {
-  M = Matching(P, W[0].length);
+  if (Hexagon.shape == "hexagon") {
+    M = Matching(P, W[0].length);
+  } else if (Hexagon.shape == "aztec") {
+    M = MatchingAztec(W[0].length);
+  }
   drawHexagon(M,W.holes);
 }
 
@@ -633,8 +787,7 @@ function animatehex() {
     //ticker.maxFPS = 10;
     if (!ticker.started) {
       ticker.add(() => {
-          M = Matching(P, W[0].length);
-          drawHexagon(M,W.holes);
+          refresh();
       });
     }
   } else { // toggle animation pause/start
@@ -1005,8 +1158,14 @@ function choose_weight() {
   const A = Hexagon.a,
         B = Hexagon.b,
         C = Hexagon.c;
+  let N;
+  if (Hexagon.shape == "hexagon") {
+    N = B+C+1;
+  } else if (Hexagon.shape == "aztec") {
+    N = 2*A;
+  }
+
   const type = Hexagon.weight_type;
-  const N = B+C+1;
   const a = Hexagon.weight_q;
   // const A = document.getElementById("Abox").valueAsNumber;
   // const B = document.getElementById("Bbox").valueAsNumber;
@@ -1201,6 +1360,10 @@ function randomHex(prefix='') {
 function drawHexagon(M,holes,probcolor) {
   // updates the lozenges using matching matrix M
   // optional input probcolor
+
+  // Hack: we have return M in a matrix M' padded one
+  // dimension in all directions
+
   let lozenges = app.stage.lozenges;
   for (let k=0, len=lozenges.length; k<len; k++) {
     const i = lozenges[k].i;
@@ -1433,6 +1596,7 @@ window.pan_reset = pan_reset;
 window.addHoles = addHoles;
 
 window.Hexagon = Hexagon;
+window.weight_aztec = weight_aztec;
 window.addrow = addrow;
 
 </script>
