@@ -13,10 +13,10 @@
 <body>
 
 <div class="row">
-  <div>
-  <h1 style="padding:20px">Lozenge tilings</h1>
-  </div>
 
+    <div class = "textbox">
+      <h1> Random lozenge tilings </h1>
+    </div>
     <div id="topbar" class="input0">
       <p>Generate</p>
 
@@ -58,7 +58,7 @@
   </div>
 
 
-    <div id="box" class="input0" style="background-color: white;">
+    <div id="box" class="input0">
       <div class="tab">
         <button id="animatehex" onclick="animatehex()" style="width:120px">Start Animation</button>
       </div>
@@ -116,13 +116,12 @@
     </div> -->
 
 
-
+    <!-- <div class="input0 textbox" style="background-color: white;">
+      This application implements the<a href="https://arxiv.org/abs/math/0111034">Generalized domino-shuffling algorithm</a>by James Propp.
+    </div> -->
 </div>
 
-<div >
 
-
-</div>
 
 <!-- <input type="checkbox" id="autorefresh" checked> Auto generate  </button> -->
 
@@ -154,6 +153,11 @@
     </svg>
 <div id="picker" style="visibility: hidden;margin:2px"></div>
 </div>
+
+<div >
+
+</div>
+
 
 <script> </script>
 
@@ -209,6 +213,7 @@ tippy('#customcolor', {
         content: colordiv,
         delay: 0,
         animation: false,
+        placement:"top",
         trigger: 'click',
         hideOnClick: 'toggle',
         theme: 'light-border'
@@ -229,7 +234,7 @@ tippy('#topbar', {
         hideOnClick: 'toggle',
         theme: 'material',
         arrow: false,
-        offset: [530,0],
+        offset: [550,0],
         triggerTarget: button,
         onHidden() { ToggleHoleControls(true) },
         onShow() { ToggleHoleControls(false) }
@@ -693,11 +698,11 @@ function createAztec() {
         let domino;
         if ((i+j) % 2) {
           // (even,even) position domino
-          domino = createDomino(x0, y0, r, 1, lineThickness, paths);
+          domino = createDomino(x0, y0, r, 1, lineThickness, paths, i,j);
           domino.type = 1;
         } else {
           // (even,odd) position domino
-          domino = createDomino(x0, y0, r, 2, lineThickness, paths);
+          domino = createDomino(x0, y0, r, 2, lineThickness, paths, i,j);
           domino.type = 2;
         }
         // hide all dominos until the matching activates the relevant ones
@@ -718,7 +723,7 @@ function rotation2D(theta, v) {
   return
 }
 
-function createDomino(xPos, yPos, r, type, lineThickness = 1, paths = false)
+function createDomino(xPos, yPos, r, type, lineThickness = 1, paths = false, i,j)
 {
   let domino = new PIXI.Graphics();
   domino.x = xPos;
@@ -727,7 +732,6 @@ function createDomino(xPos, yPos, r, type, lineThickness = 1, paths = false)
   r = r/(2*Math.sqrt(2));
   if (type == 1) {
     domino.beginFill(0xFFFFFF, 1);
-    domino.tint = Hexagon.loz_colors[0];
     domino.lineStyle(1, 0x000000, lineThickness);
     domino.moveTo(-3*r, r);
     domino.lineTo(-r, 3*r);
@@ -735,11 +739,8 @@ function createDomino(xPos, yPos, r, type, lineThickness = 1, paths = false)
     domino.lineTo(r, -3*r);
     domino.lineTo(-3*r, r);
     domino.endFill();
-    if (paths == 1) {
-    }
   } else if (type == 2) {
     domino.beginFill(0xFFFFFF, 1);
-    domino.tint = Hexagon.loz_colors[1];
     domino.lineStyle(1, 0x000000, lineThickness);
     domino.moveTo(r,3*r);
     domino.lineTo(3*r, r);
@@ -747,8 +748,31 @@ function createDomino(xPos, yPos, r, type, lineThickness = 1, paths = false)
     domino.lineTo(-3*r,-r);
     domino.lineTo(r,3*r);
     domino.endFill();
-    if (paths == 1) {
-    }
+  }
+
+  if (i % 2 == 0 && j % 2 == 0) {
+      domino.tint = Hexagon.loz_colors[2];
+      if (paths == 1) {
+        domino.lineStyle(1, 0x000000);
+        domino.moveTo(0,-2*r);
+        domino.lineTo(0, 2*r);
+      }
+  } else if (i % 2 == 1 && j % 2 == 1) {
+      domino.tint = Hexagon.loz_colors[1];
+      if (paths == 1) {
+        domino.lineStyle(1, 0x000000);
+        domino.moveTo(-2*r, 0);
+        domino.lineTo( 2*r, 0);
+      }
+  } else if (i % 2 == 0 && j % 2 == 1) {
+      domino.tint = Hexagon.loz_colors[0];
+      if (paths == 1) {
+        domino.lineStyle(1, 0x000000);
+        domino.moveTo(-2*r, 2*r);
+        domino.lineTo( 2*r, -2*r);
+      }
+  } else {
+      domino.tint = 0xfaff00;
   }
   return domino
 }
