@@ -281,8 +281,15 @@ export function createFortress(Hexagon, app) {
   // get hexagon parameters
   const a = Hexagon.a;
 
+
+  // recale if rotated
+  let scale = 1;
+  if (Hexagon.rotation) {
+    scale = Hexagon.shape.rescale;
+  }
+
   // length of unit to fit the screen / normalize into canvas
-  const r = Math.min(width,height)/(a+1);
+  const r = scale*Math.min(width,height)/(a+1);
 
   // save r
   Hexagon.r = r;
@@ -300,7 +307,7 @@ export function createFortress(Hexagon, app) {
   container.y = height/2;
 
   // rotate hexagon if chosen
-  container.rotation = Hexagon.rotated;
+  container.rotation = Hexagon.rotation;
 
   // store tri
   app.stage.lozenges = [];

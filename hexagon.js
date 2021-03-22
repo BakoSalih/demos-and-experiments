@@ -16,7 +16,16 @@ export function createHexagon(Hexagon, app) {
   // length of unit to fit the screen / normalize into canvas
   const rx = width/(-a * v[0] + b * u[0] + c * w[0]);
   const ry = height/(a * v[1] + c * w[1]);
-  const r = 0.9*Math.min(rx/2,ry/2);
+
+  // recale if rotated
+  let scale = 1;
+  if (Hexagon.rotation) {
+    scale = Hexagon.shape.rescale;
+  }
+
+  // define unit length
+  const r = Math.min(rx/2,ry/2) * scale;
+
 
   // save r
   Hexagon.r = r;
@@ -44,7 +53,7 @@ export function createHexagon(Hexagon, app) {
   container.y = height/2;
 
   // rotate hexagon if chosen
-  container.rotation = Hexagon.rotated;
+  container.rotation = Hexagon.rotation;
 
 
   // store lozenges
@@ -172,9 +181,9 @@ export function choose_weight(Hexagon) {
         B = Hexagon.b,
         C = Hexagon.c;
   let N;
-  if (Hexagon.shape == "hexagon") {
+  if (Hexagon.shape.name == "hexagon") {
     N = B+C+1;
-  } else if (Hexagon.shape == "aztec") {
+  } else if (Hexagon.shape.name == "aztec") {
     N = 2*A;
   }
 

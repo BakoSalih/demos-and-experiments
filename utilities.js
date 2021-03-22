@@ -66,22 +66,6 @@ export function hidewform() {
   }
  }
 
- export function rotate(Hexagon, app) {
-   let container = app.stage.children[0];
-   if (container.rotation == 0 && Hexagon.shape == "hexagon") {
-     container.rotation = Math.PI/6;
-     // if (app.stage.children.length > 1) {
-     //   app.stage.children[1].rotation = Math.PI/6;
-     // }
-     Hexagon.rotated = Math.PI/6;
-   } else {
-     container.rotation = 0;
-     // if (app.stage.children.length > 1) {
-     //   app.stage.children[1].rotation = 0;
-     // }
-     Hexagon.rotated = 0;
-   }
- }
 
  export function randomHex(prefix='') {
    const nums = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'];

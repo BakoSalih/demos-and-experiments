@@ -15,8 +15,14 @@ export function createAztec(Hexagon, app) {
   // get hexagon parameters
   const a = Hexagon.a;
 
+  // recale if rotated
+  let scale = 1;
+  if (Hexagon.rotation) {
+    scale = Hexagon.shape.rescale;
+  }
+
   // length of unit to fit the screen / normalize into canvas
-  const r = Math.min(width,height)/(2*(a+1));
+  const r = scale*Math.min(width,height)/(2*(a+1));
 
   // save r
   Hexagon.r = r;
@@ -35,7 +41,7 @@ export function createAztec(Hexagon, app) {
   container.y = height/2;
 
   // rotate hexagon if chosen
-  container.rotation = Hexagon.rotated;
+  container.rotation = Hexagon.rotation;
 
 
   // store domino
@@ -130,4 +136,59 @@ export function createDomino(xPos, yPos, r, type, lineThickness = 1, paths = fal
   }
 
   return domino
+}
+
+
+export function square_weight(W) {
+  let pt = (W.length)/2;
+  let endpt = W.length-1;
+
+  if (pt % 2 == 1) {
+  // the diagonal length
+    // W[pt-1][0] = 0;
+    // W.holes[pt-1][0] = 1;
+    // W[pt][0] = 0;
+    // W.holes[pt][0] = 1;
+    for (let i = 0; i < (W.length)/2 - 1; i++) {
+      // bottom-left
+      W[pt+1+i][i] = 0;
+      // top-left
+      W[pt-2-i][i] = 0;
+      // bottom-right
+      W[pt-2-i][endpt-i] = 0;
+      // top-right
+      W[pt+1+i][endpt-i] = 0;
+      // hide rest of aztec
+      for (let j = 0; j <= i; j++) {
+        W.holes[pt+1+i][i-j] = 1; // bottom-left
+        W.holes[pt-2-i][i-j] = 1; // top-left
+        W.holes[pt-2-i][endpt-i+j] = 1;  // bottom-right
+        W.holes[pt+1+i][endpt-i+j] = 1; // top-right
+      }
+    }
+  } else {
+    // W[pt-1][0] = 0;
+    // W.holes[pt-1][0] = 1;
+    // W[pt][0] = 0;
+    // W.holes[pt][0] = 1;
+    for (let i = 0; i < (W.length)/2; i++) {
+      // bottom-left
+      W[pt+i][i] = 0;
+      // top-left
+      W[pt-1-i][i] = 0;
+      // bottom-right
+      W[pt-1-i][endpt-i] = 0;
+      // top-right
+      W[pt+i][endpt-i] = 0;
+
+      // hide rest of aztec
+      for (let j = 0; j <= i; j++) {
+        W.holes[pt+i][i-j] = 1; // bottom-left
+        W.holes[pt-1-i][i-j] = 1; // top-left
+        W.holes[pt-1-i][endpt-i+j] = 1;  // bottom-right
+        W.holes[pt+i][endpt-i+j] = 1; // top-right
+      }
+    }
+  }
+  return W
 }
