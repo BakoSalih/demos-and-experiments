@@ -3,35 +3,31 @@
 <head>
   <meta charset="utf-8">
   <title>Lozenge tiling</title>
-
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.1.3/pixi.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
   <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light-border.css"/>
-
 </head>
 <body>
 
 <div class="row">
-
-    <div class = "textbox">
-      <h1> Random lozenge tilings </h1>
-    </div>
-    <div id="topbar" class="input0">
-      <p>Generate</p>
-
-      <button id="redraw", onclick="reDraw()">Redraw Figure</button>
-      <button id="rematch" onclick="refresh()">New Tiling</button>
-      <p>N</p>
-      <input type="number" value="41" id="Nbox" name="N" class="numinput">
-      <p>A</p>
-      <input type="number" value="1", step="0.1" min="1" id="Abox" name="A" class="numinput">
-      <p>B</p>
-      <input type="number" value="1", step="0.1" min="1"  id="Bbox" name="B" class="numinput">
-      <p>C</p>
-      <input type="number" value="1", step="0.1" min="1"  id="Cbox" name="C" class="numinput">
-      <p>Weight</p>
-      <select id="wtype" onchange="hidewform()" >
+  <div class = "textbox">
+    <h1> Random lozenge tilings </h1>
+  </div>
+  <div id="topbar" class="input0">
+    <p>Generate</p>
+    <button id="redraw", onclick="reDraw()">Redraw Figure</button>
+    <button id="rematch" onclick="refresh()">New Tiling</button>
+    <p>N</p>
+    <input type="number" value="40" id="Nbox" name="N" class="numinput">
+    <p>A</p>
+    <input type="number" value="1", step="0.1" min="1" id="Abox" name="A" class="numinput">
+    <p>B</p>
+    <input type="number" value="1", step="0.1" min="1"  id="Bbox" name="B" class="numinput">
+    <p>C</p>
+    <input type="number" value="1", step="0.1" min="1"  id="Cbox" name="C" class="numinput">
+    <p>Weight</p>
+    <select id="wtype" onchange="hidewform()" >
       <option value="uniform" selected="selected">Uniform</option>
       <option value="qvolume">q-Volume</option>
       <option value="periodic1x2">1x2 Periodic</option>
@@ -41,90 +37,43 @@
       <option value="racah">Racah</option>
       <option value="custom">Custom</option>
       <option value="custom2">Custom2</option>
-      </select>
-      <input type="number" value="0.1" step="0.1" id="cweight" onchange="reDraw()" name="Wweight"
-             class="numinput" style="display:none"/>
-      <div id="rows" style="display:none;">
-      <input type="number" value="1", step="1" min="1"  id="rownums"  onchange="reDraw()"
-      onchange="addrow()" name="rownums" class="numinput" style="display:none">
-      <input type="number" value="1", step="1" min="1"  id="kappa"  onchange="reDraw()" style="display:none;width:50px;" />
-      </div>
-      <button id="holebutton" >Add holes</button>
+    </select>
+    <input type="number" value="0.1" step="0.1" id="cweight" onchange="reDraw()" name="Wweight"
+           class="numinput" style="display:none"/>
+    <div id="rows" style="display:none;">
+    <input type="number" value="1", step="1" min="1"  id="rownums"  onchange="reDraw()"
+    onchange="addrow()" name="rownums" class="numinput" style="display:none">
+    <input type="number" value="1", step="1" min="1"  id="kappa"  onchange="reDraw()" style="display:none;width:50px;" />
     </div>
-
-
+    <button id="holebutton" >Add holes</button>
+  </div>
   <div id="simbox" class="input0" style="background-color: white;color:black;width:1000px;height:800px;">
     <div id="sim"></div>
   </div>
-
-
-    <div id="box" class="input0">
-      <div class="tab">
-        <button id="animatehex" onclick="animatehex()" style="width:120px">Start Animation</button>
-      </div>
-      <div class="tab">
-        <button id="probcolor" class="togglebutton" onclick="toggle_prob_color()">Probability color</button>
-      </div>
-      <div class="tab">
-        <button id="customcolor">Customize color</button>
-
-      </div>
-
-      <div class="tab">
-
+  <div id="box" class="input0">
+    <div class="tab">
+      <button id="animatehex" onclick="animatehex()" style="width:120px">Start Animation</button>
+    </div>
+    <div class="tab">
+      <button id="probcolor" class="togglebutton" onclick="toggle_prob_color()">Probability color</button>
+    </div>
+    <div class="tab">
+      <button id="customcolor">Customize color</button>
+    </div>
+    <div class="tab">
       <button id="rotate" onclick="rotate()">Rotate</button>
-      <button id="edgebutton" class="togglebutton" onclick="edges(Hexagon)">Corners</button>
-      <button id="pathbutton" class="togglebutton" onclick="paths(Hexagon)">Paths</button>
+      <button id="edgebutton" class="togglebutton" onclick="edges(State)">Corners</button>
+      <button id="pathbutton" class="togglebutton" onclick="paths(State)">Paths</button>
       <button id="controls" >Controls</button>
-      </div>
-
-
+    </div>
       <select id="shape">
       <option value="hexagon" selected="selected">Hexagon</option>
       <option value="aztec">Aztec</option>
       <option value="fortress">Fortress</option>
+      <option value="square">Square</option>
       </select>
-
-    </div>
-
-
-
-
-
-    <!-- <div class="column left" id="options1">
-      <div class="collapsible">
-        <h2> Display options </h2>
-      </div>
-
-        <h3> Other options </h3>
-        <button id="rotate" onclick="rotate()">Rotate</button>
-        <button id="edgebutton" class="togglebutton" onclick="edges()">Corners</button>
-        <button id="pathbutton" class="togglebutton" onclick="paths()">Paths</button>
-      <div class="collapsible">
-        <h2> Zoom/pan </h2>
-      </div>
-      <div class="content">
-        <button onclick="zoom_in()">Zoom in</button>
-        <button onclick="zoom_out()">Zoom out</button>
-        <br>
-        <button onclick="move('left')">&#8592;</button>
-        <button onclick="move('up')">&#8593;</button>
-        <button onclick="move('down')">&#8595;</button>
-        <button onclick="move('right')">&#8594;</button>
-        <br>
-        <button onclick="pan_reset()">Reset view</button>
-      </div>
-    </div> -->
-
-
-    <!-- <div class="input0 textbox" style="background-color: white;">
-      This application implements the<a href="https://arxiv.org/abs/math/0111034">Generalized domino-shuffling algorithm</a>by James Propp.
-    </div> -->
+  </div>
 </div>
-
-
-
-<!-- <input type="checkbox" id="autorefresh" checked> Auto generate  </button> -->
 
 <div id="holechoice" style="display: none;">
   <div>
@@ -133,7 +82,6 @@
   </div>
   <div id="holes"> </div>
 </div>
-
 
 <div id="controldiv" style="display: none;">
   <button onclick="zoom_in()">Zoom in</button>
@@ -162,8 +110,9 @@
     <h3> Choose colors manually </h3>
     <svg width="150" style="height:40px;padding:0px 5px;margin:0px;" >
     <rect x="0" y="25%" width="20" height="50%" class="colbox" id="colorbox1" onclick="colorpick(this)" style="fill:#1cff00;" />
-    <rect x="30" y="25%" width="20" height="50%" class="colbox"id="colorbox2" onclick="colorpick(this)" style="fill:#fc0606;" />
+    <rect x="30" y="25%" width="20" height="50%" class="colbox" id="colorbox2" onclick="colorpick(this)" style="fill:#fc0606;" />
     <rect x="60" y="25%" width="20" height="50%" class="colbox" id="colorbox3" onclick="colorpick(this)" style="fill:#0555db;" />
+    <rect x="90" y="25%" width="20" height="50%" class="colbox" id="colorbox4" onclick="colorpick(this)" style="fill:#0002d7;display: none;" />
     </svg>
 <div id="picker" style="visibility: hidden;margin:2px"></div>
 </div>
@@ -285,12 +234,12 @@ import { weight_hexagon, weight_aztec, gap} from './weight_hexagon.js';
 import { Reduction, Matching, Coloring } from './matching.js';
 import { Rainbow } from './rainbowvis.js';
 import { createHexagon, choose_weight } from './hexagon.js'
-import { createAztec } from './aztec.js'
+import { createAztec, square_weight } from './aztec.js'
 import { octweight, createFortress  } from './fortress.js'
 import { edges, paths, hidewform, randomHex } from './utilities.js'
 
 let type = "WebGL"
-if(!PIXI.utils.isWebGLSupported()){
+if(!PIXI.utils.isWebGLSupported()) {
   type = "canvas"
 }
 
@@ -312,19 +261,51 @@ let app = new PIXI.Application({
 }
 );
 
+// keep shapes in dictionary
+var Shapes = {
+    hexagon:
+    {
+      name: "hexagon",
+      default_colors: ['1cff00', 'fc0606', '0555db'],
+      rotation: Math.PI/6,
+      rescale: Math.sqrt(3)/2,
+      option: "default"
+    },
+    aztec: {
+      name: "aztec",
+      default_colors: ['1cff00', 'fc0606', '0555db', 'faff00'],
+      rotation: Math.PI/4,
+      rescale: 1/Math.sqrt(2),
+      option: "default"
+    },
+    square: {
+      name: "square",
+      default_colors: ['1cff00', 'fc0606', '0555db', 'faff00'],
+      rotation: Math.PI/4,
+      rescale: 1/Math.sqrt(2),
+      option: "default"
+    },
+    fortress: {
+      name: "fortress",
+      default_colors: ['ffde00', 'c400d5', '0555db', '0002d7'],
+      rotation: Math.PI/4,
+      rescale: 1/Math.sqrt(2),
+      option: "default"
+    }
+}
+
 // Hexagon parameters
-var Hexagon = { a:41,
-                b:41,
-                c:41,
-                n:41,
+var State = {   a:40,
+                b:40,
+                c:40,
+                n:40,
                 holes: 0,
                 lineThickness: 1,
                 verticesShow: false,
                 paths: false,
-                rotated: 0,
+                rotation: 0,
                 loz_colors: [0x1cff00, 0xfc0606, 0x0555db],
-                default_colors: ['1cff00', 'fc0606', '0555db'],
-                //loz_colors: [0xFFFFFF, 0xFFFFFF, 0xFFFFFF],
+                //default_colors: ['1cff00', 'fc0606', '0555db'],
                 draw_edges: false,
                 draw_paths: false,
                 weight_q: 0.1,
@@ -334,7 +315,7 @@ var Hexagon = { a:41,
                 changed: false,
                 theme: "default",
                 animating: false,
-                shape: "hexagon",
+                shape: Shapes.hexagon,
                 width: document.getElementById("sim").offsetWidth,
                 height: document.getElementById("sim").offsetHeight,
                 temp_padding: 10,
@@ -343,6 +324,8 @@ var Hexagon = { a:41,
                 v: [-1/2, Math.sqrt(3)/2],
                 w: [1/2, Math.sqrt(3)/2]
               }
+
+
 
 
 // Add the Pixi canvas that to the HTML document
@@ -363,39 +346,66 @@ document.getElementById("Nbox").addEventListener('change', changeHexagon);
 
 function changeHexagon() {
   let n = document.getElementById("Nbox").valueAsNumber;
-  Hexagon.n = n;
-  Hexagon.a = document.getElementById("Abox").valueAsNumber;
-  Hexagon.b = document.getElementById("Bbox").valueAsNumber;
-  Hexagon.c = document.getElementById("Cbox").valueAsNumber;
+  State.n = n;
+  State.a = document.getElementById("Abox").valueAsNumber;
+  State.b = document.getElementById("Bbox").valueAsNumber;
+  State.c = document.getElementById("Cbox").valueAsNumber;
 
-  Hexagon.a = Math.ceil(n*Hexagon.a);
-  Hexagon.b = Math.ceil(n*Hexagon.b);
-  Hexagon.c = Math.ceil(n*Hexagon.c);
+  State.a = Math.ceil(n*State.a);
+  State.b = Math.ceil(n*State.b);
+  State.c = Math.ceil(n*State.c);
 
-  Hexagon.changed = true;
+  State.changed = true;
 }
 
 document.getElementById("cweight").addEventListener('change', function() {
-  Hexagon.weight_q = this.valueAsNumber;
+  State.weight_q = this.valueAsNumber;
 });
 
 document.getElementById("wtype").addEventListener('change', function() {
-  Hexagon.weight_type = this.value;
+  State.weight_type = this.value;
 });
 
 document.getElementById("shape").addEventListener('change', function() {
-  Hexagon.shape = this.value;
-  Hexagon.changed = true;
-  if (Hexagon.shape == "aztec") {
-  Hexagon.loz_colors = [0x1cff00, 0xfc0606, 0x0555db, 0xfaff00];
-  Hexagon.default_colors = ['1cff00', 'fc0606', '0555db', 'faff00'];
-} else if (Hexagon.shape == "fortress") {
-  Hexagon.loz_colors = [0xffde00, 0xc400d5, 0x0555db, 0x0002d7];
-  Hexagon.default_colors = ['ffde00', 'c400d5', '0555db', '0002d7'];
-} else {
-  Hexagon.loz_colors = [0x1cff00, 0xfc0606, 0x0555db];
-  Hexagon.default_colors = ['1cff00', 'fc0606', '0555db'];
-}
+
+  // hack: square option
+  if (this.value == "square") {
+    State.shape = Shapes["aztec"];
+    State.rotation = Math.PI/4;
+    State.shape.rescale = Math.sqrt(2);
+    State.shape.option = "square";
+  } else {
+    State.shape = Shapes[this.value];
+    State.rotation = 0;
+    // reset option to default
+    State.shape.option = "default";
+  }
+  State.changed = true;
+
+  State.loz_colors = State.shape.default_colors.map( x => parseInt('0x' + x));
+
+
+
+  if (State.shape.default_colors.length > 3) {
+    document.getElementById("colorbox4").style.display = "inline";
+  } else {
+    document.getElementById("colorbox4").style.display = "none";
+  }
+
+
+
+//   if (State.shape.name == "aztec") {
+//   State.loz_colors = [0x1cff00, 0xfc0606, 0x0555db, 0xfaff00];
+//   //State.default_colors = ['1cff00', 'fc0606', '0555db', 'faff00'];
+// } else if (State.shape.name == "fortress") {
+//   State.loz_colors = [0xffde00, 0xc400d5, 0x0555db, 0x0002d7];
+//   //State.default_colors = ['ffde00', 'c400d5', '0555db', '0002d7'];
+//   document.getElementById("colorbox4").style.display = "inline";
+// } else {
+//   State.loz_colors = [0x1cff00, 0xfc0606, 0x0555db];
+//   //State.default_colors = ['1cff00', 'fc0606', '0555db'];
+//   document.getElementById("colorbox4").style.display = "none";
+// }
   reDraw();
 });
 
@@ -415,7 +425,7 @@ function setup() {
   createShape();
 
   // add container for hole controls
-  Hexagon.holes = 0;
+  State.holes = 0;
   let container = new PIXI.Container();
   app.stage.addChildAt(container,1);
   container.x = app.screen.width/2;
@@ -424,7 +434,7 @@ function setup() {
   reweight();
 }
 
-function reweight(auto=false) {
+function reweight() {
   // // pause if animation
   // PIXI.Ticker.shared.stop();
   // if (auto && !document.getElementById("autorefresh").checked) {
@@ -435,17 +445,17 @@ function reweight(auto=false) {
   M = [];
   ColorMatrix = [];
 
-  const A = Hexagon.a,
-        B = Hexagon.b,
-        C = Hexagon.c;
+  const A = State.a,
+        B = State.b,
+        C = State.c;
 
   // get the base weight
-  if (Hexagon.shape == "hexagon") {
-    W = weight_hexagon(choose_weight(Hexagon),A,B,C);
-  } else if (Hexagon.shape == "aztec") {
-    W = weight_aztec(choose_weight(Hexagon), A);
-  } else if (Hexagon.shape == "fortress") {
-    W = octweight(A, Hexagon);
+  if (State.shape.name == "hexagon") {
+    W = weight_hexagon(choose_weight(State),A,B,C);
+  } else if (State.shape.name == "aztec") {
+    W = weight_aztec(choose_weight(State), A);
+  } else if (State.shape.name == "fortress") {
+    W = octweight(A, State);
   }
 
 
@@ -457,14 +467,21 @@ function reweight(auto=false) {
     W.holes[i].fill(0);
   }
 
+  // hack: square option
+
+  if (State.shape.option == "square") {
+    W = square_weight(W);
+  }
+
+
   // add holes to W
-  for (let i=0;i<Hexagon.holes;i++) {
+  for (let i=0;i<State.holes;i++) {
     const width = document.getElementById(`holeW${i}`).valueAsNumber;
     const height = document.getElementById(`holeH${i}`).valueAsNumber;
     const X = document.getElementById(`holeX${i}`).valueAsNumber;
     const Y = document.getElementById(`holeY${i}`).valueAsNumber;
     const type = document.getElementById(`holeType${i}`).valueAsNumber;
-    W = gap(W,A,B,C,width,X,Y,type,height,Hexagon.shape);
+    W = gap(W,A,B,C,width,X,Y,type,height,State);
   }
 
   P = Reduction(W);
@@ -474,12 +491,12 @@ function reweight(auto=false) {
 }
 
 function createShape() {
-  if (Hexagon.shape == "hexagon") {
-    createHexagon(Hexagon, app);
-  } else if (Hexagon.shape == "aztec") {
-    createAztec(Hexagon, app);
-  } else if (Hexagon.shape == "fortress") {
-    createFortress(Hexagon, app);
+  if (State.shape.name == "hexagon") {
+    createHexagon(State, app);
+  } else if (State.shape.name == "aztec") {
+    createAztec(State, app);
+  } else if (State.shape.name == "fortress") {
+    createFortress(State, app);
   }
 }
 
@@ -499,8 +516,8 @@ function animatehex() {
   let ticker = PIXI.Ticker.shared;
 
   // if not animating, start
-  if (!Hexagon.animating) {
-    Hexagon.animating = true;
+  if (!State.animating) {
+    State.animating = true;
     ani_button.innerHTML = "Pause";
     // start animation
     //ticker.maxFPS = 10;
@@ -524,33 +541,35 @@ function animatehex() {
 
 function rotate() {
   let container = app.stage.children[0];
-  if (container.rotation == 0 && Hexagon.shape == "hexagon") {
-    container.rotation = Math.PI/6;
+  if (State.rotation == 0) {
+    // container.rotation = State.shape.rotation;
     // if (app.stage.children.length > 1) {
     //   app.stage.children[1].rotation = Math.PI/6;
     // }
-    Hexagon.rotated = Math.PI/6;
+    State.rotation = State.shape.rotation;
+    reDraw(true, true);
   } else {
-    container.rotation = 0;
+    // container.rotation = 0;
     // if (app.stage.children.length > 1) {
     //   app.stage.children[1].rotation = 0;
     // }
-    Hexagon.rotated = 0;
+    State.rotation = 0;
+    reDraw(true, true);
   }
 }
 
-function reDraw(auto=false) {
+function reDraw(auto=false, force = false) {
   pan_reset();
-  if (Hexagon.changed) {
+  if (State.changed || force) {
     app.stage.children = [];
     document.getElementById("holeNum").value = "0";
-    Hexagon.holes = 0;
+    State.holes = 0;
 
     let div = document.getElementById("holes");
     div.innerHTML = '';
 
-    if (Hexagon.n > 30) {
-      Hexagon.draw_edges = false;
+    if (State.n > 30) {
+      State.draw_edges = false;
       document.getElementById("edgebutton")
         .setAttribute("class", "togglebutton");
       }
@@ -558,7 +577,7 @@ function reDraw(auto=false) {
   } else {
     reweight(auto);
   }
-  Hexagon.changed = false;
+  State.changed = false;
 }
 
 function regraphics() {
@@ -600,12 +619,12 @@ function hole(container, num) {
 
   vertex.number = num;
   container.addChildAt(vertex,0);
-  // vertex.x = -Hexagon.r/2;
-  // vertex.y = Hexagon.r*Math.sqrt(3)/2;
+  // vertex.x = -State.r/2;
+  // vertex.y = State.r*Math.sqrt(3)/2;
 
-  const A = Hexagon.a,
-        B = Hexagon.b,
-        C = Hexagon.c;
+  const A = State.a,
+        B = State.b,
+        C = State.c;
   const max = Math.min(A+B,A+C)/2;
 
   // make title
@@ -687,16 +706,16 @@ function hole(container, num) {
 function addHoles() {
   // change in number of holes
   const current_holes = document.getElementById("holeNum").valueAsNumber
-  const holechange = current_holes - Hexagon.holes;
+  const holechange = current_holes - State.holes;
   let div = document.getElementById("holes");
   let container = app.stage.children[1];
 
   if (holechange > 0) { // add prescribed holes
     for (let i=0; i<holechange; i++) {
-      hole(container, Hexagon.holes+i);
+      hole(container, State.holes+i);
     }
   } else if (holechange < 0) { // remove holes
-    for (let i=Hexagon.holes; i>current_holes; i--) {
+    for (let i=State.holes; i>current_holes; i--) {
       // remove buttongroup for hole
       document.getElementById(`holegroup${i-1}`).remove();
     }
@@ -704,7 +723,7 @@ function addHoles() {
     container.removeChildren(0,-holechange);
   } else {
   }
-  Hexagon.holes = document.getElementById("holeNum").valueAsNumber;
+  State.holes = document.getElementById("holeNum").valueAsNumber;
 }
 
 
@@ -730,13 +749,13 @@ function colorpick(elem) {
     // get last number from id
     switch (boxnum) {
       case "1":
-        Hexagon.loz_colors[0] = newcolor;
+        State.loz_colors[0] = newcolor;
         break;
       case "2":
-        Hexagon.loz_colors[1] = newcolor;
+        State.loz_colors[1] = newcolor;
         break;
       case "3":
-        Hexagon.loz_colors[2] = newcolor;
+        State.loz_colors[2] = newcolor;
     }
     renew_color();
     });
@@ -754,71 +773,67 @@ function colorpick(elem) {
 }
 
 function renew_color() {
-  Hexagon.theme = "default";
+  State.theme = "default";
   let lozenges = app.stage.lozenges;
   for (let k=0, len=lozenges.length; k<len; k++) {
     const type = lozenges[k].type;
     switch (type) {
       case 1:
-        lozenges[k].tint = Hexagon.loz_colors[0];
+        lozenges[k].tint = State.loz_colors[0];
         break;
       case 2:
-        lozenges[k].tint = Hexagon.loz_colors[1];
+        lozenges[k].tint = State.loz_colors[1];
         break;
       case 3:
-        lozenges[k].tint = Hexagon.loz_colors[2];
+        lozenges[k].tint = State.loz_colors[2];
         break
       case 4:
-        lozenges[k].tint = Hexagon.loz_colors[3];
+        lozenges[k].tint = State.loz_colors[3];
         break;
       case 5:
-        lozenges[k].tint = Hexagon.loz_colors[3]*2;
+        lozenges[k].tint = State.loz_colors[3]*2;
         break;
       case 6:
-        lozenges[k].tint = Hexagon.loz_colors[3]*3;
+        lozenges[k].tint = State.loz_colors[3]*3;
         break;
       case 7:
-        lozenges[k].tint = Hexagon.loz_colors[3]*4;
+        lozenges[k].tint = State.loz_colors[3]*4;
         break;
     }
   }
 }
 
 function switch_color(opt) {
-  Hexagon.theme = "default";
+  State.theme = "default";
   let colortheme;
   switch (opt) {
     case "default":
-      colortheme = Hexagon.default_colors;
+      colortheme = State.shape.default_colors;
       break;
     case "random":
       // pick random colors
-      colortheme = Hexagon.loz_colors.map(x => randomHex());
+      colortheme = State.loz_colors.map(x => randomHex());
       break;
     case "white":
-      colortheme = Hexagon.loz_colors.map(x => 'FFFFFF');
+      colortheme = State.loz_colors.map(x => 'FFFFFF');
       break;
   }
 
   // set colors
-  for (let i=0, len=Hexagon.loz_colors.length; i<len; i++) {
-    Hexagon.loz_colors[i] = '0x' + colortheme[i];
-  }
-
-  // fix this to be general
-  for (let i=0; i<3; i++) {
+  for (let i=0, len=State.loz_colors.length; i<len; i++) {
+    State.loz_colors[i] = '0x' + colortheme[i];
     document.getElementById(`colorbox${i+1}`).style.fill = '#' + colortheme[i];
   }
 
-  renew_color()
+  renew_color();
 }
 
 function drawHexagon(M, holes) {
   let lozenges = app.stage.lozenges;
   let padding;
   // deal with padding for fortress
-  if (Hexagon.shape == "fortress") {
-    padding = Hexagon.temp_padding;
+  if (State.shape.name == "fortress") {
+    padding = State.temp_padding;
   } else {
     padding = 0;
   }
@@ -832,13 +847,13 @@ function drawHexagon(M, holes) {
       lozenges[k].visible = false;
     }
   }
-  if (Hexagon.theme == "probability") {
+  if (State.theme == "probability") {
     prob_color();
   }
 }
 
 function prob_color() {
-  Hexagon.theme = "probability";
+  State.theme = "probability";
   let padding;
 
   if (ColorMatrix.length == 0) {
@@ -846,8 +861,8 @@ function prob_color() {
   }
 
   // deal with fortress padding
-  if (Hexagon.shape == "fortress") {
-    padding = Hexagon.temp_padding;
+  if (State.shape.name == "fortress") {
+    padding = State.temp_padding;
   } else {
     padding = 0;
   }
@@ -866,12 +881,12 @@ function prob_color() {
 }
 
 function toggle_prob_color(choice="toggle") {
-  //Hexagon.lineThickness = document.getElementById("edges").checked;
-  if (Hexagon.theme == "probability") {
+  //State.lineThickness = document.getElementById("edges").checked;
+  if (State.theme == "probability") {
     switch_color("default");
     document.getElementById("probcolor")
       .setAttribute("class", "togglebutton");
-  } else if (Hexagon.theme == "default") {
+  } else if (State.theme == "default") {
     prob_color();
     document.getElementById("probcolor")
       .setAttribute("class", "togglebuttonpressed");
@@ -892,8 +907,8 @@ function zoom_out() {
   if (app.stage.children[0].scale.x > 1 && app.stage.children[0].scale.y > 1) {
     app.stage.children[0].scale.x *= 0.5;
     app.stage.children[0].scale.y *= 0.5;
-    app.stage.children[0].position.x = Hexagon.width/2;
-    app.stage.children[0].position.y = Hexagon.height/2;
+    app.stage.children[0].position.x = State.width/2;
+    app.stage.children[0].position.y = State.height/2;
     step *= 0.5;
   } else {
     if (app.stage.children[1]) {
@@ -934,13 +949,13 @@ function move(dir) {
 function pan_reset() {
   app.stage.children[0].scale.x = 1;
   app.stage.children[0].scale.y = 1;
-  app.stage.children[0].position.x = Hexagon.width/2;
-  app.stage.children[0].position.y = Hexagon.height/2;
+  app.stage.children[0].position.x = State.width/2;
+  app.stage.children[0].position.y = State.height/2;
   step = -10;
   if (app.stage.children[1]) {
     app.stage.children[1].visible = true;
-    app.stage.children[1].position.x = Hexagon.width/2;
-    app.stage.children[1].position.y = Hexagon.height/2;
+    app.stage.children[1].position.x = State.width/2;
+    app.stage.children[1].position.y = State.height/2;
   }
 }
 
@@ -965,7 +980,7 @@ function onDragMove(e)
 	if (this.dragging)
     {
       var newPosition = this.data.getLocalPosition(this.parent);
-      const r = Hexagon.r;
+      const r = State.r;
       //
       // let x = (3*newPosition.x - Math.sqrt(3) * newPosition.y)/(12*r);
       // let y = (-newPosition.x - Math.sqrt(3) * newPosition.y)/(4*r);
@@ -979,7 +994,7 @@ function onDragMove(e)
       // const num = this.number;
       // document.getElementById(`holeX${num}`).setAttribute("value", 2*x);
       // document.getElementById(`holeY${num}`).setAttribute("value", y);
-      if (Hexagon.rotated == 0 && Hexagon.shape == "hexagon") {
+      if (State.rotation == 0 && State.shape.name == "hexagon") {
 
         let x = (3*newPosition.x - Math.sqrt(3) * newPosition.y)/(12*r);
         let y = (-newPosition.x - Math.sqrt(3) * newPosition.y)/(4*r);
@@ -1013,7 +1028,7 @@ function onDragMove(e)
         // document.getElementById(`holeX${num}`).setAttribute("value", x+y);
         // document.getElementById(`holeY${num}`).setAttribute("value", -y);
 
-      } else if (Hexagon.shape == "aztec") {
+      } else if (State.shape.name == "aztec") {
 
         let x = (newPosition.x)/(r);
         let y = (newPosition.y)/(r);
@@ -1082,11 +1097,11 @@ window.pan_reset = pan_reset;
 
 window.addHoles = addHoles;
 
-window.Hexagon = Hexagon;
+window.State = State;
 window.weight_aztec = weight_aztec;
 //
 window.octweight = octweight;
-window.Hexagon = Hexagon;
+window.State = State;
 // window.Reduction = Reduction;
 // window.Matching = Matching;
 // window.getmatched = getmatched;
