@@ -175,7 +175,7 @@ function createLozenge(xPos, yPos, r, type, lineThickness = 1, paths = false, lo
   return loz
 }
 
-export function choose_weight(Hexagon) {
+export function choose_weight(Hexagon, custom) {
   let weight;
   const A = Hexagon.a,
         B = Hexagon.b,
@@ -189,8 +189,8 @@ export function choose_weight(Hexagon) {
 
   const type = Hexagon.weight_type;
   const a = Hexagon.weight_q;
-  const kappa = document.getElementById("kappa").valueAsNumber;
-  const nums = document.getElementById("rownums").valueAsNumber;
+  // const kappa = document.getElementById("kappa").valueAsNumber;
+  // const nums = document.getElementById("rownums").valueAsNumber;
   if (type == "uniform") {
     weight = [[1],[1]];
   } else if (type == "qvolume") {
@@ -237,77 +237,124 @@ export function choose_weight(Hexagon) {
         top[k] = kappa*q**k - 1/(kappa*q**k);
       }
       weight = [top, bottom];
-  } else if (type == "custom2") {
-    // let rows = document.getElementById("rownums").valueAsNumber
-    // let c = Math.ceil(Math.random(2)+0.5);
-    // let d = Math.random(1);
-    // weight = [[a,a**c,d**(c+1)], [a,a**c,c**(c+1)]];
-    weight = [];
-    // //bottom.fill(1);
-    let xmod = Math.round(nums);
-    let ymod = Math.round(kappa);
-    //console.log([xmod, ymod])
-    for (let i=0;i<N;i++) {
-      let row = [];
-      for (let k=0;k<N;k++) {
-        if (i % ymod == 0 && k % xmod == 0) {
-          row.push(1);
-        } else if (i % ymod > 0 && k % xmod > 0) {
-          row.push(a**(k % xmod - i % ymod));
-        } else if (i % ymod == 0 && k % xmod > 0) {
-          row.push(a**(k % xmod + i % ymod));
-        } else if (i % ymod > 0 && k % xmod == 0) {
-          row.push(a**(i % ymod));
-        }
-      }
-      weight.push(row);
-    }
   } else if (type == "custom") {
-      // let rows = document.getElementById("rownums").valueAsNumber
-      // let c = Math.ceil(Math.random(2)+0.5);
-      // let d = Math.random(1);
-      // weight = [[a,a**c,d**(c+1)], [a,a**c,c**(c+1)]];
-      weight = [];
-      // //bottom.fill(1);
-      let xmod = Math.round(nums);
-      let ymod = Math.round(kappa);
-      //console.log([xmod, ymod])
-      for (let i=0;i<N;i++) {
-        let row = [];
-        for (let k=0;k<N;k++) {
-          if (i % ymod == 0 && k % xmod == 0) {
-            row.push(1);
-          } else if (i % ymod == 0 && k % xmod > 0) {
-            row.push(a**(k % xmod));
-          } else if (i % ymod > 0 && k % xmod == 0) {
-            row.push(a**(i % ymod));
-          } else {
-            row.push(0.5*(a**(i % ymod)+a**(k % xmod)));
-          }
-        }
-        weight.push(row);
-      }
-  } else if (type == "weird1") {
-    weight = []
-    // //bottom.fill(1);
-    let xmod = 3;
-    let ymod = 3;
-    //console.log([xmod, ymod])
-    for (let i=0;i<N;i++) {
-      let row = [];
-      for (let k=0;k<N;k++) {
-        if (i % ymod == 0 && k % xmod == 0) {
-          row.push(1);
-        } else if (i % ymod == 0 && k % xmod > 0) {
-          row.push(1);
-        } else if (i % ymod > 0 && k % xmod == 0) {
-          row.push(a**(i % xmod - k % ymod));
-        } else {
-          row.push(1);
-        }
-      }
-      weight.push(row);
+    weight = custom;
+  }
+  // else if (type == "custom2") {
+  //   // let rows = document.getElementById("rownums").valueAsNumber
+  //   // let c = Math.ceil(Math.random(2)+0.5);
+  //   // let d = Math.random(1);
+  //   // weight = [[a,a**c,d**(c+1)], [a,a**c,c**(c+1)]];
+  //   weight = [];
+  //   // //bottom.fill(1);
+  //   let xmod = Math.round(nums);
+  //   let ymod = Math.round(kappa);
+  //   //console.log([xmod, ymod])
+  //   for (let i=0;i<N;i++) {
+  //     let row = [];
+  //     for (let k=0;k<N;k++) {
+  //       if (i % ymod == 0 && k % xmod == 0) {
+  //         row.push(1);
+  //       } else if (i % ymod > 0 && k % xmod > 0) {
+  //         row.push(a**(k % xmod - i % ymod));
+  //       } else if (i % ymod == 0 && k % xmod > 0) {
+  //         row.push(a**(k % xmod + i % ymod));
+  //       } else if (i % ymod > 0 && k % xmod == 0) {
+  //         row.push(a**(i % ymod));
+  //       }
+  //     }
+  //     weight.push(row);
+  //   }
+  // }
+  //
+  // else if (type == "custom") {
+  //     // let rows = document.getElementById("rownums").valueAsNumber
+  //     // let c = Math.ceil(Math.random(2)+0.5);
+  //     // let d = Math.random(1);
+  //     // weight = [[a,a**c,d**(c+1)], [a,a**c,c**(c+1)]];
+  //     weight = [];
+  //     // //bottom.fill(1);
+  //     let xmod = Math.round(nums);
+  //     let ymod = Math.round(kappa);
+  //     //console.log([xmod, ymod])
+  //     for (let i=0;i<N;i++) {
+  //       let row = [];
+  //       for (let k=0;k<N;k++) {
+  //         if (i % ymod == 0 && k % xmod == 0) {
+  //           row.push(1);
+  //         } else if (i % ymod == 0 && k % xmod > 0) {
+  //           row.push(a**(k % xmod));
+  //         } else if (i % ymod > 0 && k % xmod == 0) {
+  //           row.push(a**(i % ymod));
+  //         } else {
+  //           row.push(0.5*(a**(i % ymod)+a**(k % xmod)));
+  //         }
+  //       }
+  //       weight.push(row);
+  //     }
+  // } else if (type == "weird1") {
+  //   weight = []
+  //   // //bottom.fill(1);
+  //   let xmod = 3;
+  //   let ymod = 3;
+  //   //console.log([xmod, ymod])
+  //   for (let i=0;i<N;i++) {
+  //     let row = [];
+  //     for (let k=0;k<N;k++) {
+  //       if (i % ymod == 0 && k % xmod == 0) {
+  //         row.push(1);
+  //       } else if (i % ymod == 0 && k % xmod > 0) {
+  //         row.push(1);
+  //       } else if (i % ymod > 0 && k % xmod == 0) {
+  //         row.push(a**(i % xmod - k % ymod));
+  //       } else {
+  //         row.push(1);
+  //       }
+  //     }
+  //     weight.push(row);
+  //   }
+  // }
+  return weight
+}
+
+
+function interpretMatrix(input) {
+  // split rows
+  let row_regex = /\s*\;\s*/g;
+  let mat = input.split(row_regex)
+  // split columns
+  let col_regex = /\s*\,\s*/
+  mat = mat.map(x => x.split(col_regex));
+
+  const coldim = mat.length;
+  const rowdims = mat.map(x => x.length);
+  const rowdim = Math.min(...rowdims);
+
+  // raise error if not given a square matrix
+  if (rowdim != Math.max(...rowdims)) {
+    console.log("Warning: rows not equal length, will use up to shortest row");
+    for (let i=0;i<coldim;i++) {
+      mat[i] = mat[i].slice(0,rowdim);
     }
   }
-  return weight
+
+  // try to convert to integer, if doesn't work, add as constant
+  // array of constants
+  mat.constants = {};
+
+  for (let i = 0; i<coldim; i++) {
+    for (let j=0; j<rowdim; j++) {
+      let tryfloat = parseFloat(mat[i][j]);
+
+      if (!isNaN(tryfloat)) {
+        mat[i][j] = tryfloat;
+      } else {
+        mat.constants[mat[i][j]] = 1;
+      }
+    }
+  }
+
+  return mat;
+
+
 }

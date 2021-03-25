@@ -1,4 +1,28 @@
 /* @import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&display=swap'); */
+:root {
+    --showCustom: none;
+}
+
+.customweight {
+  display: var(--showCustom);
+  background-color: #343434;
+  color: white;
+  font-size: 12px;
+  border: 1px solid black;
+  border-radius: 5px;
+  padding:10px;
+  margin: 30px 50px;
+  width: 1200px;
+}
+
+.customweight .numinput {
+  width: 100px;
+}
+
+#custom_input {
+  width: 300px;
+  margin: 10px;
+}
 
 body {
   background-color: #212529;

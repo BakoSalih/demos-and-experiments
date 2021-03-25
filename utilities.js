@@ -1,22 +1,22 @@
 // function for toggling edges on and off
-export function edges(Hexagon, choice="toggle") {
-  //Hexagon.lineThickness = document.getElementById("edges").checked;
+export function edges(State, choice="toggle") {
+  //State.lineThickness = document.getElementById("edges").checked;
   if (choice == "toggle") {
-    if (Hexagon.draw_edges) {
-      Hexagon.draw_edges = false;
+    if (State.draw_edges) {
+      State.draw_edges = false;
       document.getElementById("edgebutton")
         .setAttribute("class", "togglebutton");
     } else {
-      Hexagon.draw_edges = true;
+      State.draw_edges = true;
       document.getElementById("edgebutton")
         .setAttribute("class", "togglebuttonpressed");
     }
   } else if (choice=="edges") {
-    Hexagon.draw_edges = true;
+    State.draw_edges = true;
     document.getElementById("edgebutton")
       .setAttribute("class", "togglebuttonpressed");
   } else if (choice=="no edge") {
-    Hexagon.draw_edges = false;
+    State.draw_edges = false;
     document.getElementById("edgebutton")
       .setAttribute("class", "togglebutton");
   }
@@ -24,28 +24,28 @@ export function edges(Hexagon, choice="toggle") {
 }
 
 // function for toggling paths on and off
-export function paths(Hexagon, choice="toggle") {
-  //Hexagon.lineThickness = document.getElementById("edges").checked;
+export function paths(State, choice="toggle") {
+  //State.lineThickness = document.getElementById("edges").checked;
   if (choice == "toggle") {
-    if (Hexagon.draw_paths) {
-      Hexagon.draw_paths = false;
+    if (State.draw_paths) {
+      State.draw_paths = false;
       document.getElementById("pathbutton")
         .setAttribute("class", "togglebutton");
     } else {
-      Hexagon.draw_paths = true;
+      State.draw_paths = true;
       document.getElementById("pathbutton")
         .setAttribute("class", "togglebuttonpressed");
     }
   } else if (choice=="edges") {
-    Hexagon.draw_paths = true;
+    State.draw_paths = true;
     document.getElementById("pathbutton")
       .setAttribute("class", "togglebuttonpressed");
   } else if (choice=="no edge") {
-    Hexagon.draw_paths = false;
+    State.draw_paths = false;
     document.getElementById("pathbutton")
       .setAttribute("class", "togglebutton");
   }
-  regraphics(Hexagon);
+  regraphics(State);
 }
 
 export function hidewform() {
@@ -56,14 +56,18 @@ export function hidewform() {
     document.getElementById("cweight").style.display = "inline";
   }
   if (wtype == "custom" || wtype == "custom2" ) {
-    document.getElementById("rownums").style.display = "inline";
-    document.getElementById("rows").style.display = "inline";
-    document.getElementById("kappa").style.display = "inline";
+    document.getElementById("cweight").style.display = "none";
+    document.documentElement.style.setProperty('--showCustom', 'inline');
+    // document.getElementById("rownums").style.display = "inline";
+    // document.getElementById("rows").style.display = "inline";
+    // document.getElementById("kappa").style.display = "inline";
   } else {
-    document.getElementById("rownums").style.display = "none";
-    document.getElementById("rows").style.display = "none";
-    document.getElementById("kappa").style.display = "none";
+    document.documentElement.style.setProperty('--showCustom', 'none');
+    // document.getElementById("rownums").style.display = "none";
+    // document.getElementById("rows").style.display = "none";
+    // document.getElementById("kappa").style.display = "none";
   }
+
  }
 
 
@@ -76,3 +80,64 @@ export function hidewform() {
    }
    return hex;
  }
+
+export function interpretMatrix(input, key, N) {
+  // split rows
+  let row_regex = /\s*\;\s*/g;
+  let mat = input.split(row_regex)
+  // split columns
+  let col_regex = /\s*\,\s*/
+  mat = mat.map(x => x.split(col_regex));
+
+  const coldim = mat.length;
+  const rowdims = mat.map(x => x.length);
+  const rowdim = Math.min(...rowdims);
+
+  // raise error if not given a square matrix
+  if (rowdim != Math.max(...rowdims)) {
+    console.log("Warning: rows not equal length, will use up to shortest row");
+    for (let i=0;i<coldim;i++) {
+      mat[i] = mat[i].slice(0,rowdim);
+    }
+  }
+
+  // try to convert to integer, if doesn't work, add as constant
+  // array of constants
+  // mat.constants = {};
+
+  // define q = exp(-a/N)
+  key["q"] = Math.exp(-key["a"]/N);
+  let regex = /[i|j]/g;
+  let weightmat = [];
+  if (input.match(regex) && input.match(regex).length > 0) {
+    for (let i=0; i<coldim; i++) {
+      weightmat[i] = new Array(N);
+      for (let j=0; j<N; j++) {
+        let tryfloat = parseFloat(mat[i % coldim][j % rowdim]);
+        key["i"] = i;
+        key["j"] = j;
+        if (!isNaN(tryfloat)) {
+          weightmat[i][j] = tryfloat;
+        } else {
+          weightmat[i][j] = math.evaluate(mat[i % coldim][j % rowdim], key);
+        }
+      }
+    }
+    return weightmat;
+  } else {
+    for (let i=0; i<coldim; i++) {
+      for (let j=0; j<rowdim; j++) {
+        let tryfloat = parseFloat(mat[i][j]);
+        if (!isNaN(tryfloat)) {
+          mat[i][j] = tryfloat;
+        } else {
+          mat[i][j] = math.evaluate(mat[i][j], key);
+        }
+      }
+    }
+    return mat;
+  }
+
+
+
+}
