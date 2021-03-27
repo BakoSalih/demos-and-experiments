@@ -81,7 +81,7 @@ export function hidewform() {
    return hex;
  }
 
-export function interpretMatrix(input, key, N) {
+export function interpretMatrix(input, key) {
   // split rows
   let row_regex = /\s*\;\s*/g;
   let mat = input.split(row_regex)
@@ -105,6 +105,8 @@ export function interpretMatrix(input, key, N) {
   // array of constants
   // mat.constants = {};
 
+  // get N param
+  let N = key["N"];
   // define q = exp(-a/N)
   key["q"] = Math.exp(-key["a"]/N);
   let regex = /[i|j]/g;
