@@ -61,14 +61,25 @@
     Custom input for weight
       <input id="custom_input" value="1;1" onchange="reDraw()" />
       <div id="custominputvars" class="input0" style="display:inline-block">
-        <p>a</p>
-        <input type="number" value="1", step="0.1" min="0"  id="avar" class="numinput" onchange="reDraw()">
+        <p>a (q = exp(-a/N))</p>
+        <input type="number" value="1", step="0.1" min="0"  id="avar" class="numinput coeffs" onchange="reDraw()">
         <p>b</p>
-        <input type="number" value="1", step="0.1" min="0"  id="bvar" class="numinput" onchange="reDraw()">
+        <input type="number" value="1", step="0.1" min="0"  id="bvar" class="numinput coeffs" onchange="reDraw()">
         <p>c</p>
-        <input type="number" value="1", step="0.1" min="0"  id="cvar" class="numinput" onchange="reDraw()">
+        <input type="number" value="1", step="0.1" min="0"  id="cvar" class="numinput coeffs" onchange="reDraw()">
+        <p>d</p>
+        <input type="number" value="1", step="0.1" min="0"  id="dvar" class="numinput coeffs" onchange="reDraw()">
+        <p>e</p>
+        <input type="number" value="1", step="0.1" min="0"  id="evar" class="numinput coeffs" onchange="reDraw()">
+        <p>f</p>
+        <input type="number" value="1", step="0.1" min="0"  id="fvar" class="numinput coeffs" onchange="reDraw()">
+        <p>g</p>
+        <input type="number" value="1", step="0.1" min="0"  id="gvar" class="numinput coeffs" onchange="reDraw()">
+        <p>h</p>
+        <input type="number" value="1", step="0.1" min="0"  id="hvar" class="numinput coeffs" onchange="reDraw()">
       </div>
   </div>
+  
 
   <div id="box" class="input0">
     <div class="tab">
@@ -525,19 +536,23 @@ function reweight() {
   if (State.weight_type == "custom") {
     // TEST custom weight
     let custom = document.getElementById('custom_input').value;
-    let key = {
-      a: document.getElementById('avar').valueAsNumber,
-      b: document.getElementById('bvar').valueAsNumber,
-      c: document.getElementById('cvar').valueAsNumber
-    };
+    let coeffs = ['a','b','c','d','e','f','g','h']
+    let key = {}
+    for (let i=0;i<coeffs.length;i++) {
+      key[coeffs[i]] = document.getElementById(coeffs[i]+'var').valueAsNumber;
+    }
     // key["a**2"] = key["a"]**2;
     // key["a**3"] = key["a"]**3;
 
+    // define max req length of weight matrix
     if (State.shape.name == "hexagon") {
-      custom = interpretMatrix(custom,key,B+C+1);
+      key["N"] = B+C+1;
     } else if (State.shape.name == "aztec") {
-      custom = interpretMatrix(custom,key, 2*A);
+      key["N"] = 2*A;
     }
+
+    // create custom weight matrix
+    custom = interpretMatrix(custom,key);
     if (State.shape.name == "hexagon") {
       W = weight_hexagon(choose_weight(State,custom),A,B,C);
     } else if (State.shape.name == "aztec") {

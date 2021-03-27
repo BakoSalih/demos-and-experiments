@@ -16,7 +16,10 @@
 }
 
 .customweight .numinput {
-  width: 100px;
+  width: 50px;
+}
+
+#coeffs {
 }
 
 #custom_input {
