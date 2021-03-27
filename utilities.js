@@ -109,34 +109,57 @@ export function interpretMatrix(input, key, N) {
   key["q"] = Math.exp(-key["a"]/N);
   let regex = /[i|j]/g;
   let weightmat = [];
-  if (input.match(regex) && input.match(regex).length > 0) {
-    for (let i=0; i<coldim; i++) {
-      weightmat[i] = new Array(N);
-      for (let j=0; j<N; j++) {
-        let tryfloat = parseFloat(mat[i % coldim][j % rowdim]);
-        key["i"] = i;
-        key["j"] = j;
-        if (!isNaN(tryfloat)) {
-          weightmat[i][j] = tryfloat;
-        } else {
-          weightmat[i][j] = math.evaluate(mat[i % coldim][j % rowdim], key);
-        }
-      }
-    }
-    return weightmat;
+  // if i or j exists in weight, the weight will be
+  let totcol;
+  let totrow;
+
+  // check if i or j exists
+  if (input.match(/i/) && input.match(/i/).length > 0) {
+    totcol = N;
   } else {
-    for (let i=0; i<coldim; i++) {
-      for (let j=0; j<rowdim; j++) {
-        let tryfloat = parseFloat(mat[i][j]);
-        if (!isNaN(tryfloat)) {
-          mat[i][j] = tryfloat;
-        } else {
-          mat[i][j] = math.evaluate(mat[i][j], key);
-        }
+    totcol = coldim;
+  }
+  if (input.match(/j/) && input.match(/j/).length > 0) {
+    totrow = N;
+  } else {
+    totrow = rowdim;
+  }
+
+  for (let i=0; i<totcol; i++) {
+    weightmat[i] = new Array(totrow);
+    for (let j=0; j<totrow; j++) {
+      let tryfloat = parseFloat(mat[i % coldim][j % rowdim]);
+      key["i"] = i;
+      key["j"] = j;
+      if (!isNaN(tryfloat)) {
+        weightmat[i][j] = tryfloat;
+      } else {
+        weightmat[i][j] = math.evaluate(mat[i % coldim][j % rowdim], key);
       }
     }
-    return mat;
   }
+
+  return weightmat
+
+  // if (input.match(regex) && input.match(regex).length > 0) {
+  //   for (let i=0; i<coldim; i++) {
+  //     weightmat[i] = new Array(N);
+  //     for (let j=0; j<N; j++) {
+  //       let tryfloat = parseFloat(mat[i % coldim][j % rowdim]);
+  //       key["i"] = i;
+  //       key["j"] = j;
+  //       if (!isNaN(tryfloat)) {
+  //         weightmat[i][j] = tryfloat;
+  //       } else {
+  //         weightmat[i][j] = math.evaluate(mat[i % coldim][j % rowdim], key);
+  //       }
+  //     }
+  //   }
+  //   return weightmat;
+  // } else {
+  //
+  //   return mat;
+  // }
 
 
 
