@@ -2,4 +2,4 @@ A ramdom tiling simulation (lozenge, aztec or fortress). Based on Matlab simulat
 * [Random tiling](https://bakosalih.github.io/demos-and-experiments/lozengetiling)
 
 A sandpile simulation demo (see e.g. [wikipedia article](https://en.wikipedia.org/wiki/Abelian_sandpile_model))
-* [Sandpile](https://bakosalih.github.io/demos-and-experiments/lozengetiling)
+* [Sandpile](https://bakosalih.github.io/demos-and-experiments/sandpile)
