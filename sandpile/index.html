@@ -30,6 +30,8 @@
     <input type="number" value="1" id="pilerad" name="pilerad" class="numinput" style="width:100px">
     <p>Number of sandpile rounds:</p>
     <input type="number" value="50000" id="init_iters" name="init_iters" class="numinput" style="width:100px">
+    <p>Stepsize animation</p>
+    <input type="number" value="100" id="animationstep" name="animationstep" class="numinput" style="width:100px">
   </div>
 
 
@@ -41,7 +43,7 @@
     <p>Add additional piles with mouse. </p> <p>Options: added pile height</p>
     <input type="number" value="100" id="addpile" name="addpile" class="numinput" style="width:100px">
     <p>added pile size</p>
-    <input type="number" value="0" id="addparameter" name="addparameter" class="numinput" style="width:100px">
+    <input type="number" value="1" id="addparameter" name="addparameter" class="numinput" style="width:100px">
     </div>
   
 </div>
@@ -51,7 +53,6 @@
 
 
 <script type="module">
-import { Rainbow } from './rainbowvis.js';
 
 let type = "WebGL"
 if(!PIXI.utils.isWebGLSupported()) {
@@ -85,13 +86,15 @@ var State = { n:100,
               init_iters: 50000,
               pileheight: 50000,
               pilerad: 1,
-              addparameter: 0,
+              addparameter: 1,
               addpile: 100,
               wparam: 1,
               lineThickness: 1,
               changed: false,
-              colors: ['0007ab','20c9ba','fbde44', 'a33100'],
+              // 0x0007ab=blue 0x20c9ba=teal 0xfbde44=yellow 0xa33100=brown
+              colors: ['0x0007ab','0x20c9ba','0xfbde44', '0xa33100','0xfd0808'],
               animating: false,
+              animationstep: 100,
               width: document.getElementById("sim").offsetWidth,
               height: document.getElementById("sim").offsetHeight
             }
@@ -112,6 +115,7 @@ document.getElementById("pileheight").addEventListener('change', changeVar);
 document.getElementById("pilerad").addEventListener('change', changeVar);
 document.getElementById("addpile").addEventListener('change', changeVar);
 document.getElementById("addparameter").addEventListener('change', changeVar);
+document.getElementById("animationstep").addEventListener('change', changeVar);
 
 function changeVar() {
   const id = this.id;
@@ -173,7 +177,6 @@ function setup() {
   // // containing box
   container.addChild(createBox(0, 0, r));
 
-  refresh();
 }
 
 function randmatrix(n,m) {
@@ -194,12 +197,13 @@ function pile(n,m,r=0,x=0,y=0,pileheight=State.pileheight,M=[]) {
 
   const xmid = math.floor((m-1)/2);
   const ymid = math.floor((n-1)/2);
+  
   M.active = [];
   M.active[0] = new Uint32Array(n*m);
   M.active[1] = new Uint32Array(n*m);
   let totactive = 0;
   M.active.switch = 0;
-  
+
   r-- //for clarity as we want it centered, r is half the sidelength
   for (let i=-r; i<=r; i++) {
     for (let j=-r; j<=r; j++) {
@@ -278,6 +282,26 @@ function sandpilecpu2(M, iterations) {
   return M
 }
 
+//non-optimized that does not deactivate cells
+function sandpilecpu(M, iterations) {
+  const N = 2*State.n+1;
+  for (let k=0;k<iterations;k++) {
+    for (let i = 0; i < N; i++) {
+      for (let j = 0; j < N; j++) {
+        if (M[i*N + j] > 3) {
+        // when over the edge, either fall back or lose
+        i > 0 ? M[(i-1)*N + j]++ : null //M[(i+1)*N + j]++
+        i < N-1 ? M[(i+1)*N + j]++ : null //M[(i-1)*N + j]++
+        j > 0 ? M[i*N + j-1]++ : null //M[i*N + j+1]++
+        j < N-1 ? M[i*N + j+1]++ : null //M[i*N + j-1]++
+        M[i*N + j] -= 4;
+        }
+      }
+    }
+  }
+  return M
+}
+
 function createSquare(xPos, yPos, r, color)
 {
   let square = new PIXI.Graphics();
@@ -324,10 +348,6 @@ function refresh(iters=State.init_iters) {
 
 function recolor(M = State.M) {
 
-  var rainbow = new Rainbow();
-  rainbow.setSpectrum('#a33100','#00c94b');
-  rainbow.setNumberRange(0, math.max(1,State.pileheight));
-
   let sqrs = app.squares;
 
 
@@ -337,15 +357,15 @@ function recolor(M = State.M) {
   for (let i=start; i<end; i++) {
     const m = M[i];
     if (m < 4) {
-      sqrs[i].tint = '0x'+ State.colors[m];
+      sqrs[i].tint = State.colors[m];
     } else {
-      sqrs[i].tint = '0x' + rainbow.colorAt(m);
+      sqrs[i].tint = State.colors[4];
     }
   }
 }
 
 function updatepile(iters=State.init_iters) {
-  State.M = sandpilecpu2(State.M, iters);
+  State.M = sandpilecpu(State.M, iters);
   recolor();
 }
 
@@ -364,7 +384,7 @@ function animatepile(pause = false) {
     ticker.maxFPS = 1;
     if (!ticker.started) {
       ticker.add(() => {
-        updatepile(State.pileheight/100);
+        updatepile(State.animationstep);
       });
     }
   } else { // toggle animation pause/start
@@ -389,9 +409,8 @@ function onDown(e) {
 
 function onDragEnd()
 {
-  let c = State.addpile;
   let r = State.addparameter;
-
+  
 
   const bottom = this.i-r;
   const top = this.i+r;
@@ -399,10 +418,10 @@ function onDragEnd()
   const right = this.j+r;
   
   let N = 2*State.n+1;
-  State.M = pile(N,N,State.pilerad);
 
+  // change the origin to middle of the box (State.n,State.n)
   if (bottom > 0 && top < 2*State.n && left > 0 && right < 2*State.n) {
-    State.M = pile(N,N,w,this.j,this.i,State.M);
+    State.M = pile(N,N,r,this.j-State.n,this.i-State.n,State.addpile,State.M);
     recolor();
   } else {
     //this.tint = oldtint;
