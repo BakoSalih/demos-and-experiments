@@ -85,7 +85,7 @@ button {
 }
 
 .left, .right {
-  min-height: 800px;
+  min-height: 720px;
   background-color: white;
   margin: 10px;
   padding:  10px 0px;
@@ -97,24 +97,24 @@ button {
     width: 200px;
     min-width: 1000px;
     min-height: 800px;
-    height: 800px;
+    height: 720px;
     overflow-x: hidden;
 }
 
 .right {
     min-width: 210px;
-    min-height: 800px;
+    min-height: 740px;
     padding:  5px ;
     margin: 0px 10px;
     width: 230px;
-    height: 800px;
+    height: 740px;
     overflow-x: hidden;
     float: right;
 }
 
 .middle {
   width: 800px;
-  height: 1000px;
+  height: 740px;
   margin: 0 0;
 }
 
@@ -126,11 +126,11 @@ button {
 
 #simulation {
   padding:0px;
-  height: 800px;
+  height: 740px;
 }
 #sim {
   padding:0px;
-  height: 800px;
+  height: 740px;
 }
 canvas {
     padding:0px;

@@ -1,0 +1,463 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Sandpile simulation</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.1.3/pixi.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.3.0/math.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light-border.css"/>
+</head>
+<body>
+
+<div class="row">
+  <div class = "textbox">
+    <h1> Sandpile simulation </h1>
+    <p>A simple sandpile simulation which models a pile of sandcorns falling down according to simple mathematical rules. Nevertheless, the dynamics become compliced and the model results in some intricate patterns.</p>
+  </div>
+  <div id="topbar" class="input0">
+    <button id="redraw", onclick="reDraw()">Redraw canvas</button>
+    <button id="refresh", onclick="refresh()">Re-run sim.</button>
+    <button id="animatepile" onclick="animatepile()" style="width:200px">Start animation</button>
+  </div>
+    <div id="topbar" class="input0">
+    <p>OPTIONS</p>
+    <p>Size of canvas (NxN):</p>
+    <input type="number" value="100" id="n" name="N" class="numinput">
+    <p>Initial pile height</p>
+    <input type="number" value="50000" id="pileheight" name="pileheight" class="numinput" style="width:100px">
+    <p>Initial pile size</p>
+    <input type="number" value="1" id="pilerad" name="pilerad" class="numinput" style="width:100px">
+    <p>Number of sandpile rounds:</p>
+    <input type="number" value="50000" id="init_iters" name="init_iters" class="numinput" style="width:100px">
+  </div>
+
+
+  <div id="simbox" class="input0" style="background-color: white;color:black;width:1000px;height:800px;">
+    <div id="sim"></div>
+  </div>
+
+  <div id="topbar" class="input0">
+    <p>Add additional piles with mouse. </p> <p>Options: added pile height</p>
+    <input type="number" value="100" id="addpile" name="addpile" class="numinput" style="width:100px">
+    <p>added pile size</p>
+    <input type="number" value="0" id="addparameter" name="addparameter" class="numinput" style="width:100px">
+    </div>
+  
+</div>
+
+
+
+
+
+<script type="module">
+import { Rainbow } from './rainbowvis.js';
+
+let type = "WebGL"
+if(!PIXI.utils.isWebGLSupported()) {
+  type = "canvas"
+}
+
+
+
+let app = new PIXI.Application({
+	autoResize: true,
+  resizeTo: document.getElementById("sim"),
+  // width: 2000,
+  // height: 1000,
+  antialias: true,
+  transparent: true,
+  resolution: 2
+}
+);
+
+
+// keep shapes in dictionary
+var Shapes = {
+    hexagon:
+    {
+      name: "hexagon"
+    }
+}
+
+// Hexagon parameters
+var State = { n:100,
+              init_iters: 50000,
+              pileheight: 50000,
+              pilerad: 1,
+              addparameter: 0,
+              addpile: 100,
+              wparam: 1,
+              lineThickness: 1,
+              changed: false,
+              colors: ['0007ab','20c9ba','fbde44', 'a33100'],
+              animating: false,
+              width: document.getElementById("sim").offsetWidth,
+              height: document.getElementById("sim").offsetHeight
+            }
+
+
+
+var colorpick_active = [];
+
+// Add the Pixi canvas that to the HTML document
+document.getElementById("sim").appendChild(app.view);
+
+
+
+// Binding size-inputs
+document.getElementById("n").addEventListener('change', changeVar);
+document.getElementById("init_iters").addEventListener('change', changeVar);
+document.getElementById("pileheight").addEventListener('change', changeVar);
+document.getElementById("pilerad").addEventListener('change', changeVar);
+document.getElementById("addpile").addEventListener('change', changeVar);
+document.getElementById("addparameter").addEventListener('change', changeVar);
+
+function changeVar() {
+  const id = this.id;
+  const idval = document.getElementById(id).valueAsNumber;
+  State[id] = idval;
+  State['changed'] = true;
+}
+
+
+// load and run the `setup` function when it's done
+const loader = new PIXI.Loader();
+loader
+.load(setup);
+
+// Paints the first matching
+function setup() {
+  let container = new PIXI.Container();
+  app.stage.addChildAt(container,0);
+  const n = State.n;
+
+  //let M = randmatrix(n,n);
+  // the side-length
+  let N = 2*State.n+1;
+  let r = State.height*(1/N);
+  State.r = r;
+
+  // the original pile
+  //const shift = math.floor(n/8);
+  State.M = pile(N,N,State.pilerad);
+
+
+  // create grid of squares for visualization
+  app.squares = [];
+  const xcorner = (State.width-State.height+r)/2;
+  for (let i=0; i<N; i++) {
+    for (let j=0; j<N; j++) {
+      //const color = rainbow.colorAt(M[i][j]);
+      //let square = createSquare(j,i,r,colors[M[i][j]]);
+      const xPos = xcorner+j*r;
+      const yPos = (i+1/2)*r;
+      let square = createSquare(xPos,yPos,r);
+      square.interactive = true;
+      square.buttonMode = true;
+      square.on('mousedown', onDown)
+        .on('touchstart', onDown)
+      .on('mouseup', onDragEnd)
+      .on('mouseupoutside', onDragEnd)
+      .on('touchend', onDragEnd)
+      .on('touchendoutside', onDragEnd);
+      square.i = i;
+      square.j = j;
+      app.squares.push(square);
+      container.addChild(square);
+    }
+  }
+
+  recolor();
+
+  // // containing box
+  container.addChild(createBox(0, 0, r));
+
+}
+
+function randmatrix(n,m) {
+  let M = [];
+
+  for (let i=0; i<n; i++) {
+    let row = new Float32Array(n);
+    M.push(row.map(x => math.randomInt(100)))
+  }
+
+  return M;
+}
+
+function pile(n,m,r=0,x=0,y=0,pileheight=State.pileheight,M=[]) {
+  if (M.length == 0) {
+    M = new Uint32Array(n*m);
+  }
+
+  const xmid = math.floor((m-1)/2);
+  const ymid = math.floor((n-1)/2);
+  M.active = [];
+  M.active[0] = new Uint32Array(n*m);
+  M.active[1] = new Uint32Array(n*m);
+  let totactive = 0;
+  M.active.switch = 0;
+  
+  r-- //for clarity as we want it centered, r is half the sidelength
+  for (let i=-r; i<=r; i++) {
+    for (let j=-r; j<=r; j++) {
+      if (pileheight > 0) {
+        M[(ymid+y+i)*m + xmid+x+j] = pileheight;
+
+        // set active cells
+        M.active[M.active.switch][totactive] = (ymid+y+i)*m + xmid+x+j;
+        totactive++;
+        //
+      }
+    }
+  }
+  // write total so we know where to end iteration
+  M.active.tot = totactive;
+
+  return M;
+}
+
+function sandpilecpu2(M, iterations) {
+  const N = 2*State.n+1;
+  // define shift forward for new active cells
+  for (let i=0;i<iterations;i++) {
+    const oldc = M.active.switch;
+    const newc = (oldc+1)%2;
+    let active = M.active[newc];
+    let totactive = 0;
+
+
+
+    // note M.active keeps both current and future active cells
+    // at the end of one itertion switch M.active to 1,0 from 0,1
+    for (let k = 0, len = M.active.tot; k < len; k++) {
+      //totaliters++;
+      const i = M.active[oldc][k];
+      //while (M[i] > 3) {
+      M[i] -= 4;
+      if (M[i] > 3) {active[totactive++] = i;}
+      if (++M[i-N] == 4) {
+        M[i-N] -= 4;
+        if (++M[i-2*N] == 4) {active[totactive++] = i-2*N}
+        if (++M[i-N-1] == 4) {active[totactive++] = i-N-1}
+        if (++M[i-N+1] == 4) {active[totactive++] = i-N+1}
+        if (++M[i] == 4)     {active[totactive++] = i}
+        //active[totactive++] = i-N;
+      }
+      if (++M[i-1] == 4) {
+        M[i-1] -= 4;
+        if (++M[i-N-1] == 4) {active[totactive++] = i-1-N}
+        if (++M[i-2] == 4)   {active[totactive++] = i-2}
+        if (++M[i] == 4)     {active[totactive++] = i}
+        if (++M[i+N-1] == 4) {active[totactive++] = i-1+N}
+      }
+      if (++M[i+1] == 4) {
+        M[i+1] -= 4;
+        if (++M[i-N+1] == 4) {active[totactive++] = i+1-N}
+        if (++M[i] == 4)     {active[totactive++] = i}
+        if (++M[i+2] == 4)   {active[totactive++] = i+2}
+        if (++M[i+N+1] == 4) {active[totactive++] = i+1+N}
+      }
+      if (++M[i+N] == 4) {
+        M[i+N] -= 4;
+        if (++M[i] == 4)     {active[totactive++] = i}
+        if (++M[i+N-1] == 4) {active[totactive++] = i+N-1}
+        if (++M[i+N+1] == 4) {active[totactive++] = i+N+1}
+        if (++M[i+2*N] == 4) {active[totactive++] = i+2*N}
+      }
+      //}
+    }
+
+    // switch to other lane
+    M.active.switch = newc;
+    // store total active cells for next time
+    M.active.tot = totactive;
+  }
+  return M
+}
+
+function createSquare(xPos, yPos, r, color)
+{
+  let square = new PIXI.Graphics();
+  square.x = xPos; 
+  square.y = yPos;
+  let rad = r/2;
+  square.beginFill(0xFFFFFF, 1);
+  square.drawRect(-rad, -rad, 2*rad, 2*rad);
+  square.tint = '0x'+State.colors[0];
+  return square
+}
+
+function createBox(xPos, yPos, r)
+{
+  let square = new PIXI.Graphics();
+  square.x = State.width/2;
+  square.y = State.height/2;
+  const h = State.height/2;
+  const n = State.n;
+
+
+  square.lineStyle(1, 0x000000, 1);
+  square.drawRect(-h, -h, 2*h, 2*h);
+
+  return square
+}
+
+function reDraw(auto=false, force = false) {
+  animatepile(true);
+  app.stage.children = [];
+
+  setup();
+  State.changed = false;
+}
+
+function refresh(iters=State.init_iters) {
+  animatepile(true);
+
+  //const N = 2*State.n+1;
+  //State.M = pile(N,N,State.pilerad);
+  State.M = sandpilecpu2(State.M, iters);
+  recolor();
+}
+
+function recolor(M = State.M) {
+
+  var rainbow = new Rainbow();
+  rainbow.setSpectrum('#a33100','#00c94b');
+  rainbow.setNumberRange(0, math.max(1,State.pileheight));
+
+  let sqrs = app.squares;
+
+
+  const start = 0;
+  const end = M.length;
+
+  for (let i=start; i<end; i++) {
+    const m = M[i];
+    if (m < 4) {
+      sqrs[i].tint = '0x'+ State.colors[m];
+    } else {
+      sqrs[i].tint = '0x' + rainbow.colorAt(m);
+    }
+  }
+}
+
+function updatepile(iters=State.init_iters) {
+  State.M = sandpilecpu2(State.M, iters);
+  recolor();
+}
+
+function animatepile(pause = false) {
+  // get button element
+  let ani_button = document.getElementById('animatepile');
+  // get ticker
+  let ticker = PIXI.Ticker.shared;
+
+
+  // if not animating, start
+  if (!(State.animating || pause)) {
+    State.animating = true;
+    ani_button.innerHTML = "Pause animation";
+    // start animation
+    ticker.maxFPS = 1;
+    if (!ticker.started) {
+      ticker.add(() => {
+        updatepile(State.pileheight/100);
+      });
+    }
+  } else { // toggle animation pause/start
+    if (ticker.started || pause) {
+      ticker.stop();
+      // change button name
+      ani_button.innerHTML = "Resume animation";
+    } else {
+      ticker.start();
+      // change button name
+      ani_button.innerHTML = "Pause animation";
+    }
+  }
+}
+
+function onDown(e) {
+  animatepile(true);
+  this.data = e.data;
+  const oldtint = this.tint;
+  this.tint = '0xd53939';
+}
+
+function onDragEnd()
+{
+  let c = State.addpile;
+  let r = State.addparameter;
+
+
+  const bottom = this.i-r;
+  const top = this.i+r;
+  const left = this.j-r;
+  const right = this.j+r;
+  
+  let N = 2*State.n+1;
+  State.M = pile(N,N,State.pilerad);
+
+  if (bottom > 0 && top < 2*State.n && left > 0 && right < 2*State.n) {
+    State.M = pile(N,N,w,this.j,this.i,State.M);
+    recolor();
+  } else {
+    //this.tint = oldtint;
+    console.log('out of bounds');
+  }
+
+  this.data = null;
+}
+
+function squarepile(M, cx, cy, n, w=0) {
+  let c = State.addpile;
+  const N = 2*State.n+1;
+  //let active = [];
+  // add to total active cells
+  //let totactive = M.active.tot;
+
+  for (let i=-n; i<=n; i++) {
+    for (let j=-n; j<=n; j++) {
+      if ((i >= n-w || i <= -n+w) || (j >= n-w || j <= -n+w)) {
+        //M[cy+i][cx+j] += c;
+        const pos = (cy+i)*N + cx+j;
+        M[pos] += c;
+        // if (!M.active.includes(pos)) {
+        //   M.active[totactive] = pos;
+        //   totactive += 2;
+        // }
+      }
+    }
+  }
+  // update total active cells
+  //M.active.tot = totactive;
+  return M
+}
+
+function circlepile(M, cx, cy, n, w=0) {
+  let c = State.addpile;
+  const N = 2*State.n+1;
+  const rin = (n-w)**2;
+  const rout = (n)**2;
+  let active = [];
+  let totactive = 0;
+  for (let i=-n; i<=n; i++) {
+    for (let j=-n; j<=n; j++) {
+      const rad = j**2 + i**2;
+      if (rin <= rad && rad <= rout) {
+        M[(cy+i)*N + cx+j] += c;
+        M.active[totactive++] = (cy+i)*N + cx+j;
+      }
+    }
+  }
+  return M
+}
+
+window.reDraw = reDraw;
+window.refresh = refresh;
+window.animatepile = animatepile;
+</script>
+</body>
+</html>

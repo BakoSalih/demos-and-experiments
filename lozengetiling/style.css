@@ -1,0 +1,351 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&display=swap'); */
+:root {
+    --showCustom: none;
+}
+
+.customweight {
+  display: var(--showCustom);
+  background-color: #343434;
+  color: white;
+  font-size: 12px;
+  border: 1px solid black;
+  border-radius: 5px;
+  padding:10px;
+  margin: 30px 50px;
+  width: 1200px;
+}
+
+.customweight .numinput {
+  width: 50px;
+}
+
+#coeffs {
+}
+
+#custom_input {
+  width: 300px;
+  margin: 10px;
+}
+
+body {
+  background-color: #212529;
+  /* background-image: linear-gradient( #212529, #212529); */
+  font-family: "Segoe UI",Roboto,"Helvetica Neue", Arial,  sans-serif;
+  padding: 0px;
+  margin: 0px
+}
+
+html {padding: 0px;}
+* {
+  box-sizing: border-box;
+  padding: 5px;
+}
+*:focus {
+    outline: 0 !important;
+}
+.row {
+  background-color: white;
+  /* background-image: linear-gradient(#ffffff, #dfdfdf, #d0d0d0); */
+  height: 100%;
+  margin: 0 auto;
+  padding: 0px;
+  width: 1320px;
+}
+
+.column {
+  float: left;
+}
+
+button, .hole button {
+  background-color: white;
+  display: inline-block;
+  border: 1px solid #212529;
+  border-radius: 4px;
+  color: black;
+  padding: 10px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+
+
+button:hover{
+  background-color: #212529;
+  color: white;
+  border: 1px solid white;
+}
+
+button {
+  margin: 1px;
+}
+.options {
+  background-color: white;
+}
+
+.left, .right {
+  min-height: 800px;
+  background-color: white;
+  margin: 10px;
+  padding:  10px 0px;
+  border: 2px solid #777777;
+  border-radius: .25rem;
+}
+
+.left {
+    width: 200px;
+    min-width: 1000px;
+    min-height: 800px;
+    height: 800px;
+    overflow-x: hidden;
+}
+
+.right {
+    min-width: 210px;
+    min-height: 800px;
+    padding:  5px ;
+    margin: 0px 10px;
+    width: 230px;
+    height: 800px;
+    overflow-x: hidden;
+    float: right;
+}
+
+.middle {
+  width: 800px;
+  height: 1000px;
+  margin: 0 0;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+#simulation {
+  padding:0px;
+  height: 800px;
+}
+#sim {
+  padding:0px;
+  height: 800px;
+}
+canvas {
+    padding:0px;
+}
+
+
+h2 {
+  padding: 5px 0px;
+  font-size: 20px;
+  margin: auto 0px;
+  padding: 5px 0px;
+}
+
+
+h3 {
+  padding: 5px 0px;
+  font-size: 11px;
+  margin: 0px;
+}
+
+
+
+.grid-container {
+  display: grid;
+  grid-template-columns: auto;
+}
+
+.grid-item {
+  padding: 0px;
+  margin: 0px;
+}
+
+
+#cbox {
+  width: 100px;
+  height: 100px;
+  background-color: white;
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+}
+
+#holes {
+  margin: 0px;
+  padding: 0px;
+}
+
+.hole {
+  color:black;
+  background-color: #eeeeee;
+  margin: 5px;
+  border: 1px solid black;
+}
+
+.hole h3 {
+  color:black
+}
+
+.hole button {
+  color:black
+}
+
+.holeinput {
+  width: 50px;
+}
+
+
+.togglebutton {
+  background-color: white;
+  color:black;
+}
+
+.togglebutton:hover {
+  background-color: #212529;
+  color:white;
+}
+
+.togglebuttonpressed:hover {
+}
+
+.togglebuttonpressed {
+  background-color: #212529;
+  color:white;
+}
+
+/* Style the button that is used to open and close the collapsible content */
+.collapsible {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 11px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.active, .collapsible:hover {
+  background-color: #ccc;
+}
+
+/* Style the collapsible content. Note: hidden by default */
+.content {
+  padding: 18px;
+  display: none;
+  overflow: hidden;
+  background-color: #f1f1f1;
+}
+
+.colbox {
+  stroke-width:1;
+  stroke:rgb(0,0,0);
+  cursor:pointer;
+}
+
+
+.numinput {
+  width: 50px;
+}
+
+.input0 {
+  background-color: #343434;
+  padding: 1px;
+  border: 1px solid black;
+  border-radius: 5px;
+  margin: 0px 2px 2px 0px;
+  width: fit-content;
+  height: fit-content;
+}
+.input0 p {
+  color: white;
+  text-align: center;
+  display: inline;
+  font-size: 12px;
+}
+
+.input0 input {
+  border: 1px solid black;
+  border-radius: 4px;
+  height: 30px;
+  font-size: 12px;
+  width: 50px;
+}
+
+#Abox, #Bbox, #Cbox {
+  width: 42px;
+}
+
+#wtype {
+  width: 150px;
+}
+
+#topbar, #box, #simbox {
+  padding:7px;
+  margin: 20px 50px;
+  width: 1200px;
+}
+
+#simbox {
+  width: 900px;
+  margin: 10px auto;
+  border: 0px solid black;
+}
+
+.textbox {
+  border: 0px solid black;
+    padding:5px;
+    margin: 5px 50px;
+    width: 1200px;
+}
+
+.tab {
+  display: inline-block;
+  padding:0px;
+}
+
+#box p, #simbox p {
+}
+
+#whitecolbutton {
+  fill:transparent;
+  stroke-width:1;
+  stroke:rgb(0,0,0);
+  cursor:pointer;
+}
+
+#holesbutton {
+}
+
+/* #edgebutton, #pathbutton {
+  background-color: #35d433;
+}
+
+
+#edgebutton:hover, #pathbutton:hover {
+  background-color: #025d00;
+  border: 3px solid black;
+  padding: 12px 12px;
+} */
+
+.hole .holeinput {
+  border: 1px solid black;
+}
+
+
+/* .options {
+  position:absolute;
+} */
+
+/* #options2 {
+  right: 10px;
+} */
+
+/* .row {
+  display: flex;
+} */
