@@ -13,14 +13,15 @@
 
 <div class="row">
   <div class = "textbox">
-    <h1> Random lozenge tilings </h1>
+    <h1>Tiling simulation</h1>
+    <p>Tiling simulation (lozenge, aztec, fortress). Based on a Matlab simulation for lozenge tiling of hexagon by Christophe Charlier, Lund University, ported by me to javascript/pixi.js with various optimisations to the algorithm & a bit of added functionality. Algorithm for generating tiling is based on <a href=https://arxiv.org/abs/math/0111034>Generalized domino-shuffling, James Propp, (arXiv:math/0111034)</a>.</p>
   </div>
   <div id="topbar" class="input0">
     <p>Generate</p>
     <button id="redraw", onclick="reDraw()">Redraw Figure</button>
     <button id="rematch" onclick="refresh()">New Tiling</button>
     <p>N</p>
-    <input type="number" value="80" id="Nbox" name="N" class="numinput">
+    <input type="number" value="40" id="Nbox" name="N" class="numinput">
     <p>A</p>
     <input type="number" value="1", step="0.1" min="1" id="Abox" name="A" class="numinput">
     <p>B</p>
@@ -205,11 +206,6 @@ tippy('#shape', {
         content: 'Note: Options Aztec/Fortress are works in progress, many functions do not work. At this point Fortress option does not work properly with even N.'
       });
 
-// tippy('#custom_input', {
-//         content: 'E.g. 1x2 periodic: 1,1;a,1 or 2x3 periodic a,1,1;a,1,1;1,1,a;1,1,a',
-//         interactive: true,
-//         placement:"top"
-//       });
 
 
 let colordiv = document.getElementById("coloropts").innerHTML;
@@ -292,8 +288,6 @@ var colorpick_active = [];
 let app = new PIXI.Application({
 	autoResize: true,
   resizeTo: document.getElementById("sim"),
-  // width: 2000,
-  // height: 1000,
   antialias: true,
   transparent: true,
   resolution: 2
@@ -358,18 +352,17 @@ var Shapes = {
 }
 
 // Hexagon parameters
-var State = {   a:80,
-                b:80,
-                c:80,
-                n:80,
+var State = {   a:40,
+                b:40,
+                c:40,
+                n:40,
                 holes: 0,
                 lineThickness: 1,
                 verticesShow: false,
                 paths: false,
                 rotation: 0,
                 loz_colors: [0x1cff00, 0xfc0606, 0x0555db],
-                //default_colors: ['1cff00', 'fc0606', '0555db'],
-                draw_edges: false,
+                draw_edges: true,
                 draw_paths: false,
                 weight_q: 0.1,
                 weight_type: "uniform",
@@ -475,20 +468,6 @@ document.getElementById("shape").addEventListener('change', function() {
     document.getElementById("colorbox4").style.display = "none";
   }
 
-
-
-//   if (State.shape.name == "aztec") {
-//   State.loz_colors = [0x1cff00, 0xfc0606, 0x0555db, 0xfaff00];
-//   //State.default_colors = ['1cff00', 'fc0606', '0555db', 'faff00'];
-// } else if (State.shape.name == "fortress") {
-//   State.loz_colors = [0xffde00, 0xc400d5, 0x0555db, 0x0002d7];
-//   //State.default_colors = ['ffde00', 'c400d5', '0555db', '0002d7'];
-//   document.getElementById("colorbox4").style.display = "inline";
-// } else {
-//   State.loz_colors = [0x1cff00, 0xfc0606, 0x0555db];
-//   //State.default_colors = ['1cff00', 'fc0606', '0555db'];
-//   document.getElementById("colorbox4").style.display = "none";
-// }
   reDraw();
 });
 
@@ -496,8 +475,6 @@ document.getElementById("shape").addEventListener('change', function() {
 // load and run the `setup` function when it's done
 const loader = new PIXI.Loader();
 loader
-// .add('images/loz_sprites.json')
-// .add('images/loz_edges.json')
 .load(setup);
 
 
@@ -518,12 +495,6 @@ function setup() {
 }
 
 function reweight() {
-  // // pause if animation
-  // PIXI.Ticker.shared.stop();
-  // if (auto && !document.getElementById("autorefresh").checked) {
-  //   return;
-  // }
-  // remove old matrices;
   P = [];
   M = [];
   ColorMatrix = [];
@@ -541,8 +512,6 @@ function reweight() {
     for (let i=0;i<coeffs.length;i++) {
       key[coeffs[i]] = document.getElementById(coeffs[i]+'var').valueAsNumber;
     }
-    // key["a**2"] = key["a"]**2;
-    // key["a**3"] = key["a"]**3;
 
     // define max req length of weight matrix
     if (State.shape.name == "hexagon") {
@@ -577,11 +546,9 @@ function reweight() {
   }
 
   // hack: square option
-
   if (State.shape.option == "square") {
     W = square_weight(W);
   }
-
 
   // add holes to W
   for (let i=0;i<State.holes;i++) {
@@ -629,7 +596,7 @@ function animatehex() {
     State.animating = true;
     ani_button.innerHTML = "Pause";
     // start animation
-    //ticker.maxFPS = 10;
+    ticker.maxFPS = 1;
     if (!ticker.started) {
       ticker.add(() => {
           refresh();
@@ -651,17 +618,9 @@ function animatehex() {
 function rotate() {
   let container = app.stage.children[0];
   if (State.rotation == 0) {
-    // container.rotation = State.shape.rotation;
-    // if (app.stage.children.length > 1) {
-    //   app.stage.children[1].rotation = Math.PI/6;
-    // }
     State.rotation = State.shape.rotation;
     reDraw(true, true);
   } else {
-    // container.rotation = 0;
-    // if (app.stage.children.length > 1) {
-    //   app.stage.children[1].rotation = 0;
-    // }
     State.rotation = 0;
     reDraw(true, true);
   }
@@ -677,7 +636,7 @@ function reDraw(auto=false, force = false) {
     let div = document.getElementById("holes");
     div.innerHTML = '';
 
-    if (State.n > 30) {
+    if (State.n > 60) {
       State.draw_edges = false;
       document.getElementById("edgebutton")
         .setAttribute("class", "togglebutton");
@@ -718,8 +677,6 @@ function hole(container, num) {
       .on('click', function(e) {
 
       });
-      // .on('mouseup', onRelease)
-      // .on('mouseupoutside',onRelease);
   vertex.lineStyle(1, 0x000000);
   vertex.drawCircle(0, 0, 10);
   vertex.endFill();
@@ -728,8 +685,6 @@ function hole(container, num) {
 
   vertex.number = num;
   container.addChildAt(vertex,0);
-  // vertex.x = -State.r/2;
-  // vertex.y = State.r*Math.sqrt(3)/2;
 
   const A = State.a,
         B = State.b,
@@ -738,11 +693,9 @@ function hole(container, num) {
 
   // make title
   let div = document.getElementById("holes");
-  //div.innerHTML += `<h2> Hole ${num+1} </h2>`
 
   let buttongroup = document.createElement("DIV");
 
-  //document.body.appendChild(title)
   buttongroup.setAttribute("class","hole");
   buttongroup.setAttribute("style",`background-color: #${color};padding:10px`);
   buttongroup.setAttribute("id", `holegroup${num}`);
@@ -990,7 +943,6 @@ function prob_color() {
 }
 
 function toggle_prob_color(choice="toggle") {
-  //State.lineThickness = document.getElementById("edges").checked;
   if (State.theme == "probability") {
     switch_color("default");
     document.getElementById("probcolor")
@@ -1027,7 +979,6 @@ function zoom_out() {
 }
 
 function move(dir) {
-  //let step = -10;
   switch (dir) {
     case "left":
       app.stage.children[0].position.x += -step;
@@ -1090,19 +1041,6 @@ function onDragMove(e)
     {
       var newPosition = this.data.getLocalPosition(this.parent);
       const r = State.r;
-      //
-      // let x = (3*newPosition.x - Math.sqrt(3) * newPosition.y)/(12*r);
-      // let y = (-newPosition.x - Math.sqrt(3) * newPosition.y)/(4*r);
-      //
-      // x = Math.round(x);
-      // y = Math.round(y);
-      //
-      // this.position.x = (3*x-y)*r;
-      // this.position.y = -Math.sqrt(3)*(x+y)*r;
-      //
-      // const num = this.number;
-      // document.getElementById(`holeX${num}`).setAttribute("value", 2*x);
-      // document.getElementById(`holeY${num}`).setAttribute("value", y);
       if (State.rotation == 0 && State.shape.name == "hexagon") {
 
         let x = (3*newPosition.x - Math.sqrt(3) * newPosition.y)/(12*r);
@@ -1117,26 +1055,6 @@ function onDragMove(e)
         const num = this.number;
         document.getElementById(`holeX${num}`).setAttribute("value", 2*x);
         document.getElementById(`holeY${num}`).setAttribute("value", y);
-
-        // let x = (newPosition.x)/(2*r);
-        // let y = (newPosition.y)/(Math.sqrt(3)*r);
-        //
-        // x = Math.round(x);
-        // y = Math.round(y);
-        //
-        // //(2*x-y)*r;
-        // if (y % 2 == 0) {
-        //   this.position.x = 2*r*x;
-        //     this.position.y = Math.sqrt(3)*r*y;//-Math.sqrt(3)*y*r;
-        // } else {
-        //     this.position.y = Math.sqrt(3)*r*y
-        //     this.position.x = r*(2*x-1);
-        // }
-        //
-        // const num = this.number;
-        // document.getElementById(`holeX${num}`).setAttribute("value", x+y);
-        // document.getElementById(`holeY${num}`).setAttribute("value", -y);
-
       } else if (State.shape.name == "aztec") {
 
         let x = (newPosition.x)/(r);
@@ -1212,14 +1130,9 @@ window.addHoles = addHoles;
 
 window.State = State;
 window.weight_aztec = weight_aztec;
-//
 window.octweight = octweight;
 window.State = State;
 window.interpretMatrix = interpretMatrix;
-// window.Reduction = Reduction;
-// window.Matching = Matching;
-// window.getmatched = getmatched;
-// window.Matching2 = Matching2;
 
 </script>
 
